@@ -1,0 +1,33 @@
+{
+  "name": "nonogramjs",
+  "version": "1.0.0",
+  "description": "Japanese logic puzzles",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "backbone": "^1.1.2",
+    "gulp": "^3.8.10",
+    "jquery": "^2.1.1",
+    "underscore": "^1.7.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/endemic/nonogramjs.git"
+  },
+  "keywords": [
+    "game",
+    "logic",
+    "puzzle",
+    "picross",
+    "japan"
+  ],
+  "author": "Nathan Demick",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/endemic/nonogramjs/issues"
+  },
+  "homepage": "https://github.com/endemic/nonogramjs"
+}
