@@ -1,4 +1,4 @@
-nonogramjs
+Nonogram Madness JS
 ==========
 
 Japanese logic puzzles
