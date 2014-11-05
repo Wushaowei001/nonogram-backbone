@@ -1,3 +1,6 @@
 node_modules
 .DS_Store
 src/data
+dist/assets/music
+dist/assets/sounds
+dist/assets/images
