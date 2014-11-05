@@ -1,33 +1,13 @@
-###
-Main controller
-  - Handles instantiating all game view objects and switching between them
-  - Inits sound manager
-###
-# define [
-#   'jquery'
-#   'underscore'
-#   'backbone'
-#   'buzz'
-#   'cs!utilities/env'
-#   'cs!views/title'
-#   'cs!views/game'
-#   'cs!views/about'
-#   'cs!views/level-select'
-#   'cs!views/difficulty-select'
-#   'cs!views/difficulty-select-android'
-#   'cs!views/difficulty-select-ios'
-# ], ($, _, Backbone, buzz, env, TitleScene, GameScene, AboutScene, LevelSelectScene, DifficultySelectScene, DifficultySelectAndroidScene, DifficultySelectIOSScene) ->
-
 $ = require('jquery')
 _ = require('underscore')
 Backbone = require('backbone')
 Backbone.$ = $
-
+Sona = require('Sona')
 TitleScene = require('./views/title')
 GameScene = require('./views/game')
 AboutScene = require('./views/about')
-# LevelSelectScene = require('views/level-select')
-# DifficultySelectScene = require('views/difficulty-select')
+LevelSelectScene = require('./views/level-select')
+DifficultySelectScene = require('./views/difficulty-select')
 ENV = require('./utilities/env')
 
 # Extend local storage
@@ -50,8 +30,6 @@ Backbone.View.prototype.close = ->
 class App extends Backbone.View
   el: null
   activeScene: null
-  sounds: {}
-  music: {}
 
   initialize: ->
     # Ensure 'this' context is always correct
@@ -65,7 +43,7 @@ class App extends Backbone.View
     @titleScene = new TitleScene { el: @el }
     @gameScene = new GameScene { el: @el }
     @aboutScene = new AboutScene { el: @el }
-    # @levelScene = new LevelSelectScene { el: @el }
+    @levelScene = new LevelSelectScene { el: @el }
 
     # Differentiate between views that have platform-specific IAP code
     # if ENV.cordova and ENV.android
@@ -73,29 +51,29 @@ class App extends Backbone.View
     # else if ENV.cordova and ENV.ios
     #   @difficultyScene = new DifficultySelectIOSScene { el: @el }
     # else
-    # @difficultyScene = new DifficultySelectScene { el: @el }
+    @difficultyScene = new DifficultySelectScene { el: @el }
 
     # Bind handlers on each view to allow easy switching between scenes
     @titleScene.on 'scene:change', @changeScene
     @gameScene.on 'scene:change', @changeScene
     @aboutScene.on 'scene:change', @changeScene
-    # @levelScene.on 'scene:change', @changeScene
-    # @difficultyScene.on 'scene:change', @changeScene
+    @levelScene.on 'scene:change', @changeScene
+    @difficultyScene.on 'scene:change', @changeScene
 
     # Bind handlers that deal with SFX/Music
     @titleScene.on 'sfx:play', @playSfx
     @gameScene.on 'sfx:play', @playSfx
     @aboutScene.on 'sfx:play', @playSfx
-    # @levelScene.on 'sfx:play', @playSfx
-    # @difficultyScene.on 'sfx:play', @playSfx
+    @levelScene.on 'sfx:play', @playSfx
+    @difficultyScene.on 'sfx:play', @playSfx
 
     @titleScene.on 'music:play', @playMusic
     @gameScene.on 'music:play', @playMusic
     @aboutScene.on 'music:play', @playMusic
-    # @levelScene.on 'music:play', @playMusic
-    # @difficultyScene.on 'music:play', @playMusic
+    @levelScene.on 'music:play', @playMusic
+    @difficultyScene.on 'music:play', @playMusic
 
-    # @aboutScene.on 'music:stop', @stopMusic
+    @aboutScene.on 'music:stop', @stopMusic
     @gameScene.on 'music:stop', @stopMusic
 
     @gameScene.on 'vfx:play', @playVfx
@@ -104,8 +82,8 @@ class App extends Backbone.View
     @titleScene.hide 0
     @gameScene.hide 0
     @aboutScene.hide 0
-    # @levelScene.hide 0
-    # @difficultyScene.hide 0
+    @levelScene.hide 0
+    @difficultyScene.hide 0
 
     # Set active scene
     @activeScene = @titleScene
@@ -148,60 +126,26 @@ class App extends Backbone.View
       document.addEventListener "resume", =>
         @playMusic @pausedMusic
       , false
-    
-    # @sounds.button = new buzz.sound "assets/sounds/button",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
 
-    # @sounds.error = new buzz.sound "assets/sounds/error",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-
-    # @sounds.invalid = new buzz.sound "assets/sounds/invalid",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-
-    # @sounds.fill = new buzz.sound "assets/sounds/fill",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-
-    # @sounds.mark = new buzz.sound "assets/sounds/mark",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-
-    # @sounds.win = new buzz.sound "assets/sounds/win",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-
-    # @music.one = new buzz.sound "assets/music/1",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-    #     loop: true
-
-    # @music.two = new buzz.sound "assets/music/2",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-    #     loop: true
-
-    # @music.tutorial = new buzz.sound "assets/music/tutorial",
-    #     formats: [ "mp3", "ogg" ]
-    #     preload: true
-    #     loop: true
-
-    # Lower volume a bit
-    for key, sound of @sounds
-      sound.setVolume 40
-
-    for key, music of @music
-      music.setVolume 10
-
+    @sona = new Sona([
+        { url: 'dist/assets/sounds/button.mp3', id: 'button' }
+        { url: 'dist/assets/sounds/error.mp3', id: 'error' }
+        { url: 'dist/assets/sounds/invalid.mp3', id: 'invalid' }
+        { url: 'dist/assets/sounds/fill.mp3', id: 'fill' }
+        { url: 'dist/assets/sounds/mark.mp3', id: 'mark' }
+        { url: 'dist/assets/sounds/win.mp3', id: 'win' }
+        { url: 'dist/assets/music/1.mp3', id: 'bgm-one' }
+        { url: 'dist/assets/music/2.mp3', id: 'bgm-two' }
+        { url: 'dist/assets/music/tutorial.mp3', id: 'bgm-tutorial' }
+    ])
+    @sona.load()
 
   # Callback to play a sound effect
   playSfx: (id) ->
     # Consider user prefs
     return if localStorage.getItem('playSfx') == "false"
 
-    @sounds[id]?.play()
+    @sona.play(id)
 
   # Callback to play music
   playMusic: (id) ->
@@ -214,15 +158,16 @@ class App extends Backbone.View
     # Play the same track that was previously playing if no arg is passed
     if not id and @currentMusic then id = @currentMusic
 
-    if @currentMusic then @music[@currentMusic].stop()
-    @music[id]?.play()
+    @sona.stop(@currentMusic) if @currentMusic
+    
+    @sona.loop(id)
     @currentMusic = id
 
   # Stop music!
   stopMusic: ->
     return if not @currentMusic
 
-    @music[@currentMusic].stop()
+    @sona.stop(@currentMusic)
 
     @currentMusic = null
 
@@ -311,7 +256,7 @@ class App extends Backbone.View
 
     # Call a "resize" method on other views that have elements that need to have their position manually calculated
     @gameScene.resize width, height, orientation
-    # @levelScene.resize width, height, orientation
+    @levelScene.resize width, height, orientation
 
   # Make sure that any data stored in localStorage is initialized to a default (read: expected) value
   initializeDefaults: ->
@@ -348,10 +293,10 @@ class App extends Backbone.View
 
     # Whether to play music/SFX
     if localStorage.getItem('playMusic') == null
-      localStorage.setItem 'playMusic', true
+      localStorage.setItem 'playMusic', "true"
 
     if localStorage.getItem('playSfx') == null
-      localStorage.setItem 'playSfx', true
+      localStorage.setItem 'playSfx', "true"
 
 # Wait until "deviceready" event is fired, if necessary (Cordova only)
 if ENV.cordova

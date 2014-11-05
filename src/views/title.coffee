@@ -55,6 +55,6 @@ class TitleScene extends Scene
 
     # Play some music
     # track = if Math.random() < 0.5 then 'one' else 'two'
-    @trigger 'music:play', 'one'
+    @trigger 'music:play', 'bgm-one'
   
 module.exports = TitleScene

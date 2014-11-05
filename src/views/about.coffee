@@ -1,17 +1,3 @@
-###
-AboutScene
-- Shows credits and lets user reset data
-###
-# define [
-#   'jquery'
-#   'underscore'
-#   'backbone'
-#   'cs!utilities/env'
-#   'cs!classes/scene'
-#   'cs!classes/dialog-box'
-#   'text!templates/about.html'
-# ], ($, _, Backbone, env, Scene, DialogBox, template) ->
-
 $ = require('jquery')
 _ = require('underscore')
 Scene = require('../classes/scene')
@@ -21,14 +7,13 @@ DialogBox = require('../classes/dialog-box')
 
 class AboutScene extends Scene
   events: ->
-    # Determine whether touchscreen or desktop
     if ENV.mobile
       events =
-        'touchstart .back': 'back' 
-        'touchstart .reset': 'reset'
-        'touchstart .sfx': 'toggleSfx'
-        'touchstart .music': 'toggleMusic'
-        'touchstart .feedback': 'feedback'
+        'touchend .back': 'back' 
+        'touchend .reset': 'reset'
+        'touchend .sfx': 'toggleSfx'
+        'touchend .music': 'toggleMusic'
+        'touchend .feedback': 'feedback'
     else
       events =
         'click .back': 'back'
@@ -88,7 +73,7 @@ class AboutScene extends Scene
 
     if preference == true
       @$('.button.music span', @elem).html 'Music ON'
-      @trigger 'music:play', 'one'
+      @trigger 'music:play', 'bgm-one'
     else
       @$('.button.music span', @elem).html 'Music OFF'
       @trigger 'music:stop'

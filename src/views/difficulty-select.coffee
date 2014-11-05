@@ -1,65 +1,61 @@
-###
-DifficultySelectScene
-	- Lets user choose difficulty of levels
-###
-define [
-	'jquery'
-	'backbone'
-	'cs!utilities/env'
-	'cs!classes/scene'
-	'cs!classes/dialog-box'
-	'text!templates/difficulty-select.html'
-], ($, Backbone, env, Scene, DialogBox, template) ->
-	class DifficultySelectScene extends Scene
-		events: ->
-			# Determine whether touchscreen or desktop
-			if env.mobile
-				events =
-					'touchstart .back': 'back' 
-					'touchstart .easy': 'select'
-					'touchstart .medium': 'select'
-					'touchstart .hard': 'select'
-					'touchstart .random': 'select'
-			else
-				events =
-					'click .back': 'back'
-					'click .easy': 'select'
-					'click .medium': 'select'
-					'click .hard': 'select'
-					'click .random': 'select'
+$ = require('jquery')
+_ = require('underscore')
+Scene = require('../classes/scene')
+ENV = require('../utilities/env')
+template = require('../templates/difficulty-select')
+DialogBox = require('../classes/dialog-box')
 
-		initialize: ->
-			@elem = $(template)
-			
-			# Hide IAP nonsense
-			$('.restore', @elem).hide()
+class DifficultySelectScene extends Scene
+  events: ->
+    if ENV.mobile
+      events =
+        'touchend .back': 'back' 
+        'touchend .easy': 'select'
+        'touchend .medium': 'select'
+        'touchend .hard': 'select'
+        'touchend .random': 'select'
+    else
+      events =
+        'click .back': 'back'
+        'click .easy': 'select'
+        'click .medium': 'select'
+        'click .hard': 'select'
+        'click .random': 'select'
 
-			@render()
+  initialize: ->
+    @elem = $(template())
+    
+    # Hide IAP by default
+    # $('.restore', @elem).hide()
 
-		# Difficulty choice
-		select: (e) ->
-			e.preventDefault()
-			button = $(e.target)
+    @render()
 
-			# Prevent multiple clicks
-			@undelegateEvents()
+  # Difficulty choice
+  select: (e) ->
+    e.preventDefault()
+    button = $(e.target)
 
-			@trigger 'sfx:play', 'button'
-			@trigger 'scene:change', 'level', { difficulty: button.data 'difficulty' }
+    # Prevent multiple clicks
+    @undelegateEvents()
 
-		# Go back to title
-		back: (e) ->
-			e.preventDefault()
+    @trigger 'sfx:play', 'button'
+    @trigger 'scene:change', 'level', { difficulty: button.data 'difficulty' }
 
-			# Prevent multiple clicks
-			@undelegateEvents()
+  # Go back to title
+  back: (e) ->
+    e.preventDefault()
 
-			@trigger 'sfx:play', 'button'
-			@trigger 'scene:change', 'title'
+    # Prevent multiple clicks
+    @undelegateEvents()
 
-		# Re-delegate event handlers and show the view's elem
-		show: (duration = 500, callback) ->
-			@trigger 'music:play', 'tutorial'
+    @trigger 'sfx:play', 'button'
+    @trigger 'scene:change', 'title'
 
-			# Call "super"
-			super duration, callback
+  # Re-delegate event handlers and show the view's elem
+  show: (duration = 500, callback) ->
+    @trigger 'music:play', 'bgm-tutorial'
+
+    # Call "super"
+    super duration, callback
+
+module.exports = DifficultySelectScene

@@ -1,21 +1,3 @@
-###
-GameScene
-- Contains the main game logic
-###
-# define [
-#   'jquery'
-#   'underscore'
-#   'backbone'
-#   'data/levels'
-#   'cs!utilities/env'
-#   'cs!utilities/cgrect'
-#   'cs!utilities/input'
-#   'cs!classes/scene'
-#   'cs!classes/dialog-box'
-#   'cs!classes/floating-text'
-#   'text!templates/game.html'
-# ], ($, _, Backbone, levels, env, CGRect, Input, Scene, DialogBox, FloatingText, template) ->
-
 $ = require('jquery')
 _ = require('underscore')
 Scene = require('../classes/scene')
@@ -24,12 +6,11 @@ template = require('../templates/game')
 
 class GameScene extends Scene
   events: ->
-    # Determine whether touchscreen or desktop
     if ENV.mobile
       events = 
-        'touchstart .pause': 'pause'
-        'touchstart .mark': 'changeAction'
-        'touchstart .fill': 'changeAction'
+        'touchend .pause': 'pause'
+        'touchend .mark': 'changeAction'
+        'touchend .fill': 'changeAction'
         'touchstart': 'onActionStart'
         'touchmove': 'onActionMove'
         'touchend': 'onActionEnd'
@@ -43,8 +24,7 @@ class GameScene extends Scene
 
   difficulty: "easy"
   level: 0
-  
-  # Timer junk
+
   timerId: null
   seconds: 0
   
@@ -589,7 +569,7 @@ class GameScene extends Scene
     @timerId = setInterval @updateTimer, 1000
 
     # Play some music
-    track = if Math.random() < 0.5 then 'one' else 'two'
+    track = if Math.random() < 0.5 then 'bgm-one' else 'bgm-two'
     @trigger 'music:play', track
 
     if @tutorial is true
