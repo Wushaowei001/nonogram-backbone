@@ -1,8 +1,12 @@
 $ = require('jquery')
 _ = require('underscore')
 Scene = require('../classes/scene')
+FloatingText = require('../classes/floating-text')
+DialogBox = require('../classes/dialog-box')
 ENV = require('../utilities/env')
+Input = require('../utilities/input')
 template = require('../templates/game')
+levels = require('../data/levels')
 
 class GameScene extends Scene
   events: ->
@@ -72,7 +76,7 @@ class GameScene extends Scene
   # Triggered on mousedown or touchstart
   onActionStart: (e) ->
     e.preventDefault()
-    if @ignoreInput then return
+    return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
     if e.type == 'mousedown' then @elem.on 'mousemove', @onActionMove
@@ -98,8 +102,8 @@ class GameScene extends Scene
   # Triggered on mousemove or touchmove
   onActionMove: (e) ->
     e.preventDefault()
-    if @ignoreInput then return
-    if @startRow is -1 or @startCol is -1 then return
+    return if @ignoreInput
+    return if @startRow is -1 or @startCol is -1
 
     # Get user input
     position = Input.normalize e
@@ -144,7 +148,7 @@ class GameScene extends Scene
   # Triggered on mouseup or touchend
   onActionEnd: (e) ->
     e.preventDefault()
-    if @ignoreInput then return
+    return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
     if e.type == 'mouseup' then @elem.off 'mousemove', @onActionMove

@@ -2,7 +2,7 @@ $ = require('jquery')
 _ = require('underscore')
 Backbone = require('backbone')
 Backbone.$ = $
-Sona = require('Sona')
+Sona = require('sona')
 TitleScene = require('./views/title')
 GameScene = require('./views/game')
 AboutScene = require('./views/about')
@@ -88,12 +88,6 @@ class App extends Backbone.View
     # Set active scene
     @activeScene = @titleScene
 
-    # Show the active scene after a slight delay so user can view the amazing splash screen
-    _.delay =>
-      if ENV.cordova then navigator.splashscreen.hide() # Manually remove the Cordova splash screen; prevent a white flash while UIWebView is initialized
-      @activeScene.show()
-    , 500
-
     # Add an additional class to game container if "installed" on iOS homescreen - currently unused
     if window.navigator.standalone then @el.addClass 'standalone'
 
@@ -128,29 +122,30 @@ class App extends Backbone.View
       , false
 
     @sona = new Sona([
-        { url: 'dist/assets/sounds/button.mp3', id: 'button' }
-        { url: 'dist/assets/sounds/error.mp3', id: 'error' }
-        { url: 'dist/assets/sounds/invalid.mp3', id: 'invalid' }
-        { url: 'dist/assets/sounds/fill.mp3', id: 'fill' }
-        { url: 'dist/assets/sounds/mark.mp3', id: 'mark' }
-        { url: 'dist/assets/sounds/win.mp3', id: 'win' }
-        { url: 'dist/assets/music/1.mp3', id: 'bgm-one' }
-        { url: 'dist/assets/music/2.mp3', id: 'bgm-two' }
-        { url: 'dist/assets/music/tutorial.mp3', id: 'bgm-tutorial' }
+        { url: 'assets/sounds/button.mp3', id: 'button' }
+        { url: 'assets/sounds/error.mp3', id: 'error' }
+        { url: 'assets/sounds/invalid.mp3', id: 'invalid' }
+        { url: 'assets/sounds/fill.mp3', id: 'fill' }
+        { url: 'assets/sounds/mark.mp3', id: 'mark' }
+        { url: 'assets/sounds/win.mp3', id: 'win' }
+        { url: 'assets/music/1.mp3', id: 'bgm-one' }
+        { url: 'assets/music/2.mp3', id: 'bgm-two' }
+        { url: 'assets/music/tutorial.mp3', id: 'bgm-tutorial' }
     ])
-    @sona.load()
+
+    @sona.load =>
+      navigator.splashscreen.hide() if ENV.cordova # Manually remove the Cordova splash screen; prevent a white flash while UIWebView is initialized
+      @activeScene.show()
 
   # Callback to play a sound effect
   playSfx: (id) ->
-    # Consider user prefs
-    return if localStorage.getItem('playSfx') == "false"
+    return unless !!localStorage.getItem('playSfx')
 
     @sona.play(id)
 
   # Callback to play music
   playMusic: (id) ->
-    # Consider user prefs
-    return if localStorage.getItem('playMusic') == "false"
+    return unless !!localStorage.getItem('playMusic')
 
     # Do nothing if the same track is currently being played
     return if @currentMusic == id
