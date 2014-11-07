@@ -1,4 +1,4 @@
-$ = require('jquery')
+$ = require('../vendor/zepto')
 _ = require('underscore')
 Scene = require('../classes/scene')
 ENV = require('../utilities/env')

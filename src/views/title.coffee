@@ -1,24 +1,15 @@
-# define [
-# 'jquery'
-# 'backbone'
-# 'cs!utilities/env'
-# 'cs!classes/scene'
-# 'text!templates/title.html'
-# ], ($, Backbone, env, Scene, template) ->
-
-$ = require('jquery')
+$ = require('../vendor/zepto')
 Scene = require('../classes/scene')
 ENV = require('../utilities/env')
 template = require('../templates/title.html')
 
 class TitleScene extends Scene
   events: ->
-    # Determine whether touchscreen or desktop
     if ENV.mobile
       events =
-        'touchstart .start': 'start' 
-        'touchstart .tutorial': 'tutorial' 
-        'touchstart .about': 'about'
+        'touchend .start': 'start' 
+        'touchend .tutorial': 'tutorial' 
+        'touchend .about': 'about'
     else
       events =
         'click .start': 'start' 

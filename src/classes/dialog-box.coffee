@@ -1,25 +1,19 @@
 ###
 pass args object like this
 {
-title: "string"
-message: "string"
-buttons: [
-  {
-    text: 'OK'
-    callback: ->
-      dostuf()
-  }
-]
+  title: "string"
+  message: "string"
+  buttons: [
+    {
+      text: 'OK'
+      callback: ->
+        dostuf()
+    }
+  ]
 }
 ###
-# define [
-# 'jquery'
-# 'backbone'
-# 'buzz'
-# 'cs!utilities/env'
-# ], ($, Backbone, buzz, env) ->
 
-$ = require('jquery')
+$ = require('../vendor/zepto')
 _ = require('underscore')
 Backbone = require('backbone')
 ENV = require('../utilities/env')
@@ -29,10 +23,9 @@ class DialogBox extends Backbone.View
   doCallback: true
 
   events: ->
-    # Determine whether touchscreen or desktop
     if ENV.mobile
       events =
-        'touchstart .button': 'onAction'
+        'touchend .button': 'onAction'
     else
       events =
         'click .button': 'onAction'
@@ -42,6 +35,7 @@ class DialogBox extends Backbone.View
 
     if @options.animationTime? then @animationTime = @options.animationTime
 
+    _.bindAll @, 'resize'
     $(window).on 'resize', @resize
 
     # Create HTML contents here
@@ -90,7 +84,7 @@ class DialogBox extends Backbone.View
 
     buttonAction = $(e.target).attr 'data-action'
 
-    window.sounds['button']?.play()
+    # window.sounds['button']?.play()
 
     # Search through the buttons array, looking for the callback associated w/ the clicked button
     for button in @options.buttons

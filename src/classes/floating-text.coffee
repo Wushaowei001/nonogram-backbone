@@ -1,4 +1,4 @@
-$ = require('jquery')
+$ = require('../vendor/zepto')
 
 class FloatingText
   constructor: (options) ->

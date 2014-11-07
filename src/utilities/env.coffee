@@ -13,9 +13,9 @@ mobile = android or ios or bb10
 desktop = not mobile
  
 module.exports =
-    android: android
-    ios: ios
-    bb10: bb10
-    mobile: mobile
-    desktop: desktop
-    cordova: typeof cordova != "undefined"
+  android: android
+  ios: ios
+  bb10: bb10
+  mobile: mobile
+  desktop: desktop
+  cordova: typeof cordova != "undefined"

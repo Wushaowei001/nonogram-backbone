@@ -1,4 +1,4 @@
-$ = require('jquery')
+$ = require('./vendor/zepto')
 _ = require('underscore')
 Backbone = require('backbone')
 Backbone.$ = $
