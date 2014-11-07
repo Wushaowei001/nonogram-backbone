@@ -19,7 +19,7 @@ gulp.task('coffee', function () {
 });
 
 gulp.task('less', function () {
-	gulp.src('dist/assets/stylesheets/main.less')
+	gulp.src('src/stylesheets/main.less')
 		.pipe(less())
 		.pipe(gulp.dest('dist/assets/stylesheets'));
 })
