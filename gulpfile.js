@@ -1,5 +1,6 @@
 var gulp = require('gulp'),
 	browserify = require('gulp-browserify'),
+	uglify = require('gulp-uglify'),
 	rename = require('gulp-rename'),
 	less = require('gulp-less'),
 	watch = require('gulp-watch');
@@ -10,6 +11,7 @@ gulp.task('coffee', function () {
 			transform: ['coffeeify', 'jstify'],
 			extensions: ['.coffee', '.html']
 		}))
+		.pipe(uglify())
 		.pipe(rename('app.js'))
 		.pipe(gulp.dest('dist'));
 });
@@ -26,4 +28,6 @@ gulp.task('build', function () {
 
 gulp.task('watch', function () {
 	gulp.watch(['src/**/*.coffee'], ['coffee']);
+
+	gulp.watch(['src/stylesheets/main.less'], ['less']);
 });
