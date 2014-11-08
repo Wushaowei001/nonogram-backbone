@@ -8,6 +8,11 @@
 [ ] Change scene transition to be code based - allow for an extra parameter, "forward" or "back", which dictates the direction the transition occurs
 [ ] Make puzzle grid 100% width
 [ ] Experiment with encasing buttons in a <div>, to allow for a "pressed" effect
-[ ] Move LESS source into "/src" directory (or at least out of "/dist")
-[ ] Add Zepto?
-[ ] Fix positioning of Dialog Box
+[ ] Add canvas-based level previews
+[ ] Add "squish" effect when interacting with cells in puzzle board
+[x] Add livereload
+[ ] Add config file to specify path to assets, etc.
+[x] Compress concat'd source
+[x] Move LESS source into "/src" directory (or at least out of "/dist")
+[x] Add Zepto?
+[x] Fix positioning of Dialog Box
