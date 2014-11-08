@@ -18,6 +18,10 @@ Storage.prototype.getObject = (key) ->
   value = @getItem key
   return value and JSON.parse value
 
+Storage.prototype.getBoolean = (key) ->
+  value = @getItem(key)
+  value == "true"
+
 # Extend Backbone
 Backbone.View.prototype.close = ->
   @elem.remove()
@@ -139,13 +143,13 @@ class App extends Backbone.View
 
   # Callback to play a sound effect
   playSfx: (id) ->
-    return unless !!localStorage.getItem('playSfx')
+    return unless localStorage.getBoolean('playSfx')
 
     @sona.play(id)
 
   # Callback to play music
   playMusic: (id) ->
-    return unless !!localStorage.getItem('playMusic')
+    return unless localStorage.getBoolean('playMusic')
 
     # Do nothing if the same track is currently being played
     return if @currentMusic == id
