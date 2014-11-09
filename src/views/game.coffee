@@ -178,7 +178,7 @@ class GameScene extends Scene
         @trigger 'sfx:play', 'invalid'
       else if valid
         # Do a bunch of crap when a successful move is made
-        block.addClass 'filled'
+        block.addClass 'filled pulse'
 
         @hits++
 
