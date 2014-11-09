@@ -1,12 +1,15 @@
 $ = require('../vendor/zepto')
+_ = require('underscore')
 
 class FloatingText
   constructor: (options) ->
     options = _.defaults options,
-      'text': 'Message!'
-      'speed': 1000
-      'el': $('body')
-      'position': { 'x': 0, 'y': 0 }
+      text: 'Message!'
+      speed: 1000
+      el: $('body')
+      position:
+        x: 0
+        y: 0
 
     html = """
         <div class="floating-text">
@@ -30,3 +33,5 @@ class FloatingText
       'opacity': 0
     , options.speed, 'ease-in-out', =>
       @elem.remove()
+
+module.exports = FloatingText
