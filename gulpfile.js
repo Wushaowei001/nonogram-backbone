@@ -3,6 +3,7 @@ var gulp = require('gulp'),
 	uglify = require('gulp-uglify'),
 	rename = require('gulp-rename'),
 	less = require('gulp-less'),
+	autoprefixer = require('gulp-autoprefixer'),
 	watch = require('gulp-watch');
 
 gulp.task('coffee', function () {
@@ -19,6 +20,10 @@ gulp.task('coffee', function () {
 gulp.task('less', function () {
 	gulp.src('src/stylesheets/main.less')
 		.pipe(less())
+		.pipe(autoprefixer({
+			browsers: ['last 2 versions'],
+			cascade: false
+		}))
 		.pipe(gulp.dest('dist/assets/stylesheets'));
 });
 
@@ -27,7 +32,7 @@ gulp.task('build', function () {
 });
 
 gulp.task('watch', function () {
-	gulp.watch(['src/**/*.coffee'], ['coffee']);
+	gulp.watch(['src/**/*.coffee', 'src/**/*.html'], ['coffee']);
 
 	gulp.watch(['src/stylesheets/main.less'], ['less']);
 });
