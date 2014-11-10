@@ -90,16 +90,13 @@ class App extends Backbone.View
     @difficultyScene.hide 0
 
     # Set active scene
-    @activeScene = @titleScene
+    @activeScene = @levelScene
 
     # Add an additional class to game container if "installed" on iOS homescreen - currently unused
     if window.navigator.standalone then @el.addClass 'standalone'
 
     # This handles desktop resize events as well as orientation changes
     $(window).on 'resize', @resize
-
-    # Do an initial resize of the content area to ensure a 2:3 ratio
-    @resize()
 
     # Prevent content from dragging around
     if ENV.mobile
@@ -138,6 +135,7 @@ class App extends Backbone.View
     ])
 
     @sona.load =>
+      @resize() # Do an initial resize of the content area to ensure a 2:3 ratio
       navigator.splashscreen.hide() if ENV.cordova # Manually remove the Cordova splash screen; prevent a white flash while UIWebView is initialized
       @activeScene.show()
 
