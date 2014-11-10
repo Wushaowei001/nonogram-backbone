@@ -10,6 +10,7 @@
 [ ] Add config file to specify path to assets, etc.
 [ ] Add CSS compression
 [ ] Add sourcemaps
+[ ] Turn <div>s back into <button>s
 [x] Add "squish" effect when interacting with cells in puzzle board
 [x] Set up CSS autoprefixer
 [x] Add livereload
