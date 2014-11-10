@@ -28,6 +28,20 @@ class LevelSelectScene extends Scene
     @elem = $(template())
     @render()
 
+    # Spike: draw previews on all the <canvas> objects
+    i = 0
+    while (i < 9)
+      canvas = @$('.preview canvas').eq(i)
+      context = canvas[0].getContext('2d')
+      level = levels[@difficulty][i]
+      for clue, index in level.clues
+          if clue is 1
+            x = index % 10
+            y = Math.floor(index / 10)
+            context.fillRect(x, y, 1, 1)
+      i += 1
+
+
   previous: (e) ->
     e.preventDefault()
 
