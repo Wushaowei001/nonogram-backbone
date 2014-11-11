@@ -21,26 +21,13 @@ class LevelSelectScene extends Scene
         'click .play': 'play'
 
   current: 0
+  page: 0
   difficulty: 'easy'
   stats: {}
 
   initialize: ->
     @elem = $(template())
     @render()
-
-    # Spike: draw previews on all the <canvas> objects
-    i = 0
-    while (i < 9)
-      canvas = @$('.preview canvas').eq(i)
-      context = canvas[0].getContext('2d')
-      level = levels[@difficulty][i]
-      for clue, index in level.clues
-          if clue is 1
-            x = index % 10
-            y = Math.floor(index / 10)
-            context.fillRect(x, y, 1, 1)
-      i += 1
-
 
   previous: (e) ->
     e.preventDefault()
@@ -54,7 +41,9 @@ class LevelSelectScene extends Scene
 
       @trigger 'sfx:play', 'button'
 
-      @showPreview levels[@difficulty][@current]
+      # @showPreview levels[@difficulty][@current]
+      @page -= 1
+      @drawPreviews()
 
   next: (e) ->
     e.preventDefault()
@@ -67,8 +56,9 @@ class LevelSelectScene extends Scene
       if @current == 1 then @$('.previous').removeClass 'disabled'
 
       @trigger 'sfx:play', 'button'
-
-      @showPreview levels[@difficulty][@current]
+      @page += 1
+      @drawPreviews()
+      # @showPreview levels[@difficulty][@current]
 
   play: (e) ->
     e.preventDefault()
@@ -114,16 +104,16 @@ class LevelSelectScene extends Scene
 
       # Show a preview of the completed level
       # This will show the previously completed random puzzle
-      if level.clues.length > 0
-        @$('.preview .complete').show()
-        @$('.preview .incomplete').hide()
+      # if level.clues.length > 0
+      #   @$('.preview .complete').show()
+      #   @$('.preview .incomplete').hide()
 
-        # Clear out previous preview
-        @$('.preview .complete div').removeClass('filled')
+      #   # Clear out previous preview
+      #   @$('.preview .complete div').removeClass('filled')
 
-        for clue, index in level.clues
-          if clue is 1
-            @$('.preview .complete div').eq(index).addClass('filled')
+      #   for clue, index in level.clues
+      #     if clue is 1
+      #       @$('.preview .complete div').eq(index).addClass('filled')
 
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: ????"
@@ -140,6 +130,21 @@ class LevelSelectScene extends Scene
     #   'left': 0
     # , 500, 'cubic-bezier(0.5, -0.5, 0.5, 1.5)'
 
+  drawPreviews: ->
+    i = 0
+    while (i < 9)
+      canvas = @$('.preview canvas').eq(i)
+      pixelSize = Math.floor(canvas.width() / 10)
+      context = canvas[0].getContext('2d')
+      context.clearRect(0, 0, canvas.width(), canvas.height())
+
+      level = levels[@difficulty][@page * 9 + i]
+      for clue, index in level.clues
+          if clue is 1
+            x = index % 10
+            y = Math.floor(index / 10)
+            context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
+      i += 1
 
   resize: (width, height, orientation) ->
     preview = @$('.preview')
@@ -153,6 +158,13 @@ class LevelSelectScene extends Scene
       width = width * 0.6
       preview.width(Math.round(width / 10) * 10)
       preview.height(preview.width())
+
+    @$('canvas').each (index, object) ->
+      canvas = $(object)
+      canvas.attr('width', Math.floor(canvas.width() / 10) * 10)
+      canvas.attr('height', Math.floor(canvas.height() / 10) * 10)
+
+    @drawPreviews()
 
   hide: (duration = 500, callback) ->
     super duration, callback
