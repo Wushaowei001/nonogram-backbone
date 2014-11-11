@@ -44,10 +44,12 @@ class App extends Backbone.View
 
     # Create all game views here
     @el = $('#nonograms')
-    @titleScene = new TitleScene { el: @el }
-    @gameScene = new GameScene { el: @el }
-    @aboutScene = new AboutScene { el: @el }
-    @levelScene = new LevelSelectScene { el: @el }
+    @scenes =
+      title: new TitleScene { el: @el }
+      game: new GameScene { el: @el }
+      about: new AboutScene { el: @el }
+      levelSelect: new LevelSelectScene { el: @el }
+      difficultySelect: new DifficultySelectScene { el: @el }
 
     # Differentiate between views that have platform-specific IAP code
     # if ENV.cordova and ENV.android
@@ -55,42 +57,18 @@ class App extends Backbone.View
     # else if ENV.cordova and ENV.ios
     #   @difficultyScene = new DifficultySelectIOSScene { el: @el }
     # else
-    @difficultyScene = new DifficultySelectScene { el: @el }
 
-    # Bind handlers on each view to allow easy switching between scenes
-    @titleScene.on 'scene:change', @changeScene
-    @gameScene.on 'scene:change', @changeScene
-    @aboutScene.on 'scene:change', @changeScene
-    @levelScene.on 'scene:change', @changeScene
-    @difficultyScene.on 'scene:change', @changeScene
-
-    # Bind handlers that deal with SFX/Music
-    @titleScene.on 'sfx:play', @playSfx
-    @gameScene.on 'sfx:play', @playSfx
-    @aboutScene.on 'sfx:play', @playSfx
-    @levelScene.on 'sfx:play', @playSfx
-    @difficultyScene.on 'sfx:play', @playSfx
-
-    @titleScene.on 'music:play', @playMusic
-    @gameScene.on 'music:play', @playMusic
-    @aboutScene.on 'music:play', @playMusic
-    @levelScene.on 'music:play', @playMusic
-    @difficultyScene.on 'music:play', @playMusic
-
-    @aboutScene.on 'music:stop', @stopMusic
-    @gameScene.on 'music:stop', @stopMusic
-
-    @gameScene.on 'vfx:play', @playVfx
-
-    # Hide all scenes
-    @titleScene.hide 0
-    @gameScene.hide 0
-    @aboutScene.hide 0
-    @levelScene.hide 0
-    @difficultyScene.hide 0
+    # Bind various handlers on each view, and initially hide
+    for name, scene of @scenes
+      scene.on 'scene:change', @changeScene
+      scene.on 'sfx:play', @playSfx
+      scene.on 'music:play', @playMusic
+      scene.on 'music:stop', @stopMusic
+      scene.on 'vfx:play', @playVfx
+      scene.hide 0
 
     # Set active scene
-    @activeScene = @levelScene
+    @activeScene = @scenes.levelSelect
 
     # Add an additional class to game container if "installed" on iOS homescreen - currently unused
     if window.navigator.standalone then @el.addClass 'standalone'
@@ -180,18 +158,18 @@ class App extends Backbone.View
     @activeScene.hide()
 
     switch scene
-      when 'title' then @activeScene = @titleScene
-      when 'about' then @activeScene = @aboutScene
-      when 'difficulty' then @activeScene = @difficultyScene
+      when 'title' then @activeScene = @scenes.title
+      when 'about' then @activeScene = @scenes.about
+      when 'difficulty' then @activeScene = @scenes.difficultySelect
       when 'level' 
         @levelScene.difficulty = options.difficulty
-        @activeScene = @levelScene
+        @activeScene = @scenes.levelSelect
       when 'game' 
         # Set the game's diff & level props from the passed "options" arg
         @gameScene.difficulty = options.difficulty
         @gameScene.level = options.level
         @gameScene.tutorial = options.tutorial
-        @activeScene = @gameScene
+        @activeScene = @scenes.game
       else
         console.log "Error! Scene not defined in switch statement" 
         @activeScene = @titleScene
@@ -252,8 +230,8 @@ class App extends Backbone.View
       padding: "#{padding.height / 2}px #{padding.width / 2}px"
 
     # Call a "resize" method on other views that have elements that need to have their position manually calculated
-    @gameScene.resize width, height, orientation
-    @levelScene.resize width, height, orientation
+    for name, scene of @scenes
+      scene.resize(width, height, orientation) if typeof scene.resize == 'function'
 
   # Make sure that any data stored in localStorage is initialized to a default (read: expected) value
   initializeDefaults: ->
