@@ -161,15 +161,15 @@ class App extends Backbone.View
       when 'title' then @activeScene = @scenes.title
       when 'about' then @activeScene = @scenes.about
       when 'difficulty' then @activeScene = @scenes.difficultySelect
-      when 'level' 
-        @levelScene.difficulty = options.difficulty
+      when 'level'
         @activeScene = @scenes.levelSelect
+        @activeScene.difficulty = options.difficulty
       when 'game' 
         # Set the game's diff & level props from the passed "options" arg
-        @gameScene.difficulty = options.difficulty
-        @gameScene.level = options.level
-        @gameScene.tutorial = options.tutorial
         @activeScene = @scenes.game
+        @activeScene.difficulty = options.difficulty
+        @activeScene.level = options.level
+        @activeScene.tutorial = options.tutorial
       else
         console.log "Error! Scene not defined in switch statement" 
         @activeScene = @titleScene
