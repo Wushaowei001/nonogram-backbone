@@ -13,15 +13,18 @@ class LevelSelectScene extends Scene
         'touchend .previous': 'previous'
         'touchend .next': 'next'
         'touchend .play': 'play'
+        'touchend canvas': 'select'
     else
       events =
         'click .back': 'back' 
         'click .previous': 'previous'
         'click .next': 'next'
         'click .play': 'play'
+        'click canvas': 'select'
 
   current: 0
   page: 0
+  perPage: 9
   difficulty: 'easy'
   stats: {}
 
@@ -29,42 +32,44 @@ class LevelSelectScene extends Scene
     @elem = $(template())
     @render()
 
+    @totalPages = Math.ceil(levels[@difficulty].length / @perPage)
+
   previous: (e) ->
     e.preventDefault()
 
-    if @current > 0
-      @current--
+    if @page > 0
+      @page -= 1
 
       # Handle dimming prev/next buttons
-      if @current == 0 then @$('.previous').addClass 'disabled'
-      if @current == levels[@difficulty].length - 2 then @$('.next').removeClass 'disabled'
+      @$('.previous').addClass 'disabled' if @page is 0
+      @$('.next').removeClass 'disabled' if @page is @totalPages - 2
 
       @trigger 'sfx:play', 'button'
 
-      # @showPreview levels[@difficulty][@current]
-      @page -= 1
       @drawPreviews()
+      @current = @page * @perPage
+      @highlightPreview()
 
   next: (e) ->
     e.preventDefault()
 
-    if @current < levels[@difficulty].length - 1
-      @current++
+    if @page < @totalPages - 1
+      @page += 1
 
       # Handle dimming prev/next buttons
-      if @current == levels[@difficulty].length - 1 then @$('.next').addClass 'disabled'
-      if @current == 1 then @$('.previous').removeClass 'disabled'
+      @$('.next').addClass 'disabled' if @page is @totalPages - 1
+      @$('.previous').removeClass 'disabled' if @page is 1
 
       @trigger 'sfx:play', 'button'
-      @page += 1
+
       @drawPreviews()
-      # @showPreview levels[@difficulty][@current]
+      @current = @page * @perPage
+      @highlightPreview()
 
   play: (e) ->
     e.preventDefault()
     
-    # Prevent multiple clicks
-    @undelegateEvents()
+    @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @current }
@@ -73,14 +78,13 @@ class LevelSelectScene extends Scene
   back: (e) ->
     e.preventDefault()
 
-    # Prevent multiple clicks
-    @undelegateEvents()
+    @undelegateEvents() # Prevent multiple clicks
     
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficulty'
 
-  # Parse through a level object and display on a table
-  showPreview: (level) ->
+  showLevelInfo: ->
+    # TODO move this elsewhere
     pad = (number, length) ->
       string = String(number)
       string = '0' + string while string.length < length
@@ -98,58 +102,52 @@ class LevelSelectScene extends Scene
     @$('.attempts').html "Attempts: #{attempts}"
     @$('.best-time').html "Best Time: #{time}"
 
+    levelData = levels[@difficulty][@current]
+
     # If level is completed, show preview, title, etc.
     if time != '--:--'
-      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: #{level.title}"
-
-      # Show a preview of the completed level
-      # This will show the previously completed random puzzle
-      # if level.clues.length > 0
-      #   @$('.preview .complete').show()
-      #   @$('.preview .incomplete').hide()
-
-      #   # Clear out previous preview
-      #   @$('.preview .complete div').removeClass('filled')
-
-      #   for clue, index in level.clues
-      #     if clue is 1
-      #       @$('.preview .complete div').eq(index).addClass('filled')
-
+      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: #{levelData.title}"
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: ????"
       @$('.preview .complete').hide()
       @$('.preview .incomplete').show()
 
-    # Animate into place
-    # preview = @$('.preview')
-
-    # preview.css
-    #   'left': -@elem.width()
-
-    # preview.animate
-    #   'left': 0
-    # , 500, 'cubic-bezier(0.5, -0.5, 0.5, 1.5)'
-
   drawPreviews: ->
     i = 0
-    while (i < 9)
+    while (i < @perPage)
       canvas = @$('.preview canvas').eq(i)
       pixelSize = Math.floor(canvas.width() / 10)
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
 
-      level = levels[@difficulty][@page * 9 + i]
-      for clue, index in level.clues
-          if clue is 1
-            x = index % 10
-            y = Math.floor(index / 10)
-            context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
+      levelData = levels[@difficulty][@page * @perPage + i]
+
+      if levelData is undefined
+        canvas.hide()
+      else
+        canvas.show()
+        for clue, index in levelData.clues
+            if clue is 1
+              x = index % 10
+              y = Math.floor(index / 10)
+              context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
       i += 1
+
+  select: (event) ->
+    @current = @page * @perPage + $(event.target).index()
+    @highlightPreview()
+
+  highlightPreview: ->
+    index = @current - @page * @perPage
+    preview = @$('canvas').eq(index)
+    preview.siblings().removeClass 'selected'
+    preview.addClass 'selected'
+    @showLevelInfo()
 
   resize: (width, height, orientation) ->
     preview = @$('.preview')
 
-    # TODO: Is it possible to get rid of this hardcoded nonsense? I don't think so
+    # TODO: Get rid of this hardcoded nonsense
     if orientation is 'landscape'
       width = width * 0.4
       preview.width(Math.round(width / 10) * 10)
@@ -159,6 +157,8 @@ class LevelSelectScene extends Scene
       preview.width(Math.round(width / 10) * 10)
       preview.height(preview.width())
 
+    # Make each canvas a multiple of 10, so 10x10 grids can
+    # be drawn without artifacts caused by antialiasing
     @$('canvas').each (index, object) ->
       canvas = $(object)
       canvas.attr('width', Math.floor(canvas.width() / 10) * 10)
@@ -199,7 +199,8 @@ class LevelSelectScene extends Scene
     @current = localStorage.getObject('lastViewedLevel')[@difficulty]
 
     # Re-populate the preview window
-    @showPreview levels[@difficulty][@current]
+    @drawPreviews()
+    @highlightPreview()
 
     @trigger 'music:play', 'bgm-tutorial'
 
