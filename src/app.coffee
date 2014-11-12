@@ -210,7 +210,7 @@ class App extends Backbone.View
         newHeight = width / ratio
         padding.height = height - newHeight
         height = newHeight
-      $('body').css { 'font-size': "#{width * 0.1302}%" }   # Dynamically update the font size - 0.1302% font size per pixel in width
+      $('html').css { 'font-size': "#{width * 0.1302}%" }   # Dynamically update the font size - 0.1302% font size per pixel in width
 
     else if orientation is 'portrait'
       if height / ratio > width     # Too high; add padding to height
@@ -221,7 +221,7 @@ class App extends Backbone.View
         newWidth = height / ratio
         padding.width = width - newWidth
         width = newWidth
-      $('body').css { 'font-size': "#{height * 0.1302}%" }  # Dynamically update the font size - 0.1302% font size per pixel in height
+      $('html').css { 'font-size': "#{height * 0.1302}%" }  # Dynamically update the font size - 0.1302% font size per pixel in height
 
     # Add the calculated padding to each scene <div>
     @el.find('.scene .container').css
