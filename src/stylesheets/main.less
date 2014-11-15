@@ -44,8 +44,7 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(1, 1); }
-  50% { transform: scale(1.2, 1.2); }
+  0% { transform: scale(1.3, 1.3); }
   100% { transform: scale(1, 1); }
 }
 
@@ -200,9 +199,14 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
     h2 { clear: left; }
 
-    .preview { width: 60%; height: 40%; overflow: hidden; margin: 0 auto; padding-top: 4%;
+    .preview { width: 60%; height: 40%; overflow: visible; margin: 0 auto; padding-top: 4%;
       canvas { width: 30%; height: 30%; margin: -2% 3% 3% 0; image-rendering: -webkit-optimize-contrast; background: #fff; .box-shadow; box-sizing: border-box; 
-        &.selected { border: 5px solid orange; }
+        &.selected {
+          border: 5px solid orange;
+          animation-name: pulse;
+          animation-duration: 0.5s;
+          animation-timing-function: ease-in-out;
+        }
       }
     }
 

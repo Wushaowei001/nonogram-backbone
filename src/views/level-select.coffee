@@ -97,7 +97,7 @@ class LevelSelectScene extends Scene
     else
       time = '--:--'
 
-    attempts = if @stats[@current]?.attempts then @stats[@current].attempts else "0"
+    attempts = @stats[@current]?.attempts || "0"
     
     @$('.attempts').html "Attempts: #{attempts}"
     @$('.best-time').html "Best Time: #{time}"
@@ -109,27 +109,34 @@ class LevelSelectScene extends Scene
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: #{levelData.title}"
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: ????"
-      @$('.preview .complete').hide()
-      @$('.preview .incomplete').show()
 
   drawPreviews: ->
+    canvases = @$('.preview canvas')
     i = 0
     while (i < @perPage)
-      canvas = @$('.preview canvas').eq(i)
-      pixelSize = Math.floor(canvas.width() / 10)
+      canvas = canvases.eq(i)
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
 
-      levelData = levels[@difficulty][@page * @perPage + i]
+      index = @page * @perPage + i
+      levelData = levels[@difficulty][index]
 
       if levelData is undefined
         canvas.hide()
       else
+        gridSize = Math.sqrt(levelData.clues.length)
+        pixelSize = Math.floor(canvas.width() / gridSize)
+
         canvas.show()
-        for clue, index in levelData.clues
+        clues = if @stats[index]?.time 
+                  levelData.clues
+                else
+                  levels.incomplete.clues
+
+        for clue, index in clues
             if clue is 1
-              x = index % 10
-              y = Math.floor(index / 10)
+              x = index % gridSize
+              y = Math.floor(index / gridSize)
               context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
       i += 1
 
@@ -138,32 +145,22 @@ class LevelSelectScene extends Scene
     @highlightPreview()
 
   highlightPreview: ->
+    canvases = @$('.preview canvas')
     index = @current - @page * @perPage
-    preview = @$('canvas').eq(index)
-    preview.siblings().removeClass 'selected'
-    preview.addClass 'selected'
+    selected = canvases.eq(index)
+    canvases.removeClass 'selected'
+    selected.addClass 'selected'
     @showLevelInfo()
 
   resize: (width, height, orientation) ->
-    preview = @$('.preview')
-
-    # TODO: Get rid of this hardcoded nonsense
-    if orientation is 'landscape'
-      width = width * 0.4
-      preview.width(Math.round(width / 10) * 10)
-      preview.height(preview.width())
-    else
-      width = width * 0.6
-      preview.width(Math.round(width / 10) * 10)
-      preview.height(preview.width())
-
     # Make each canvas a multiple of 10, so 10x10 grids can
     # be drawn without artifacts caused by antialiasing
-    @$('canvas').each (index, object) ->
+    @$('.preview canvas').each (index, object) ->
       canvas = $(object)
       canvas.attr('width', Math.floor(canvas.width() / 10) * 10)
       canvas.attr('height', Math.floor(canvas.height() / 10) * 10)
 
+    # Re-draw previews, since resetting width/height on a canvas erases it
     @drawPreviews()
 
   hide: (duration = 500, callback) ->
@@ -173,12 +170,6 @@ class LevelSelectScene extends Scene
     lastViewedLevel = localStorage.getObject('lastViewedLevel')
     lastViewedLevel[@difficulty] = @current
     localStorage.setObject 'lastViewedLevel', lastViewedLevel
-
-    # Hide the level preview after transition is complete
-    _.delay =>
-      @$('.preview .complete').hide()
-      @$('.preview .incomplete').show()
-    , duration
 
   # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
