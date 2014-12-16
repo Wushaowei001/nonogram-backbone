@@ -68,12 +68,12 @@ class App extends Backbone.View
       scene.hide 0
 
     # Set active scene
-    @activeScene = @scenes.levelSelect
+    @activeScene = @scenes.title
 
     # Add an additional class to game container if "installed" on iOS homescreen - currently unused
     if window.navigator.standalone then @el.addClass 'standalone'
 
-    # This handles desktop resize events as well as orientation changes
+    # Handle desktop resize/orientation change
     $(window).on 'resize', @resize
 
     # Prevent content from dragging around
