@@ -44,8 +44,6 @@ class TitleScene extends Scene
   show: (duration = 500, callback) ->
     super duration, callback
 
-    # Play some music
-    # track = if Math.random() < 0.5 then 'one' else 'two'
     @trigger 'music:play', 'bgm-one'
   
 module.exports = TitleScene

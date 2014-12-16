@@ -10,36 +10,27 @@ class DifficultySelectScene extends Scene
     if ENV.mobile
       events =
         'touchend .back': 'back' 
-        'touchend .easy': 'select'
-        'touchend .medium': 'select'
-        'touchend .hard': 'select'
-        'touchend .random': 'select'
+        'touchend .select': 'select'
     else
       events =
         'click .back': 'back'
-        'click .easy': 'select'
-        'click .medium': 'select'
-        'click .hard': 'select'
-        'click .random': 'select'
+        'click .select': 'select'
 
   initialize: ->
     @elem = $(template())
-    
-    # Hide IAP by default
-    # $('.restore', @elem).hide()
-
     @render()
 
   # Difficulty choice
   select: (e) ->
     e.preventDefault()
     button = $(e.target)
+    button = button.parent('.button') unless button.data('difficulty')
 
     # Prevent multiple clicks
     @undelegateEvents()
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'level', { difficulty: button.data 'difficulty' }
+    @trigger 'scene:change', 'level', { difficulty: button.data('difficulty') }
 
   # Go back to title
   back: (e) ->
