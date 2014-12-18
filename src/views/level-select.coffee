@@ -32,7 +32,7 @@ class LevelSelectScene extends Scene
     @elem = $(template())
     @render()
 
-    @totalPages = Math.ceil(levels[@difficulty].length / @perPage)
+    @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
 
   previous: (e) ->
     e.preventDefault()
@@ -42,7 +42,7 @@ class LevelSelectScene extends Scene
 
       # Handle dimming prev/next buttons
       @$('.previous').addClass 'disabled' if @page is 0
-      @$('.next').removeClass 'disabled' if @page is @totalPages - 2
+      @$('.next').removeClass 'disabled' if @page is @totalPages - 1
 
       @trigger 'sfx:play', 'button'
 
@@ -53,11 +53,11 @@ class LevelSelectScene extends Scene
   next: (e) ->
     e.preventDefault()
 
-    if @page < @totalPages - 1
+    if @page < @totalPages
       @page += 1
 
       # Handle dimming prev/next buttons
-      @$('.next').addClass 'disabled' if @page is @totalPages - 1
+      @$('.next').addClass 'disabled' if @page is @totalPages
       @$('.previous').removeClass 'disabled' if @page is 1
 
       @trigger 'sfx:play', 'button'
@@ -111,10 +111,8 @@ class LevelSelectScene extends Scene
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: ????"
 
   drawPreviews: ->
-    canvases = @$('.preview canvas')
-    i = 0
-    while (i < @perPage)
-      canvas = canvases.eq(i)
+    @$('.preview canvas').each (i, element) =>
+      canvas = $(element)
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
 
@@ -128,6 +126,21 @@ class LevelSelectScene extends Scene
         pixelSize = Math.floor(canvas.width() / gridSize)
 
         canvas.show()
+
+        # Turn off transitions so canvas moves instantly
+        canvas.css('transition', 'transform 0s linear')
+
+        # Move offscreen
+        canvas.css('transform', "translateX(#{@width}px)")
+
+        _.delay ->
+          # Turn transitions back on for smooth animation
+          canvas.css('transition', 'transform 0.75s cubic-bezier(.5,-0.5,.5,1.5)')
+
+          # Move onscreen
+          canvas.css('transform', 'translateX(0)')
+        , i * 100
+
         clues = if @stats[index]?.time 
                   levelData.clues
                 else
@@ -162,6 +175,9 @@ class LevelSelectScene extends Scene
 
     # Re-draw previews, since resetting width/height on a canvas erases it
     @drawPreviews()
+
+    @width = width
+    @height = height
 
   hide: (duration = 500, callback) ->
     super duration, callback
