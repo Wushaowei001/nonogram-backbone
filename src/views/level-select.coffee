@@ -22,7 +22,7 @@ class LevelSelectScene extends Scene
         'click .play': 'play'
         'click canvas': 'select'
 
-  current: 0
+  selectedLevel: 0
   page: 0
   perPage: 9
   difficulty: 'easy'
@@ -33,6 +33,8 @@ class LevelSelectScene extends Scene
     @render()
 
     @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
+    @onscreen = @$('.preview .onscreen canvas')
+    @offscreen = @$('.preview .offscreen canvas')
 
   previous: (e) ->
     e.preventDefault()
@@ -47,7 +49,7 @@ class LevelSelectScene extends Scene
       @trigger 'sfx:play', 'button'
 
       @drawPreviews()
-      @current = @page * @perPage
+      @selectedLevel = @page * @perPage
       @highlightPreview()
 
   next: (e) ->
@@ -63,7 +65,7 @@ class LevelSelectScene extends Scene
       @trigger 'sfx:play', 'button'
 
       @drawPreviews()
-      @current = @page * @perPage
+      @selectedLevel = @page * @perPage
       @highlightPreview()
 
   play: (e) ->
@@ -72,7 +74,7 @@ class LevelSelectScene extends Scene
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @current }
+    @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @selectedLevel }
 
 
   back: (e) ->
@@ -90,28 +92,41 @@ class LevelSelectScene extends Scene
       string = '0' + string while string.length < length
       return string
 
-    if @stats[@current]?.time     
-      minutes = pad Math.floor(@stats[@current].time / 60), 2
-      seconds = pad @stats[@current].time % 60, 2
+    if @stats[@selectedLevel]?.time     
+      minutes = pad Math.floor(@stats[@selectedLevel].time / 60), 2
+      seconds = pad @stats[@selectedLevel].time % 60, 2
       time = "#{minutes}:#{seconds}"
     else
       time = '--:--'
 
-    attempts = @stats[@current]?.attempts || "0"
+    attempts = @stats[@selectedLevel]?.attempts || "0"
     
     @$('.attempts').html "Attempts: #{attempts}"
     @$('.best-time').html "Best Time: #{time}"
 
-    levelData = levels[@difficulty][@current]
+    levelData = levels[@difficulty][@selectedLevel]
 
     # If level is completed, show preview, title, etc.
     if time != '--:--'
-      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: #{levelData.title}"
+      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: #{levelData.title}"
     else
-      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: ????"
+      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: ????"
 
   drawPreviews: ->
-    @$('.preview canvas').each (i, element) =>
+    # Move existing previews off
+    @onscreen.each (i, element) =>
+      canvas = $(element)
+
+      _.delay ->
+        # Turn transitions back on for smooth animation
+        canvas.css('transition', 'transform 0.75s cubic-bezier(.5,-0.5,.5,1.5)')
+
+        # Move offscreen
+        canvas.css('transform', "translateX(-#{@width}px)")
+      , i * 100
+
+    # Move new previews on
+    @offscreen.each (i, element) =>
       canvas = $(element)
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
@@ -153,13 +168,18 @@ class LevelSelectScene extends Scene
               context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
       i += 1
 
+    # Swap groups
+    tmp = @onscreen
+    @onscreen = @offscreen
+    @offscreen = tmp
+
   select: (event) ->
-    @current = @page * @perPage + $(event.target).index()
+    @selectedLevel = @page * @perPage + $(event.target).index()
     @highlightPreview()
 
   highlightPreview: ->
     canvases = @$('.preview canvas')
-    index = @current - @page * @perPage
+    index = @selectedLevel - @page * @perPage
     selected = canvases.eq(index)
     canvases.removeClass 'selected'
     selected.addClass 'selected'
@@ -184,7 +204,7 @@ class LevelSelectScene extends Scene
 
     # Store the last viewed level for this difficulty
     lastViewedLevel = localStorage.getObject('lastViewedLevel')
-    lastViewedLevel[@difficulty] = @current
+    lastViewedLevel[@difficulty] = @selectedLevel
     localStorage.setObject 'lastViewedLevel', lastViewedLevel
 
   # Re-delegate event handlers and show the view's elem
@@ -193,8 +213,8 @@ class LevelSelectScene extends Scene
     
     # Re-enable buttons
     @$('.previous').addClass 'disabled'
-    if @current > 0 then @$('.previous').removeClass 'disabled'
-    if @current < levels[@difficulty].length - 1 then @$('.next').removeClass 'disabled'
+    if @selectedLevel > 0 then @$('.previous').removeClass 'disabled'
+    if @selectedLevel < levels[@difficulty].length - 1 then @$('.next').removeClass 'disabled'
 
     # Handle bizarre condition where this property isn't being set
     if !@difficulty then @difficulty = "easy"
@@ -203,7 +223,11 @@ class LevelSelectScene extends Scene
     @stats = localStorage.getObject('stats')[@difficulty]
 
     # Determine the last viewed level for this difficulty
-    @current = localStorage.getObject('lastViewedLevel')[@difficulty]
+    @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty]
+
+    @offscreen.css
+      transition: 'transform 0s linear',
+      transform: "translateX(-#{@width}px)"
 
     # Re-populate the preview window
     @drawPreviews()
