@@ -224,7 +224,7 @@ class App extends Backbone.View
       $('html').css { 'font-size': "#{height * 0.1302}%" }  # Dynamically update the font size - 0.1302% font size per pixel in height
 
     # Add the calculated padding to each scene <div>
-    @el.find('.scene .container').css
+    @el.find('.scene > .container').css
       width: width
       height: height
       padding: "#{padding.height / 2}px #{padding.width / 2}px"

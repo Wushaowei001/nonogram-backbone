@@ -32,9 +32,8 @@ class LevelSelectScene extends Scene
     @elem = $(template())
     @render()
 
-    @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
-    @onscreen = @$('.preview .onscreen canvas')
-    @offscreen = @$('.preview .offscreen canvas')
+    @canvases = @$('.preview .group:first-child canvas')
+    @altCanvases = @$('.preview .group:last-child canvas')
 
   previous: (e) ->
     e.preventDefault()
@@ -48,9 +47,7 @@ class LevelSelectScene extends Scene
 
       @trigger 'sfx:play', 'button'
 
-      @drawPreviews()
-      @selectedLevel = @page * @perPage
-      @highlightPreview()
+      @animateThumbnails()
 
   next: (e) ->
     e.preventDefault()
@@ -64,13 +61,10 @@ class LevelSelectScene extends Scene
 
       @trigger 'sfx:play', 'button'
 
-      @drawPreviews()
-      @selectedLevel = @page * @perPage
-      @highlightPreview()
+      @animateThumbnails()
 
   play: (e) ->
     e.preventDefault()
-    
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
@@ -79,7 +73,6 @@ class LevelSelectScene extends Scene
 
   back: (e) ->
     e.preventDefault()
-
     @undelegateEvents() # Prevent multiple clicks
     
     @trigger 'sfx:play', 'button'
@@ -112,21 +105,45 @@ class LevelSelectScene extends Scene
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: ????"
 
-  drawPreviews: ->
-    # Move existing previews off
-    @onscreen.each (i, element) =>
+  animateThumbnails: (direction) ->
+    # Move existing thumbnails off
+    @canvases.parent('.group').css('z-index': 0)
+    @canvases.each (i, element) =>
       canvas = $(element)
 
-      _.delay ->
-        # Turn transitions back on for smooth animation
-        canvas.css('transition', 'transform 0.75s cubic-bezier(.5,-0.5,.5,1.5)')
-
-        # Move offscreen
-        canvas.css('transform', "translateX(-#{@width}px)")
+      _.delay =>
+        # Animate offscreen
+        # "cubic-bezier(.5,-0.5,.5,1.5)"
+        canvas.animate({ transform: "translateX(-#{@width}px)" }, "fast", "ease-in-out")
       , i * 100
 
-    # Move new previews on
-    @offscreen.each (i, element) =>
+    # switch thumbnail groups
+    tmp = @canvases
+    @canvases = @altCanvases
+    @altCanvases = tmp
+
+    # Draw on 'em
+    @drawThumbnails()
+
+    # Move new thumbnails on
+    @canvases.parent('.group').css('z-index': 1)
+    @canvases.each (i, element) =>
+      canvas = $(element)
+
+      # Move offscreen
+      canvas.animate({ transform: "translateX(#{@width}px)" }, 0)
+
+      _.delay ->
+        # Animate onscreen
+        # "cubic-bezier(.5,-0.5,.5,1.5)"
+        canvas.animate({ transform: "translateX(0)" }, "fast", "ease-in-out")
+      , i * 100 + 250
+
+    @selectedLevel = @page * @perPage
+    @highlightThumbnail()
+
+  drawThumbnails: ->
+    @canvases.each (i, element) =>
       canvas = $(element)
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
@@ -137,64 +154,43 @@ class LevelSelectScene extends Scene
       if levelData is undefined
         canvas.hide()
       else
-        gridSize = Math.sqrt(levelData.clues.length)
-        pixelSize = Math.floor(canvas.width() / gridSize)
-
         canvas.show()
-
-        # Turn off transitions so canvas moves instantly
-        canvas.css('transition', 'transform 0s linear')
-
-        # Move offscreen
-        canvas.css('transform', "translateX(#{@width}px)")
-
-        _.delay ->
-          # Turn transitions back on for smooth animation
-          canvas.css('transition', 'transform 0.75s cubic-bezier(.5,-0.5,.5,1.5)')
-
-          # Move onscreen
-          canvas.css('transform', 'translateX(0)')
-        , i * 100
-
         clues = if @stats[index]?.time 
                   levelData.clues
                 else
                   levels.incomplete.clues
+
+        gridSize = Math.sqrt(levelData.clues.length)
+        canvasSize = Math.floor(canvas.width() / 10) * 10
+        pixelSize = Math.floor(canvasSize / gridSize)
+
+        # Make each canvas an even multiple, so grids can
+        # be drawn without artifacts caused by antialiasing
+        canvas.attr('width', canvasSize)
+        canvas.attr('height', canvasSize)
 
         for clue, index in clues
             if clue is 1
               x = index % gridSize
               y = Math.floor(index / gridSize)
               context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
-      i += 1
-
-    # Swap groups
-    tmp = @onscreen
-    @onscreen = @offscreen
-    @offscreen = tmp
 
   select: (event) ->
-    @selectedLevel = @page * @perPage + $(event.target).index()
-    @highlightPreview()
+    selected = @page * @perPage + $(event.target).index()
+    return if @selectedLevel == selected
+    @selectedLevel = selected
+    @highlightThumbnail()
 
-  highlightPreview: ->
-    canvases = @$('.preview canvas')
+  highlightThumbnail: ->
     index = @selectedLevel - @page * @perPage
-    selected = canvases.eq(index)
-    canvases.removeClass 'selected'
+    selected = @canvases.eq(index)
+    @canvases.removeClass 'selected'
     selected.addClass 'selected'
     @showLevelInfo()
 
   resize: (width, height, orientation) ->
-    # Make each canvas a multiple of 10, so 10x10 grids can
-    # be drawn without artifacts caused by antialiasing
-    @$('.preview canvas').each (index, object) ->
-      canvas = $(object)
-      canvas.attr('width', Math.floor(canvas.width() / 10) * 10)
-      canvas.attr('height', Math.floor(canvas.height() / 10) * 10)
-
-    # Re-draw previews, since resetting width/height on a canvas erases it
-    @drawPreviews()
+    # Re-draw thumbnails, since resetting width/height on a canvas erases it
+    @drawThumbnails()
 
     @width = width
     @height = height
@@ -210,28 +206,25 @@ class LevelSelectScene extends Scene
   # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
     super duration, callback
-    
-    # Re-enable buttons
-    @$('.previous').addClass 'disabled'
-    if @selectedLevel > 0 then @$('.previous').removeClass 'disabled'
-    if @selectedLevel < levels[@difficulty].length - 1 then @$('.next').removeClass 'disabled'
 
-    # Handle bizarre condition where this property isn't being set
-    if !@difficulty then @difficulty = "easy"
+    @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
+    # Determine the last viewed level for this difficulty
+    @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty] || 0
+    @page = Math.floor(@selectedLevel / @perPage)
     
+    # disable/enable buttons
+    @$('.previous, .next').addClass 'disabled'
+    if @page > 0 then @$('.previous').removeClass 'disabled'
+    if @page < @totalPages then @$('.next').removeClass 'disabled'
+
     # Update level stats based on localStorage
     @stats = localStorage.getObject('stats')[@difficulty]
 
-    # Determine the last viewed level for this difficulty
-    @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty]
+    # Move alt canvases off-screen
+    @altCanvases.animate({ transform: "translateX(-#{@width}px)" }, 0)
 
-    @offscreen.css
-      transition: 'transform 0s linear',
-      transform: "translateX(-#{@width}px)"
-
-    # Re-populate the preview window
-    @drawPreviews()
-    @highlightPreview()
+    @drawThumbnails()
+    @highlightThumbnail()
 
     @trigger 'music:play', 'bgm-tutorial'
 
