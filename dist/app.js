@@ -3197,53 +3197,42 @@ App = (function(_super) {
   App.prototype.activeScene = null;
 
   App.prototype.initialize = function() {
+    var name, scene, _ref;
     _.bindAll(this, 'playSfx', 'playMusic', 'stopMusic', 'playVfx', 'changeScene', 'resize', 'initializeDefaults');
     this.initializeDefaults();
     this.el = $('#nonograms');
-    this.titleScene = new TitleScene({
-      el: this.el
-    });
-    this.gameScene = new GameScene({
-      el: this.el
-    });
-    this.aboutScene = new AboutScene({
-      el: this.el
-    });
-    this.levelScene = new LevelSelectScene({
-      el: this.el
-    });
-    this.difficultyScene = new DifficultySelectScene({
-      el: this.el
-    });
-    this.titleScene.on('scene:change', this.changeScene);
-    this.gameScene.on('scene:change', this.changeScene);
-    this.aboutScene.on('scene:change', this.changeScene);
-    this.levelScene.on('scene:change', this.changeScene);
-    this.difficultyScene.on('scene:change', this.changeScene);
-    this.titleScene.on('sfx:play', this.playSfx);
-    this.gameScene.on('sfx:play', this.playSfx);
-    this.aboutScene.on('sfx:play', this.playSfx);
-    this.levelScene.on('sfx:play', this.playSfx);
-    this.difficultyScene.on('sfx:play', this.playSfx);
-    this.titleScene.on('music:play', this.playMusic);
-    this.gameScene.on('music:play', this.playMusic);
-    this.aboutScene.on('music:play', this.playMusic);
-    this.levelScene.on('music:play', this.playMusic);
-    this.difficultyScene.on('music:play', this.playMusic);
-    this.aboutScene.on('music:stop', this.stopMusic);
-    this.gameScene.on('music:stop', this.stopMusic);
-    this.gameScene.on('vfx:play', this.playVfx);
-    this.titleScene.hide(0);
-    this.gameScene.hide(0);
-    this.aboutScene.hide(0);
-    this.levelScene.hide(0);
-    this.difficultyScene.hide(0);
-    this.activeScene = this.titleScene;
+    this.scenes = {
+      title: new TitleScene({
+        el: this.el
+      }),
+      game: new GameScene({
+        el: this.el
+      }),
+      about: new AboutScene({
+        el: this.el
+      }),
+      levelSelect: new LevelSelectScene({
+        el: this.el
+      }),
+      difficultySelect: new DifficultySelectScene({
+        el: this.el
+      })
+    };
+    _ref = this.scenes;
+    for (name in _ref) {
+      scene = _ref[name];
+      scene.on('scene:change', this.changeScene);
+      scene.on('sfx:play', this.playSfx);
+      scene.on('music:play', this.playMusic);
+      scene.on('music:stop', this.stopMusic);
+      scene.on('vfx:play', this.playVfx);
+      scene.hide(0);
+    }
+    this.activeScene = this.scenes.levelSelect;
     if (window.navigator.standalone) {
       this.el.addClass('standalone');
     }
     $(window).on('resize', this.resize);
-    this.resize();
     if (ENV.mobile) {
       $('body').on('touchmove', function(e) {
         return e.preventDefault();
@@ -3306,6 +3295,7 @@ App = (function(_super) {
     ]);
     return this.sona.load((function(_this) {
       return function() {
+        _this.resize();
         if (ENV.cordova) {
           navigator.splashscreen.hide();
         }
@@ -3359,23 +3349,23 @@ App = (function(_super) {
     this.activeScene.hide();
     switch (scene) {
       case 'title':
-        this.activeScene = this.titleScene;
+        this.activeScene = this.scenes.title;
         break;
       case 'about':
-        this.activeScene = this.aboutScene;
+        this.activeScene = this.scenes.about;
         break;
       case 'difficulty':
-        this.activeScene = this.difficultyScene;
+        this.activeScene = this.scenes.difficultySelect;
         break;
       case 'level':
-        this.levelScene.difficulty = options.difficulty;
-        this.activeScene = this.levelScene;
+        this.activeScene = this.scenes.levelSelect;
+        this.activeScene.difficulty = options.difficulty;
         break;
       case 'game':
-        this.gameScene.difficulty = options.difficulty;
-        this.gameScene.level = options.level;
-        this.gameScene.tutorial = options.tutorial;
-        this.activeScene = this.gameScene;
+        this.activeScene = this.scenes.game;
+        this.activeScene.difficulty = options.difficulty;
+        this.activeScene.level = options.level;
+        this.activeScene.tutorial = options.tutorial;
         break;
       default:
         console.log("Error! Scene not defined in switch statement");
@@ -3385,7 +3375,7 @@ App = (function(_super) {
   };
 
   App.prototype.resize = function() {
-    var height, newHeight, newWidth, orientation, padding, ratio, width;
+    var height, name, newHeight, newWidth, orientation, padding, ratio, scene, width, _ref, _results;
     width = this.el.width();
     height = this.el.height();
     padding = {
@@ -3410,7 +3400,7 @@ App = (function(_super) {
         padding.height = height - newHeight;
         height = newHeight;
       }
-      $('body').css({
+      $('html').css({
         'font-size': "" + (width * 0.1302) + "%"
       });
     } else if (orientation === 'portrait') {
@@ -3423,17 +3413,26 @@ App = (function(_super) {
         padding.width = width - newWidth;
         width = newWidth;
       }
-      $('body').css({
+      $('html').css({
         'font-size': "" + (height * 0.1302) + "%"
       });
     }
-    this.el.find('.scene .container').css({
+    this.el.find('.scene > .container').css({
       width: width,
       height: height,
       padding: "" + (padding.height / 2) + "px " + (padding.width / 2) + "px"
     });
-    this.gameScene.resize(width, height, orientation);
-    return this.levelScene.resize(width, height, orientation);
+    _ref = this.scenes;
+    _results = [];
+    for (name in _ref) {
+      scene = _ref[name];
+      if (typeof scene.resize === 'function') {
+        _results.push(scene.resize(width, height, orientation));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
   };
 
   App.prototype.initializeDefaults = function() {
@@ -3743,6 +3742,7 @@ module.exports = Scene;
 
 },{"backbone":1,"underscore":4}],9:[function(require,module,exports){
 module.exports = {
+	"incomplete": { "clues": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0] },
 	"easy": [
 		{ "title": "Triangle", "clues": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
 		{ "title": "Top Hat", "clues": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
@@ -3866,12 +3866,13 @@ module.exports = {
 		{ "title": "Hard", "clues": [] }
 	]
 };
+
 },{}],10:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+='<div id="about" class="scene"><div class="container"><div class="button small back"><span>&larr; Title</span></div><h2>About</h2><p>Designed and programmed by Nathan Demick.</p><div class="button sfx"><span>Sound ON</span></div><div class="button music"><span>Music ON</span></div><div class="button reset"><span>Erase Data</span></div></div></div>';
+__p+='<div id="about" class="scene"><div class="container"><div class="button small back"><span>&lt; Title</span></div><h2>About</h2><p>Designed and programmed by Nathan Demick.</p><div class="button sfx"><span>Sound ON</span></div><div class="button music"><span>Music ON</span></div><div class="button reset"><span>Erase Data</span></div></div></div>';
 }
 return __p;
 };
@@ -3881,7 +3882,7 @@ var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+='<div id="difficulty-select" class="scene"><div class="container"><div class="button small back"><span>&larr; Title</span></div><div class="button small restore"><span>Restore</span></div><h2>Select Difficulty</h2><div class="button easy" data-difficulty="easy"><span data-difficulty="easy" data-purchased="yes">Easy</span></div><div class="button medium" data-difficulty="medium"><span data-difficulty="medium" data-purchased="no">Medium</span></div><div class="button hard" data-difficulty="hard"><span data-difficulty="hard" data-purchased="no">Hard</span></div><div class="button random" data-difficulty="random"><span data-difficulty="random" data-purchased="no">Random</span></div></div></div>';
+__p+='<div id="difficulty-select" class="scene"><div class="container"><div class="small button back"><span>&lt; Title</span></div><div class="small button restore"><span>Restore</span></div><h2>Select Difficulty</h2><div class="button select" data-difficulty="beginner"><span>Beginner</span></div><div class="button select" data-difficulty="easy"><span>Easy</span></div><div class="button select" data-difficulty="medium"><span>Medium</span></div><div class="button select" data-difficulty="hard"><span>Hard</span></div><div class="button select" data-difficulty="random"><span>Random</span></div></div></div>';
 }
 return __p;
 };
@@ -3901,7 +3902,7 @@ var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+='<div id="level-select" class="scene"><div class="container"><div class="button small back"><span>&lt; Difficulty</span></div><h2>Select Level</h2><div class="button previous disabled"><span>&lt;</span></div><div class="button next"><span>&gt;</span></div><div class="preview"><div class="complete"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="incomplete">?</div></div><ul class="info"><li class="level-number"></li><li class="attempts"></li><li class="best-time"></li></ul><div class="button play"><span>Play</span></div></div></div>';
+__p+='<div id="level-select" class="scene"><div class="container"><div class="button small back"><span>&lt; Difficulty</span></div><h2>Select Level</h2><div class="button previous disabled"><span>&lt;</span></div><div class="button next"><span>&gt;</span></div><div class="preview"><div class="group"><canvas class="selected"></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas></div><div class="group"><canvas class="selected"></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas></div></div><ul class="info"><li class="level-number"></li><li class="attempts"></li><li class="best-time"></li></ul><div class="button play"><span>Play</span></div></div></div>';
 }
 return __p;
 };
@@ -3911,7 +3912,7 @@ var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+='<div id="title" class="scene"><div class="container"><h1>Nonogram Madness</h1><div class="button start"><span>Start</span></div><div class="button tutorial"><span>Tutorial</span></div><div class="button about"><span>About</span></div><p class="copyright">&copy; 2010&ndash;2013 Ganbaru Games</p></div></div>';
+__p+='<div id="title" class="scene"><div class="container"><h1>Nonogram Madness</h1><div class="button play"><span>Play</span></div><div class="button tutorial"><span>Tutorial</span></div><div class="button about"><span>About</span></div><p class="copyright">&copy; 2010&ndash;2014 Ganbaru Games</p></div></div>';
 }
 return __p;
 };
@@ -5649,18 +5650,12 @@ DifficultySelectScene = (function(_super) {
     if (ENV.mobile) {
       return events = {
         'touchend .back': 'back',
-        'touchend .easy': 'select',
-        'touchend .medium': 'select',
-        'touchend .hard': 'select',
-        'touchend .random': 'select'
+        'touchend .select': 'select'
       };
     } else {
       return events = {
         'click .back': 'back',
-        'click .easy': 'select',
-        'click .medium': 'select',
-        'click .hard': 'select',
-        'click .random': 'select'
+        'click .select': 'select'
       };
     }
   };
@@ -5674,6 +5669,9 @@ DifficultySelectScene = (function(_super) {
     var button;
     e.preventDefault();
     button = $(e.target);
+    if (!button.data('difficulty')) {
+      button = button.parent('.button');
+    }
     this.undelegateEvents();
     this.trigger('sfx:play', 'button');
     return this.trigger('scene:change', 'level', {
@@ -5788,10 +5786,6 @@ GameScene = (function(_super) {
 
   GameScene.prototype.previousCol = -1;
 
-  GameScene.prototype.lockedRow = -1;
-
-  GameScene.prototype.lockedCol = -1;
-
   GameScene.prototype.ignoreInput = false;
 
   GameScene.prototype.tutorial = false;
@@ -5847,19 +5841,6 @@ GameScene = (function(_super) {
     row = Math.floor((position.y - this.grid.offset().top) / this.blockSize);
     col = Math.floor((position.x - this.grid.offset().left) / this.blockSize);
     if ((0 <= row && row <= 9) && (0 <= col && col <= 9)) {
-      if (this.lockedRow === -1 && this.lockedCol === -1 && ENV.mobile) {
-        if (this.previousRow !== row) {
-          this.lockedCol = col;
-        } else if (this.previousCol !== col) {
-          this.lockedRow = row;
-        }
-      }
-      if (this.lockedRow !== -1) {
-        row = this.lockedRow;
-      }
-      if (this.lockedCol !== -1) {
-        col = this.lockedCol;
-      }
       if (row !== this.previousRow || col !== this.previousCol) {
         verticalClues = this.$('.vertical.clue');
         verticalClues.eq(this.previousCol).removeClass('highlight');
@@ -5885,7 +5866,7 @@ GameScene = (function(_super) {
     this.$('.vertical.clue').eq(this.previousCol).removeClass('highlight');
     this.$('.horizontal.clue').eq(this.previousRow).removeClass('highlight');
     this.actionLock = "none";
-    return this.startRow = this.startCol = this.previousRow = this.previousCol = this.lockedRow = this.lockedCol = -1;
+    return this.startRow = this.startCol = this.previousRow = this.previousCol = -1;
   };
 
   GameScene.prototype.doAction = function(row, col) {
@@ -6068,13 +6049,13 @@ GameScene = (function(_super) {
     if (target.is('span')) {
       target = target.parents('.button');
     }
-    this.$(".button." + this.action, this.elem).removeClass('highlight');
+    this.$(".button." + this.action, this.elem).removeClass('active');
     if (target.hasClass('mark')) {
       this.action = 'mark';
-      return target.addClass('highlight');
+      return target.addClass('active');
     } else {
       this.action = 'fill';
-      return target.addClass('highlight');
+      return target.addClass('active');
     }
   };
 
@@ -6201,7 +6182,7 @@ GameScene = (function(_super) {
     var borderSize, gridBackgroundWidth, gridWidth, iconWidth, margin;
     borderSize = 10;
     if (orientation === 'landscape') {
-      gridBackgroundWidth = Math.round(height * 0.95);
+      gridBackgroundWidth = Math.round(height * 0.97);
       this.gridBackground.width(gridBackgroundWidth);
       this.gridBackground.height(gridBackgroundWidth);
       margin = (height - gridBackgroundWidth - 10) / 2;
@@ -6209,7 +6190,7 @@ GameScene = (function(_super) {
         'margin': "" + margin + "px 0"
       });
     } else if (orientation === 'portrait') {
-      gridBackgroundWidth = Math.round(width * 0.95);
+      gridBackgroundWidth = Math.round(width * 0.97);
       this.gridBackground.width(gridBackgroundWidth);
       this.gridBackground.height(gridBackgroundWidth);
       margin = (width - gridBackgroundWidth - 10) / 2;
@@ -6258,8 +6239,8 @@ GameScene = (function(_super) {
         $('.clue', _this.elem).removeClass('highlight complete pinch');
         _this.action = "mark";
         _this.actionLock = "none";
-        $(".button.fill", _this.elem).removeClass('highlight');
-        $(".button.mark", _this.elem).addClass('highlight');
+        $(".button.fill", _this.elem).removeClass('active');
+        $(".button.mark", _this.elem).addClass('active');
         _this.hits = 0;
         _this.totalHits = 0;
         return _this.misses = 0;
@@ -6359,11 +6340,8 @@ GameScene = (function(_super) {
       }
       match = verticalClue.match(/<br>/g);
       length = match != null ? match.length : 0;
-      if (length >= 4) {
-        this.$('.vertical.clue', this.elem).eq(i).addClass('pinch');
-      }
-      if (length < 4) {
-        for (_l = length; length <= 3 ? _l <= 3 : _l >= 3; length <= 3 ? _l++ : _l--) {
+      if (length < 5) {
+        for (_l = length; length <= 4 ? _l <= 4 : _l >= 4; length <= 4 ? _l++ : _l--) {
           verticalClue = "<br>" + verticalClue;
         }
       }
@@ -6412,19 +6390,25 @@ LevelSelectScene = (function(_super) {
         'touchend .back': 'back',
         'touchend .previous': 'previous',
         'touchend .next': 'next',
-        'touchend .play': 'play'
+        'touchend .play': 'play',
+        'touchend canvas': 'select'
       };
     } else {
       return events = {
         'click .back': 'back',
         'click .previous': 'previous',
         'click .next': 'next',
-        'click .play': 'play'
+        'click .play': 'play',
+        'click canvas': 'select'
       };
     }
   };
 
-  LevelSelectScene.prototype.current = 0;
+  LevelSelectScene.prototype.selectedLevel = 0;
+
+  LevelSelectScene.prototype.page = 0;
+
+  LevelSelectScene.prototype.perPage = 9;
 
   LevelSelectScene.prototype.difficulty = 'easy';
 
@@ -6432,36 +6416,38 @@ LevelSelectScene = (function(_super) {
 
   LevelSelectScene.prototype.initialize = function() {
     this.elem = $(template());
-    return this.render();
+    this.render();
+    this.canvases = this.$('.preview .group:first-child canvas');
+    return this.altCanvases = this.$('.preview .group:last-child canvas');
   };
 
   LevelSelectScene.prototype.previous = function(e) {
     e.preventDefault();
-    if (this.current > 0) {
-      this.current--;
-      if (this.current === 0) {
+    if (this.page > 0) {
+      this.page -= 1;
+      if (this.page === 0) {
         this.$('.previous').addClass('disabled');
       }
-      if (this.current === levels[this.difficulty].length - 2) {
+      if (this.page === this.totalPages - 1) {
         this.$('.next').removeClass('disabled');
       }
       this.trigger('sfx:play', 'button');
-      return this.showPreview(levels[this.difficulty][this.current]);
+      return this.animateThumbnails();
     }
   };
 
   LevelSelectScene.prototype.next = function(e) {
     e.preventDefault();
-    if (this.current < levels[this.difficulty].length - 1) {
-      this.current++;
-      if (this.current === levels[this.difficulty].length - 1) {
+    if (this.page < this.totalPages) {
+      this.page += 1;
+      if (this.page === this.totalPages) {
         this.$('.next').addClass('disabled');
       }
-      if (this.current === 1) {
+      if (this.page === 1) {
         this.$('.previous').removeClass('disabled');
       }
       this.trigger('sfx:play', 'button');
-      return this.showPreview(levels[this.difficulty][this.current]);
+      return this.animateThumbnails();
     }
   };
 
@@ -6471,7 +6457,7 @@ LevelSelectScene = (function(_super) {
     this.trigger('sfx:play', 'button');
     return this.trigger('scene:change', 'game', {
       difficulty: this.difficulty,
-      level: this.current
+      level: this.selectedLevel
     });
   };
 
@@ -6482,8 +6468,8 @@ LevelSelectScene = (function(_super) {
     return this.trigger('scene:change', 'difficulty');
   };
 
-  LevelSelectScene.prototype.showPreview = function(level) {
-    var attempts, clue, index, minutes, pad, seconds, time, _i, _len, _ref, _ref1, _ref2, _results;
+  LevelSelectScene.prototype.showLevelInfo = function() {
+    var attempts, levelData, minutes, pad, seconds, time, _ref, _ref1;
     pad = function(number, length) {
       var string;
       string = String(number);
@@ -6492,53 +6478,124 @@ LevelSelectScene = (function(_super) {
       }
       return string;
     };
-    if ((_ref = this.stats[this.current]) != null ? _ref.time : void 0) {
-      minutes = pad(Math.floor(this.stats[this.current].time / 60), 2);
-      seconds = pad(this.stats[this.current].time % 60, 2);
+    if ((_ref = this.stats[this.selectedLevel]) != null ? _ref.time : void 0) {
+      minutes = pad(Math.floor(this.stats[this.selectedLevel].time / 60), 2);
+      seconds = pad(this.stats[this.selectedLevel].time % 60, 2);
       time = "" + minutes + ":" + seconds;
     } else {
       time = '--:--';
     }
-    attempts = ((_ref1 = this.stats[this.current]) != null ? _ref1.attempts : void 0) ? this.stats[this.current].attempts : "0";
+    attempts = ((_ref1 = this.stats[this.selectedLevel]) != null ? _ref1.attempts : void 0) || "0";
     this.$('.attempts').html("Attempts: " + attempts);
     this.$('.best-time').html("Best Time: " + time);
+    levelData = levels[this.difficulty][this.selectedLevel];
     if (time !== '--:--') {
-      this.$('.level-number').html("" + (this.difficulty.charAt(0).toUpperCase() + this.difficulty.slice(1)) + " #" + (this.current + 1) + ": " + level.title);
-      if (level.clues.length > 0) {
-        this.$('.preview .complete').show();
-        this.$('.preview .incomplete').hide();
-        this.$('.preview .complete div').removeClass('filled');
-        _ref2 = level.clues;
-        _results = [];
-        for (index = _i = 0, _len = _ref2.length; _i < _len; index = ++_i) {
-          clue = _ref2[index];
-          if (clue === 1) {
-            _results.push(this.$('.preview .complete div').eq(index).addClass('filled'));
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      }
+      return this.$('.level-number').html("" + (this.difficulty.charAt(0).toUpperCase() + this.difficulty.slice(1)) + " #" + (this.selectedLevel + 1) + ": " + levelData.title);
     } else {
-      this.$('.level-number').html("" + (this.difficulty.charAt(0).toUpperCase() + this.difficulty.slice(1)) + " #" + (this.current + 1) + ": ????");
-      this.$('.preview .complete').hide();
-      return this.$('.preview .incomplete').show();
+      return this.$('.level-number').html("" + (this.difficulty.charAt(0).toUpperCase() + this.difficulty.slice(1)) + " #" + (this.selectedLevel + 1) + ": ????");
     }
   };
 
-  LevelSelectScene.prototype.resize = function(width, height, orientation) {
-    var preview;
-    preview = this.$('.preview');
-    if (orientation === 'landscape') {
-      width = width * 0.4;
-      preview.width(Math.round(width / 10) * 10);
-      return preview.height(preview.width());
-    } else {
-      width = width * 0.6;
-      preview.width(Math.round(width / 10) * 10);
-      return preview.height(preview.width());
+  LevelSelectScene.prototype.animateThumbnails = function(direction) {
+    var tmp;
+    this.canvases.parent('.group').css({
+      'z-index': 0
+    });
+    this.canvases.each((function(_this) {
+      return function(i, element) {
+        var canvas;
+        canvas = $(element);
+        return _.delay(function() {
+          return canvas.animate({
+            transform: "translateX(-" + _this.width + "px)"
+          }, "fast", "ease-in-out");
+        }, i * 100);
+      };
+    })(this));
+    tmp = this.canvases;
+    this.canvases = this.altCanvases;
+    this.altCanvases = tmp;
+    this.drawThumbnails();
+    this.canvases.parent('.group').css({
+      'z-index': 1
+    });
+    this.canvases.each((function(_this) {
+      return function(i, element) {
+        var canvas;
+        canvas = $(element);
+        canvas.animate({
+          transform: "translateX(" + _this.width + "px)"
+        }, 0);
+        return _.delay(function() {
+          return canvas.animate({
+            transform: "translateX(0)"
+          }, "fast", "ease-in-out");
+        }, i * 100 + 250);
+      };
+    })(this));
+    this.selectedLevel = this.page * this.perPage;
+    return this.highlightThumbnail();
+  };
+
+  LevelSelectScene.prototype.drawThumbnails = function() {
+    return this.canvases.each((function(_this) {
+      return function(i, element) {
+        var canvas, canvasSize, clue, clues, context, gridSize, index, levelData, pixelSize, x, y, _i, _len, _ref, _results;
+        canvas = $(element);
+        context = canvas[0].getContext('2d');
+        context.clearRect(0, 0, canvas.width(), canvas.height());
+        index = _this.page * _this.perPage + i;
+        levelData = levels[_this.difficulty][index];
+        if (levelData === void 0) {
+          return canvas.hide();
+        } else {
+          canvas.show();
+          clues = ((_ref = _this.stats[index]) != null ? _ref.time : void 0) ? levelData.clues : levels.incomplete.clues;
+          gridSize = Math.sqrt(levelData.clues.length);
+          canvasSize = Math.floor(canvas.width() / 10) * 10;
+          pixelSize = Math.floor(canvasSize / gridSize);
+          canvas.attr('width', canvasSize);
+          canvas.attr('height', canvasSize);
+          _results = [];
+          for (index = _i = 0, _len = clues.length; _i < _len; index = ++_i) {
+            clue = clues[index];
+            if (clue === 1) {
+              x = index % gridSize;
+              y = Math.floor(index / gridSize);
+              _results.push(context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize));
+            } else {
+              _results.push(void 0);
+            }
+          }
+          return _results;
+        }
+      };
+    })(this));
+  };
+
+  LevelSelectScene.prototype.select = function(event) {
+    var selected;
+    selected = this.page * this.perPage + $(event.target).index();
+    if (this.selectedLevel === selected) {
+      return;
     }
+    this.selectedLevel = selected;
+    return this.highlightThumbnail();
+  };
+
+  LevelSelectScene.prototype.highlightThumbnail = function() {
+    var index, selected;
+    index = this.selectedLevel - this.page * this.perPage;
+    selected = this.canvases.eq(index);
+    this.canvases.removeClass('selected');
+    selected.addClass('selected');
+    return this.showLevelInfo();
+  };
+
+  LevelSelectScene.prototype.resize = function(width, height, orientation) {
+    this.drawThumbnails();
+    this.width = width;
+    return this.height = height;
   };
 
   LevelSelectScene.prototype.hide = function(duration, callback) {
@@ -6548,14 +6605,8 @@ LevelSelectScene = (function(_super) {
     }
     LevelSelectScene.__super__.hide.call(this, duration, callback);
     lastViewedLevel = localStorage.getObject('lastViewedLevel');
-    lastViewedLevel[this.difficulty] = this.current;
-    localStorage.setObject('lastViewedLevel', lastViewedLevel);
-    return _.delay((function(_this) {
-      return function() {
-        _this.$('.preview .complete').hide();
-        return _this.$('.preview .incomplete').show();
-      };
-    })(this), duration);
+    lastViewedLevel[this.difficulty] = this.selectedLevel;
+    return localStorage.setObject('lastViewedLevel', lastViewedLevel);
   };
 
   LevelSelectScene.prototype.show = function(duration, callback) {
@@ -6563,19 +6614,22 @@ LevelSelectScene = (function(_super) {
       duration = 500;
     }
     LevelSelectScene.__super__.show.call(this, duration, callback);
-    this.$('.previous').addClass('disabled');
-    if (this.current > 0) {
+    this.totalPages = Math.ceil(levels[this.difficulty].length / this.perPage) - 1;
+    this.selectedLevel = localStorage.getObject('lastViewedLevel')[this.difficulty] || 0;
+    this.page = Math.floor(this.selectedLevel / this.perPage);
+    this.$('.previous, .next').addClass('disabled');
+    if (this.page > 0) {
       this.$('.previous').removeClass('disabled');
     }
-    if (this.current < levels[this.difficulty].length - 1) {
+    if (this.page < this.totalPages) {
       this.$('.next').removeClass('disabled');
     }
-    if (!this.difficulty) {
-      this.difficulty = "easy";
-    }
     this.stats = localStorage.getObject('stats')[this.difficulty];
-    this.current = localStorage.getObject('lastViewedLevel')[this.difficulty];
-    this.showPreview(levels[this.difficulty][this.current]);
+    this.altCanvases.animate({
+      transform: "translateX(-" + this.width + "px)"
+    }, 0);
+    this.drawThumbnails();
+    this.highlightThumbnail();
     return this.trigger('music:play', 'bgm-tutorial');
   };
 
@@ -6611,13 +6665,13 @@ TitleScene = (function(_super) {
     var events;
     if (ENV.mobile) {
       return events = {
-        'touchend .start': 'start',
+        'touchend .play': 'play',
         'touchend .tutorial': 'tutorial',
         'touchend .about': 'about'
       };
     } else {
       return events = {
-        'click .start': 'start',
+        'click .play': 'play',
         'click .tutorial': 'tutorial',
         'click .about': 'about'
       };
@@ -6629,7 +6683,7 @@ TitleScene = (function(_super) {
     return this.render();
   };
 
-  TitleScene.prototype.start = function(e) {
+  TitleScene.prototype.play = function(e) {
     e.preventDefault();
     this.undelegateEvents();
     this.trigger('sfx:play', 'button');

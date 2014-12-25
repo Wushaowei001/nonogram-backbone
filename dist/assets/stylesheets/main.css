@@ -115,10 +115,6 @@
 }
 @-webkit-keyframes pulse {
   0% {
-    -webkit-transform: scale(1, 1);
-    transform: scale(1, 1);
-  }
-  50% {
     -webkit-transform: scale(1.2, 1.2);
     transform: scale(1.2, 1.2);
   }
@@ -129,10 +125,6 @@
 }
 @keyframes pulse {
   0% {
-    -webkit-transform: scale(1, 1);
-    transform: scale(1, 1);
-  }
-  50% {
     -webkit-transform: scale(1.2, 1.2);
     transform: scale(1.2, 1.2);
   }
@@ -158,13 +150,11 @@
 }
 html,
 body {
+  font-size: 62.5%;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-}
-body {
-  font-size: 62.5%;
   background: #000;
+  overflow: hidden;
 }
 /****************************/
 /*      DEFAULT     */
@@ -216,21 +206,20 @@ body {
   transform: translateX(-200%);
 }
 #nonograms h1 {
-  font: normal 2.6em/1.5 'uni_05_53', sans-serif;
+  font: normal 4rem/1.5 'uni_05_53', sans-serif;
   margin: 3%;
   text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
 }
 #nonograms h2 {
-  font: normal 2.3em/1.5 'uni_05_53', sans-serif;
+  font: normal 3.5rem/1.5 'uni_05_53', sans-serif;
   margin: 3%;
   text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
 }
 #nonograms .button {
-  font: normal 1.5em/1 'uni_05_53', sans-serif;
+  font: normal 2.3rem/1 'uni_05_53', sans-serif;
   width: 50%;
-  height: 10%;
+  height: 9%;
   border: 5px solid #000;
-  box-sizing: border-box;
   padding: 0;
   background: #665945;
   color: #fff;
@@ -239,6 +228,7 @@ body {
   display: inline-block;
   margin: 1.5%;
   box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
 }
 #nonograms .button span {
   display: block;
@@ -250,14 +240,19 @@ body {
   border-right: 5px solid #3c362c;
   box-sizing: border-box;
 }
-#nonograms .button:active {
+#nonograms .button:active,
+#nonograms .button.active {
+  position: relative;
+  left: 5px;
+  top: 5px;
   box-shadow: none;
+  color: #fb9a00;
 }
 #nonograms .button.small {
   width: 30%;
-  height: 8%;
-  font-size: 1em;
-  line-height: 1.1;
+  height: 7%;
+  font-size: 1.5rem;
+  line-height: 1;
 }
 #nonograms .button.back {
   float: left;
@@ -305,22 +300,106 @@ body {
   opacity: 0;
 }
 #nonograms .dialog-box h3 {
-  margin: 0;
-  font-size: 1.3em;
+  margin: 1%;
+  font-size: 2.5rem;
   font-weight: normal;
 }
 #nonograms .dialog-box .button {
-  width: auto;
-  margin-top: 2%;
+  width: 70%;
+  height: 10%;
+  line-height: 0.9;
+  margin-top: 3%;
 }
 #nonograms #title h1 {
-  font-size: 3em;
-  margin-top: 10%;
+  margin: 10%;
 }
 #nonograms #title .copyright {
   text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
   text-align: center;
   margin-top: 25%;
+}
+#nonograms #about {
+  color: #fff;
+}
+#nonograms #about h2 {
+  clear: left;
+  padding-top: 3%;
+}
+#nonograms #about p {
+  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+  font-size: 2rem;
+  margin: 5%;
+}
+#nonograms #difficulty-select .restore {
+  float: right;
+  display: none;
+}
+#nonograms #difficulty-select h2 {
+  clear: both;
+}
+#nonograms #difficulty-select .select {
+  width: 80%;
+  height: 12%;
+  font-size: 3rem;
+  line-height: 1;
+  text-align: center;
+}
+#nonograms #level-select .back {
+  width: 40%;
+}
+#nonograms #level-select .previous {
+  float: left;
+}
+#nonograms #level-select .next {
+  float: right;
+}
+#nonograms #level-select .previous,
+#nonograms #level-select .next {
+  margin-top: 25%;
+  font-size: 2.8rem;
+  line-height: 0.8;
+}
+#nonograms #level-select h2 {
+  clear: left;
+}
+#nonograms #level-select .preview {
+  width: 60%;
+  height: 40%;
+  overflow: visible;
+  margin: 0 auto;
+  padding-top: 4%;
+  position: relative;
+}
+#nonograms #level-select .preview .group {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+#nonograms #level-select .preview canvas {
+  width: 30%;
+  height: 30%;
+  margin: -2% 3% 3% 0;
+  image-rendering: -webkit-optimize-contrast;
+  background: #fff;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+#nonograms #level-select .preview canvas.selected {
+  border: 5px solid orange;
+  -webkit-animation-name: pulse;
+  animation-name: pulse;
+  -webkit-animation-duration: 0.2s;
+  animation-duration: 0.2s;
+  -webkit-animation-timing-function: cubic-bezier(0.5, -0.5, 0.5, 1.5);
+  animation-timing-function: cubic-bezier(0.5, -0.5, 0.5, 1.5);
+}
+#nonograms #level-select ul.info {
+  margin: 1% 0;
+  font-size: 2rem;
+}
+#nonograms #level-select ul.info li {
+  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
 }
 #nonograms #game .floating-text {
   position: absolute;
@@ -349,14 +428,14 @@ body {
   width: 14%;
   height: 100%;
   float: left;
-  font-size: 1.4em;
+  font-size: 2.2rem;
 }
 #nonograms #game .actions.pause .text {
   -webkit-transform: rotateZ(-90deg);
   transform: rotateZ(-90deg);
   line-height: 3.3;
   height: 100%;
-  margin-top: 85%;
+  margin-top: 65%;
   border: 0;
 }
 #nonograms #game .actions.mark,
@@ -400,7 +479,7 @@ body {
   box-sizing: border-box;
 }
 #nonograms #game .info.complete {
-  font-size: 1em;
+  font-size: 1.5rem;
   width: 30%;
 }
 #nonograms #game .info.complete .percentage {
@@ -409,7 +488,7 @@ body {
   padding: 10% 0;
 }
 #nonograms #game .info.timer {
-  font-size: 1.6em;
+  font-size: 2.5rem;
   width: 40%;
   padding-top: 2%;
 }
@@ -442,15 +521,15 @@ body {
   float: left;
   box-sizing: border-box;
   color: #000;
-  font-size: 0.9em;
+  font-size: 1.2rem;
 }
 #nonograms #game .grid-background .clue.horizontal {
   height: 7.5%;
   width: 25%;
+  line-height: 2;
   padding-right: 2%;
   border-top: 1px solid #000;
   text-align: right;
-  line-height: 1.5;
 }
 #nonograms #game .grid-background .clue.horizontal:nth-child(2n - 1) {
   background-color: #d6e8ee;
@@ -460,6 +539,7 @@ body {
   width: 7.5%;
   border-left: 1px solid #000;
   line-height: 1.2;
+  padding-top: 2%;
 }
 #nonograms #game .grid-background .clue.vertical:nth-child(2n) {
   background-color: #d6e8ee;
@@ -471,7 +551,7 @@ body {
   color: #999;
 }
 #nonograms #game .grid-background .clue.pinch {
-  font-size: 0.7em;
+  font-size: 0.8rem;
 }
 #nonograms #game .grid-background .grid {
   width: 75%;
@@ -496,103 +576,6 @@ body {
 }
 #nonograms #game .grid-background .grid div.hint {
   background-color: rgba(251, 154, 0, 0.5);
-}
-#nonograms #about {
-  color: #fff;
-}
-#nonograms #about h2 {
-  clear: left;
-  padding-top: 3%;
-}
-#nonograms #about p {
-  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
-  font-size: 1.1em;
-  padding: 3%;
-}
-#nonograms #about .reset {
-  font-size: 1.3em;
-  line-height: 1.5;
-}
-#nonograms #options {
-  color: #fff;
-}
-#nonograms #options h2 {
-  clear: left;
-  padding-top: 3%;
-}
-#nonograms #options p {
-  font-size: 1.2em;
-  padding: 3%;
-  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
-  display: block;
-}
-#nonograms #difficulty-select .restore {
-  float: right;
-}
-#nonograms #difficulty-select h2 {
-  clear: both;
-}
-#nonograms #difficulty-select .easy,
-#nonograms #difficulty-select .medium,
-#nonograms #difficulty-select .hard,
-#nonograms #difficulty-select .random {
-  width: 80%;
-  height: 12%;
-  line-height: 1;
-  font-size: 2.2em;
-  text-align: center;
-}
-#nonograms #level-select .back {
-  width: 40%;
-}
-#nonograms #level-select .previous {
-  float: left;
-  margin-top: 25%;
-}
-#nonograms #level-select .next {
-  float: right;
-  margin-top: 25%;
-}
-#nonograms #level-select h2 {
-  clear: left;
-}
-#nonograms #level-select .preview {
-  width: 60%;
-  height: 40%;
-  overflow: hidden;
-  margin: 0 auto;
-  border: 5px solid #000;
-  background: #fff;
-  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
-}
-#nonograms #level-select .preview .complete {
-  height: 100%;
-}
-#nonograms #level-select .preview .complete div {
-  width: 10%;
-  height: 10%;
-  /*border-right: 1px solid #000; border-bottom: 1px solid #000;*/
-  float: left;
-  box-sizing: border-box;
-}
-#nonograms #level-select .preview .complete div.filled {
-  background: #333;
-}
-#nonograms #level-select .preview .incomplete {
-  font-size: 8em;
-  line-height: 1.3;
-  width: 100%;
-  height: 100%;
-  color: #000;
-  position: relative;
-  left: 5%;
-}
-#nonograms #level-select ul.info {
-  margin: 1.5% 0;
-  font-size: 1.2em;
-}
-#nonograms #level-select ul.info li {
-  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
 }
 #nonograms.landscape .scene {
   background-size: contain;
@@ -708,8 +691,8 @@ body {
 }
 #nonograms.landscape #level-select .previous,
 #nonograms.landscape #level-select .next {
-  line-height: 2;
-  font-size: 0.8em;
+  line-height: 0.8;
+  font-size: 1.8em;
 }
 #nonograms.landscape #level-select .preview {
   width: 40%;
