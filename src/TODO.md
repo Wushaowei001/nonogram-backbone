@@ -5,11 +5,17 @@
 [ ] Create a simple particle effect - only four particles will appear for a correct answer
 [ ] Change scene transition to be code based - allow for an extra parameter, "forward" or "back", which dictates the direction the transition occurs
 [ ] Make puzzle grid 100% width
-[ ] Experiment with encasing buttons in a <div>, to allow for a "pressed" effect
-[ ] Add canvas-based level previews
+[x] Add canvas-based level previews
 [ ] Add config file to specify path to assets, etc.
 [ ] Add CSS compression
 [ ] Add sourcemaps
+[ ] Turn <div>s back into <button>s
+[ ] Experiment with encasing buttons in a <div>, to allow for a "pressed" effect
+[x] Fix rem font sizes/layouts
+[ ] Fix modal layout
+[ ] Fix landscape layout
+[ ] Add support for levels smaller than 10x10
+[x] Add question marks to incomplete level previews
 [x] Add "squish" effect when interacting with cells in puzzle board
 [x] Set up CSS autoprefixer
 [x] Add livereload

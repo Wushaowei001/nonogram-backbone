@@ -45,8 +45,6 @@ class GameScene extends Scene
   startCol: -1
   previousRow: -1
   previousCol: -1
-  lockedRow: -1
-  lockedCol: -1
   ignoreInput: false
 
   # For dealing w/ tutorial
@@ -114,20 +112,6 @@ class GameScene extends Scene
 
     # Only recognize movement if within grid bounds
     if 0 <= row <= 9 and 0 <= col <= 9
-
-      # Enforce locking the user to a particular row/column for touch input
-      if @lockedRow == -1 and @lockedCol == -1 and ENV.mobile
-        if @previousRow != row
-          @lockedCol = col
-        else if @previousCol != col
-          @lockedRow = row
-
-      if @lockedRow != -1
-        row = @lockedRow
-
-      if @lockedCol != -1
-        col = @lockedCol
-
       if row != @previousRow or col != @previousCol
         # Update highlighted clue cells
         verticalClues = @$('.vertical.clue')
@@ -161,7 +145,7 @@ class GameScene extends Scene
     @actionLock = "none"
 
     # Clear out previous touch data
-    @startRow = @startCol = @previousRow = @previousCol = @lockedRow = @lockedCol = -1
+    @startRow = @startCol = @previousRow = @previousCol = -1
 
   # Try to either mark or fill a grid cell
   doAction: (row, col) ->
@@ -262,13 +246,9 @@ class GameScene extends Scene
     # Ensure this event handler is removed, even if user doesn't "unclick"
     @elem.off 'mousemove', @onActionMove
 
-    # Stop music
     @trigger 'music:stop'
-
-    # Play jingle
     @trigger 'sfx:play', 'win'
 
-    # Stop the timer
     window.clearInterval @timerIdId
 
     if not @tutorial
@@ -350,15 +330,14 @@ class GameScene extends Scene
     # User is probably actually clicking a span inside the button
     if target.is 'span' then target = target.parents '.button'
 
-    # Remove highlight from previous button
-    @$(".button.#{@action}", @elem).removeClass 'highlight'
+    @$(".button.#{@action}", @elem).removeClass 'active'
 
     if target.hasClass 'mark'
       @action = 'mark'
-      target.addClass 'highlight'
+      target.addClass 'active'
     else
       @action = 'fill'
-      target.addClass 'highlight'
+      target.addClass 'active'
     
 
   # Update timer elem
@@ -481,7 +460,7 @@ class GameScene extends Scene
 
     # Use Math.floor here to ensure the grid doesn't round up to be larger than width/height of container
     if orientation is 'landscape'
-      gridBackgroundWidth = Math.round(height * 0.95)   # Make sure grid background size is 95% of viewport
+      gridBackgroundWidth = Math.round(height * 0.97)   # Make sure grid background size is 95% of viewport
       @gridBackground.width gridBackgroundWidth
       @gridBackground.height gridBackgroundWidth
 
@@ -491,7 +470,7 @@ class GameScene extends Scene
         'margin': "#{margin}px 0"
 
     else if orientation is 'portrait'
-      gridBackgroundWidth = Math.round(width * 0.95)  # grid size is 95% of viewport
+      gridBackgroundWidth = Math.round(width * 0.97)  # grid size is 95% of viewport
       @gridBackground.width gridBackgroundWidth
       @gridBackground.height gridBackgroundWidth
 
@@ -555,8 +534,8 @@ class GameScene extends Scene
       # Reset buttons
       @action = "mark"
       @actionLock = "none"
-      $(".button.fill", @elem).removeClass 'highlight'
-      $(".button.mark", @elem).addClass 'highlight'
+      $(".button.fill", @elem).removeClass 'active'
+      $(".button.mark", @elem).addClass 'active'
 
       # Reset game progress
       @hits = 0
@@ -653,11 +632,11 @@ class GameScene extends Scene
       length = if match? then match.length else 0
       
       # Determine if there are 5 clues in col, which means the font size needs to be stepped down
-      if length >= 4 then @$('.vertical.clue', @elem).eq(i).addClass 'pinch'
+      # if length >= 4 then @$('.vertical.clue', @elem).eq(i).addClass 'pinch'
 
       # Add some manual padding for vertical clues so they are bottom aligned
-      if length < 4
-        for [length..3]
+      if length < 5
+        for [length..4]
           verticalClue = "<br>#{verticalClue}"
 
 

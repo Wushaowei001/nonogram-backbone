@@ -13,14 +13,18 @@ class LevelSelectScene extends Scene
         'touchend .previous': 'previous'
         'touchend .next': 'next'
         'touchend .play': 'play'
+        'touchend canvas': 'select'
     else
       events =
         'click .back': 'back' 
         'click .previous': 'previous'
         'click .next': 'next'
         'click .play': 'play'
+        'click canvas': 'select'
 
-  current: 0
+  selectedLevel: 0
+  page: 0
+  perPage: 9
   difficulty: 'easy'
   stats: {}
 
@@ -28,152 +32,199 @@ class LevelSelectScene extends Scene
     @elem = $(template())
     @render()
 
+    @canvases = @$('.preview .group:first-child canvas')
+    @altCanvases = @$('.preview .group:last-child canvas')
+
   previous: (e) ->
     e.preventDefault()
 
-    if @current > 0
-      @current--
+    if @page > 0
+      @page -= 1
 
       # Handle dimming prev/next buttons
-      if @current == 0 then @$('.previous').addClass 'disabled'
-      if @current == levels[@difficulty].length - 2 then @$('.next').removeClass 'disabled'
+      @$('.previous').addClass 'disabled' if @page is 0
+      @$('.next').removeClass 'disabled' if @page is @totalPages - 1
 
       @trigger 'sfx:play', 'button'
 
-      @showPreview levels[@difficulty][@current]
+      @animateThumbnails()
 
   next: (e) ->
     e.preventDefault()
 
-    if @current < levels[@difficulty].length - 1
-      @current++
+    if @page < @totalPages
+      @page += 1
 
       # Handle dimming prev/next buttons
-      if @current == levels[@difficulty].length - 1 then @$('.next').addClass 'disabled'
-      if @current == 1 then @$('.previous').removeClass 'disabled'
+      @$('.next').addClass 'disabled' if @page is @totalPages
+      @$('.previous').removeClass 'disabled' if @page is 1
 
       @trigger 'sfx:play', 'button'
 
-      @showPreview levels[@difficulty][@current]
+      @animateThumbnails()
 
   play: (e) ->
     e.preventDefault()
-    
-    # Prevent multiple clicks
-    @undelegateEvents()
+    @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @current }
+    @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @selectedLevel }
 
 
   back: (e) ->
     e.preventDefault()
-
-    # Prevent multiple clicks
-    @undelegateEvents()
+    @undelegateEvents() # Prevent multiple clicks
     
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficulty'
 
-  # Parse through a level object and display on a table
-  showPreview: (level) ->
+  showLevelInfo: ->
+    # TODO move this elsewhere
     pad = (number, length) ->
       string = String(number)
       string = '0' + string while string.length < length
       return string
 
-    if @stats[@current]?.time     
-      minutes = pad Math.floor(@stats[@current].time / 60), 2
-      seconds = pad @stats[@current].time % 60, 2
+    if @stats[@selectedLevel]?.time     
+      minutes = pad Math.floor(@stats[@selectedLevel].time / 60), 2
+      seconds = pad @stats[@selectedLevel].time % 60, 2
       time = "#{minutes}:#{seconds}"
     else
       time = '--:--'
 
-    attempts = if @stats[@current]?.attempts then @stats[@current].attempts else "0"
+    attempts = @stats[@selectedLevel]?.attempts || "0"
     
     @$('.attempts').html "Attempts: #{attempts}"
     @$('.best-time').html "Best Time: #{time}"
 
+    levelData = levels[@difficulty][@selectedLevel]
+
     # If level is completed, show preview, title, etc.
     if time != '--:--'
-      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: #{level.title}"
-
-      # Show a preview of the completed level
-      # This will show the previously completed random puzzle
-      if level.clues.length > 0
-        @$('.preview .complete').show()
-        @$('.preview .incomplete').hide()
-
-        # Clear out previous preview
-        @$('.preview .complete div').removeClass('filled')
-
-        for clue, index in level.clues
-          if clue is 1
-            @$('.preview .complete div').eq(index).addClass('filled')
-
+      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: #{levelData.title}"
     else
-      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@current + 1}: ????"
-      @$('.preview .complete').hide()
-      @$('.preview .incomplete').show()
+      @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: ????"
 
-    # Animate into place
-    # preview = @$('.preview')
+  animateThumbnails: (direction) ->
+    # Move existing thumbnails off
+    @canvases.parent('.group').css('z-index': 0)
+    @canvases.each (i, element) =>
+      canvas = $(element)
 
-    # preview.css
-    #   'left': -@elem.width()
+      _.delay =>
+        # Animate offscreen
+        # "cubic-bezier(.5,-0.5,.5,1.5)"
+        canvas.animate({ transform: "translateX(-#{@width}px)" }, "fast", "ease-in-out")
+      , i * 100
 
-    # preview.animate
-    #   'left': 0
-    # , 500, 'cubic-bezier(0.5, -0.5, 0.5, 1.5)'
+    # switch thumbnail groups
+    tmp = @canvases
+    @canvases = @altCanvases
+    @altCanvases = tmp
 
+    # Draw on 'em
+    @drawThumbnails()
+
+    # Move new thumbnails on
+    @canvases.parent('.group').css('z-index': 1)
+    @canvases.each (i, element) =>
+      canvas = $(element)
+
+      # Move offscreen
+      canvas.animate({ transform: "translateX(#{@width}px)" }, 0)
+
+      _.delay ->
+        # Animate onscreen
+        # "cubic-bezier(.5,-0.5,.5,1.5)"
+        canvas.animate({ transform: "translateX(0)" }, "fast", "ease-in-out")
+      , i * 100 + 250
+
+    @selectedLevel = @page * @perPage
+    @highlightThumbnail()
+
+  drawThumbnails: ->
+    @canvases.each (i, element) =>
+      canvas = $(element)
+      context = canvas[0].getContext('2d')
+      context.clearRect(0, 0, canvas.width(), canvas.height())
+
+      index = @page * @perPage + i
+      levelData = levels[@difficulty][index]
+
+      if levelData is undefined
+        canvas.hide()
+      else
+        canvas.show()
+        clues = if @stats[index]?.time 
+                  levelData.clues
+                else
+                  levels.incomplete.clues
+
+        gridSize = Math.sqrt(levelData.clues.length)
+        canvasSize = Math.floor(canvas.width() / 10) * 10
+        pixelSize = Math.floor(canvasSize / gridSize)
+
+        # Make each canvas an even multiple, so grids can
+        # be drawn without artifacts caused by antialiasing
+        canvas.attr('width', canvasSize)
+        canvas.attr('height', canvasSize)
+
+        for clue, index in clues
+            if clue is 1
+              x = index % gridSize
+              y = Math.floor(index / gridSize)
+              context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
+
+  select: (event) ->
+    selected = @page * @perPage + $(event.target).index()
+    return if @selectedLevel == selected
+    @selectedLevel = selected
+    @highlightThumbnail()
+
+  highlightThumbnail: ->
+    index = @selectedLevel - @page * @perPage
+    selected = @canvases.eq(index)
+    @canvases.removeClass 'selected'
+    selected.addClass 'selected'
+    @showLevelInfo()
 
   resize: (width, height, orientation) ->
-    preview = @$('.preview')
+    # Re-draw thumbnails, since resetting width/height on a canvas erases it
+    @drawThumbnails()
 
-    # TODO: Is it possible to get rid of this hardcoded nonsense? I don't think so
-    if orientation is 'landscape'
-      width = width * 0.4
-      preview.width(Math.round(width / 10) * 10)
-      preview.height(preview.width())
-    else
-      width = width * 0.6
-      preview.width(Math.round(width / 10) * 10)
-      preview.height(preview.width())
+    @width = width
+    @height = height
 
   hide: (duration = 500, callback) ->
     super duration, callback
 
     # Store the last viewed level for this difficulty
     lastViewedLevel = localStorage.getObject('lastViewedLevel')
-    lastViewedLevel[@difficulty] = @current
+    lastViewedLevel[@difficulty] = @selectedLevel
     localStorage.setObject 'lastViewedLevel', lastViewedLevel
-
-    # Hide the level preview after transition is complete
-    _.delay =>
-      @$('.preview .complete').hide()
-      @$('.preview .incomplete').show()
-    , duration
 
   # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
     super duration, callback
-    
-    # Re-enable buttons
-    @$('.previous').addClass 'disabled'
-    if @current > 0 then @$('.previous').removeClass 'disabled'
-    if @current < levels[@difficulty].length - 1 then @$('.next').removeClass 'disabled'
 
-    # Handle bizarre condition where this property isn't being set
-    if !@difficulty then @difficulty = "easy"
+    @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
+    # Determine the last viewed level for this difficulty
+    @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty] || 0
+    @page = Math.floor(@selectedLevel / @perPage)
     
+    # disable/enable buttons
+    @$('.previous, .next').addClass 'disabled'
+    if @page > 0 then @$('.previous').removeClass 'disabled'
+    if @page < @totalPages then @$('.next').removeClass 'disabled'
+
     # Update level stats based on localStorage
     @stats = localStorage.getObject('stats')[@difficulty]
 
-    # Determine the last viewed level for this difficulty
-    @current = localStorage.getObject('lastViewedLevel')[@difficulty]
+    # Move alt canvases off-screen
+    @altCanvases.animate({ transform: "translateX(-#{@width}px)" }, 0)
 
-    # Re-populate the preview window
-    @showPreview levels[@difficulty][@current]
+    @drawThumbnails()
+    @highlightThumbnail()
 
     @trigger 'music:play', 'bgm-tutorial'
 
