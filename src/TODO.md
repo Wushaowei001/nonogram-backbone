@@ -1,25 +1,17 @@
-[ ] Long level names cause the layout to break in landscape mode
-[ ] Push level preview down slightly in landscape mode
+# Now
 [ ] Break SFX/Music code out into a "sound controller" singleton/object
 [ ] Break scene transition out into a "scene controller" singleton/object
-[ ] Create a simple particle effect - only four particles will appear for a correct answer
 [ ] Change scene transition to be code based - allow for an extra parameter, "forward" or "back", which dictates the direction the transition occurs
-[ ] Make puzzle grid 100% width
-[x] Add canvas-based level previews
+[ ] Make puzzle grid closer to 100% width
 [ ] Add config file to specify path to assets, etc.
 [ ] Add CSS compression
 [ ] Add sourcemaps
-[ ] Turn <div>s back into <button>s
-[ ] Experiment with encasing buttons in a <div>, to allow for a "pressed" effect
-[x] Fix rem font sizes/layouts
-[ ] Fix modal layout
-[ ] Fix landscape layout
 [ ] Add support for levels smaller than 10x10
-[x] Add question marks to incomplete level previews
-[x] Add "squish" effect when interacting with cells in puzzle board
-[x] Set up CSS autoprefixer
-[x] Add livereload
-[x] Compress concat'd source
-[x] Move LESS source into "/src" directory (or at least out of "/dist")
-[x] Add Zepto?
-[x] Fix positioning of Dialog Box
+[ ] Animate level previews on/off screen
+[ ] Create some "beginner" difficulty levels
+[ ] Make disabled button not have an "active" state
+
+# Future
+
+[ ] Level editor
+[ ] "Share" feature -- append base64 encoded level data at end of URL, point to ganbarugames.com

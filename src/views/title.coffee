@@ -7,12 +7,12 @@ class TitleScene extends Scene
   events: ->
     if ENV.mobile
       events =
-        'touchend .start': 'start' 
+        'touchend .play': 'play' 
         'touchend .tutorial': 'tutorial' 
         'touchend .about': 'about'
     else
       events =
-        'click .start': 'start' 
+        'click .play': 'play' 
         'click .tutorial': 'tutorial' 
         'click .about': 'about'
 
@@ -20,7 +20,7 @@ class TitleScene extends Scene
     @elem = $(template())
     @render()
 
-  start: (e) ->
+  play: (e) ->
     e.preventDefault()
     @undelegateEvents()
     
