@@ -11,9 +11,10 @@ gulp.task('coffee', function () {
     gulp.src('src/app.coffee', { read: false })
         .pipe(browserify({
             transform: ['coffeeify', 'jstify'],
-            extensions: ['.coffee', '.html']
+            extensions: ['.coffee', '.html'],
+            debug: true // source maps
         }))
-        // .pipe(uglify())
+        .pipe(uglify())
         .pipe(rename('app.js'))
         .pipe(gulp.dest('dist'));
 });
