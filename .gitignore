@@ -4,3 +4,4 @@ src/data
 dist/assets/music
 dist/assets/sounds
 dist/assets/images
+*.swp
