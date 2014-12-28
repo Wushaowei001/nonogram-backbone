@@ -9,14 +9,14 @@ class LevelSelectScene extends Scene
   events: ->
     if ENV.mobile
       events =
-        'touchend .back': 'back' 
+        'touchend .back': 'back'
         'touchend .previous': 'previous'
         'touchend .next': 'next'
         'touchend .play': 'play'
         'touchend canvas': 'select'
     else
       events =
-        'click .back': 'back' 
+        'click .back': 'back'
         'click .previous': 'previous'
         'click .next': 'next'
         'click .play': 'play'
@@ -47,7 +47,7 @@ class LevelSelectScene extends Scene
 
       @trigger 'sfx:play', 'button'
 
-      @animateThumbnails()
+      @animateThumbnails("-")
 
   next: (e) ->
     e.preventDefault()
@@ -74,7 +74,7 @@ class LevelSelectScene extends Scene
   back: (e) ->
     e.preventDefault()
     @undelegateEvents() # Prevent multiple clicks
-    
+
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficulty'
 
@@ -85,7 +85,7 @@ class LevelSelectScene extends Scene
       string = '0' + string while string.length < length
       return string
 
-    if @stats[@selectedLevel]?.time     
+    if @stats[@selectedLevel]?.time
       minutes = pad Math.floor(@stats[@selectedLevel].time / 60), 2
       seconds = pad @stats[@selectedLevel].time % 60, 2
       time = "#{minutes}:#{seconds}"
@@ -93,7 +93,7 @@ class LevelSelectScene extends Scene
       time = '--:--'
 
     attempts = @stats[@selectedLevel]?.attempts || "0"
-    
+
     @$('.attempts').html "Attempts: #{attempts}"
     @$('.best-time').html "Best Time: #{time}"
 
@@ -105,16 +105,18 @@ class LevelSelectScene extends Scene
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: ????"
 
-  animateThumbnails: (direction) ->
+  animateThumbnails: (direction = "") ->
+    opposite = if direction == "-" then "" else "-"
+
     # Move existing thumbnails off
     @canvases.parent('.group').css('z-index': 0)
     @canvases.each (i, element) =>
       canvas = $(element)
 
       _.delay =>
-        # Animate offscreen
-        # "cubic-bezier(.5,-0.5,.5,1.5)"
-        canvas.animate({ transform: "translateX(-#{@width}px)" }, "fast", "ease-in-out")
+        canvas.animate({
+          transform: "translateX(#{direction}#{@width}px)"
+        }, "fast", "ease-in-out")
       , i * 100
 
     # switch thumbnail groups
@@ -130,13 +132,15 @@ class LevelSelectScene extends Scene
     @canvases.each (i, element) =>
       canvas = $(element)
 
-      # Move offscreen
-      canvas.animate({ transform: "translateX(#{@width}px)" }, 0)
+      # Start offscreen
+      canvas.animate({
+        transform: "translateX(#{opposite}#{@width}px)"
+      }, 0)
 
       _.delay ->
-        # Animate onscreen
-        # "cubic-bezier(.5,-0.5,.5,1.5)"
-        canvas.animate({ transform: "translateX(0)" }, "fast", "ease-in-out")
+        canvas.animate({
+          transform: "translateX(0)"
+        }, "fast", "ease-in-out")
       , i * 100 + 250
 
     @selectedLevel = @page * @perPage
@@ -155,7 +159,7 @@ class LevelSelectScene extends Scene
         canvas.hide()
       else
         canvas.show()
-        clues = if @stats[index]?.time 
+        clues = if @stats[index]?.time
                   levelData.clues
                 else
                   levels.incomplete.clues
@@ -211,7 +215,7 @@ class LevelSelectScene extends Scene
     # Determine the last viewed level for this difficulty
     @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty] || 0
     @page = Math.floor(@selectedLevel / @perPage)
-    
+
     # disable/enable buttons
     @$('.previous, .next').addClass 'disabled'
     if @page > 0 then @$('.previous').removeClass 'disabled'
@@ -222,6 +226,10 @@ class LevelSelectScene extends Scene
 
     # Move alt canvases off-screen
     @altCanvases.animate({ transform: "translateX(-#{@width}px)" }, 0)
+
+    # Ensure on-screen group is clickable
+    @altCanvases.parent('.group').css('z-index': 0)
+    @canvases.parent('.group').css('z-index': 1)
 
     @drawThumbnails()
     @highlightThumbnail()
