@@ -13,7 +13,7 @@ class LevelSelectScene extends Scene
         'touchend .previous': 'previous'
         'touchend .next': 'next'
         'touchend .play': 'play'
-        'touchend canvas': 'select'
+        'touchstart canvas': 'select'
     else
       events =
         'click .back': 'back'
@@ -107,17 +107,22 @@ class LevelSelectScene extends Scene
 
   animateThumbnails: (direction = "") ->
     opposite = if direction == "-" then "" else "-"
+    delayTime = if direction != "-" then @perPage * 100 else 0
 
     # Move existing thumbnails off
     @canvases.parent('.group').css('z-index': 0)
     @canvases.each (i, element) =>
       canvas = $(element)
+      delayTime = if direction is "-"
+        i * 100
+      else
+        (@perPage * 100) - (i * 100)
 
       _.delay =>
         canvas.animate({
           transform: "translateX(#{direction}#{@width}px)"
         }, "fast", "ease-in-out")
-      , i * 100
+      , delayTime
 
     # switch thumbnail groups
     tmp = @canvases
@@ -131,6 +136,10 @@ class LevelSelectScene extends Scene
     @canvases.parent('.group').css('z-index': 1)
     @canvases.each (i, element) =>
       canvas = $(element)
+      delayTime = if direction is "-"
+        i * 100 + 250
+      else
+        (@perPage * 100) - (i * 100) + 250
 
       # Start offscreen
       canvas.animate({
@@ -141,7 +150,7 @@ class LevelSelectScene extends Scene
         canvas.animate({
           transform: "translateX(0)"
         }, "fast", "ease-in-out")
-      , i * 100 + 250
+      , delayTime
 
     @selectedLevel = @page * @perPage
     @highlightThumbnail()
