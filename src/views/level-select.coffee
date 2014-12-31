@@ -41,12 +41,8 @@ class LevelSelectScene extends Scene
     if @page > 0
       @page -= 1
 
-      # Handle dimming prev/next buttons
-      @$('.previous').addClass 'disabled' if @page is 0
-      @$('.next').removeClass 'disabled' if @page is @totalPages - 1
-
       @trigger 'sfx:play', 'button'
-
+      @enableOrDisablePagingButtons()
       @animateThumbnails("-")
 
   next: (e) ->
@@ -55,12 +51,8 @@ class LevelSelectScene extends Scene
     if @page < @totalPages
       @page += 1
 
-      # Handle dimming prev/next buttons
-      @$('.next').addClass 'disabled' if @page is @totalPages
-      @$('.previous').removeClass 'disabled' if @page is 1
-
       @trigger 'sfx:play', 'button'
-
+      @enableOrDisablePagingButtons()
       @animateThumbnails()
 
   play: (e) ->
@@ -77,6 +69,14 @@ class LevelSelectScene extends Scene
 
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficulty'
+
+  enableOrDisablePagingButtons: ->
+    if 0 < @page < @totalPages
+      @$('.next').removeClass 'disabled'
+      @$('.previous').removeClass 'disabled'
+    else
+      @$('.next').addClass 'disabled' if @page is @totalPages
+      @$('.previous').addClass 'disabled' if @page is 0
 
   showLevelInfo: ->
     # TODO move this elsewhere
@@ -107,7 +107,6 @@ class LevelSelectScene extends Scene
 
   animateThumbnails: (direction = "") ->
     opposite = if direction == "-" then "" else "-"
-    delayTime = if direction != "-" then @perPage * 100 else 0
 
     # Move existing thumbnails off
     @canvases.parent('.group').css('z-index': 0)
@@ -120,6 +119,7 @@ class LevelSelectScene extends Scene
 
       _.delay =>
         canvas.animate({
+          "-webkit-transform": "translateX(#{direction}#{@width}px)" # Bug with Zepto/Safari
           transform: "translateX(#{direction}#{@width}px)"
         }, "fast", "ease-in-out")
       , delayTime
@@ -143,11 +143,13 @@ class LevelSelectScene extends Scene
 
       # Start offscreen
       canvas.animate({
+        "-webkit-transform": "translateX(#{opposite}#{@width}px)" # Bug with Zepto/Safari
         transform: "translateX(#{opposite}#{@width}px)"
       }, 0)
 
       _.delay ->
         canvas.animate({
+          "-webkit-transform": "translateX(0)" # Bug with Zepto/Safari
           transform: "translateX(0)"
         }, "fast", "ease-in-out")
       , delayTime
@@ -225,10 +227,7 @@ class LevelSelectScene extends Scene
     @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty] || 0
     @page = Math.floor(@selectedLevel / @perPage)
 
-    # disable/enable buttons
-    @$('.previous, .next').addClass 'disabled'
-    if @page > 0 then @$('.previous').removeClass 'disabled'
-    if @page < @totalPages then @$('.next').removeClass 'disabled'
+    @enableOrDisablePagingButtons()
 
     # Update level stats based on localStorage
     @stats = localStorage.getObject('stats')[@difficulty]
