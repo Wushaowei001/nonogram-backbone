@@ -4,6 +4,7 @@ Scene = require('../classes/scene')
 ENV = require('../utilities/env')
 template = require('../templates/editor')
 DialogBox = require('../classes/dialog-box')
+Input = require('../utilities/input')
 
 class EditorScene extends Scene
   events: ->
@@ -27,13 +28,14 @@ class EditorScene extends Scene
       'mousedown': 'onPointStart'
       'mouseup': 'onPointEnd'
 
-  initialize: ->
-    @elem = $(template())
-    @render()
+  MAX_GRID_SIZE: 10
+  MIN_GRID_SIZE: 5
+  gridSize: 10
 
   initialize: ->
     # Ensure 'this' has correct context
-    _.bindAll @, 'onPointStart', 'onPointMove', 'onPointEnd', 'doPoint', 'checkCompleted', 'win', 'pause', 'changePoint', 'updateTimer', 'showTutorial', 'resize', 'hide', 'show'
+    #_.bindAll @, 'onPointStart', 'onPointMove', 'onPointEnd', 'fillBlock', 'checkCompleted', 'win', 'pause', 'changePoint', 'updateTimer', 'showTutorial', 'resize', 'hide', 'show'
+    _.bindAll(@, 'onPointStart', 'onPointMove', 'onPointEnd')
 
     # View is initialized hidden
     @elem = $(template())
@@ -44,13 +46,9 @@ class EditorScene extends Scene
     @$el.append @elem
 
     # Get some references to DOM elements that we need later
-    @grid = @$('.grid')
-
-    # Get size of grid blocks - round to nearest whole number to prevent weirdness w/ decimals
-    @blockSize = Math.round @grid.width() / 10
+    @grid = @elem.find('.grid')
 
   quit: (e) ->
-    e.preventDefault()
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
@@ -58,13 +56,26 @@ class EditorScene extends Scene
 
   # max: 10 squares
   makeGridLarger: (e) ->
-    e.preventDefault()
-    @trigger 'sfx:play', 'button'
+    if @gridSize < @MAX_GRID_SIZE
+      @trigger 'sfx:play', 'button'
+      @gridSize += 1
+      @resizeGrid()
 
   # min: 5 squares
   makeGridSmaller: (e) ->
-    e.preventDefault()
-    @trigger 'sfx:play', 'button'
+    if @gridSize > @MIN_GRID_SIZE
+      @trigger 'sfx:play', 'button'
+      @gridSize -= 1
+      @resizeGrid()
+
+  resizeGrid: ->
+    @grid.width(@gridSize * @blockSize)
+    @grid.height(@gridSize * @blockSize)
+    @grid.children('div').each (index, element) =>
+      if index < Math.pow(@gridSize, 2)
+        $(element).show()
+      else
+        $(element).hide()
 
   onPointStart: (e) ->
     e.preventDefault()
@@ -72,16 +83,15 @@ class EditorScene extends Scene
     # Determine if event was caused by mouse or finger
     if e.type == 'mousedown' then @elem.on 'mousemove', @onPointMove
 
-    position = Input.normalize e
+    position = Input.normalize(e)
 
     row = Math.floor((position.y - @grid.offset().top) / @blockSize)
     col = Math.floor((position.x - @grid.offset().left) / @blockSize)
 
-    # Only recognize movement if within grid bounds
     if 0 <= row <= 9 and 0 <= col <= 9
       @previousRow = row
       @previousCol = col
-      @doPoint(row, col) 
+      @fillBlock(row, col)
 
   # Triggered on mousemove or touchmove
   onPointMove: (e) ->
@@ -94,7 +104,7 @@ class EditorScene extends Scene
 
     # Only recognize movement if within grid bounds
     if 0 <= row <= 9 and 0 <= col <= 9
-      @doPoint(row, col) if row != @previousRow or col != @previousCol
+      @fillBlock(row, col) if row != @previousRow or col != @previousCol
 
       @previousRow = row
       @previousCol = col
@@ -108,7 +118,7 @@ class EditorScene extends Scene
 
     @previousRow = @previousCol = null
 
-  doPoint: (row, col) ->
+  fillBlock: (row, col) ->
     index = row * 10 + col
 
     block = @grid.find('div').eq(index)
@@ -119,5 +129,28 @@ class EditorScene extends Scene
     else
       @trigger 'sfx:play', 'mark'
       block.addClass 'filled'
+
+  resize: (width, height, orientation) ->
+    if orientation is 'landscape'
+      gridWidth = Math.round(height * 0.97 / 10) * 10   # Make sure grid background size is 97% of viewport
+      @grid.width gridWidth
+      @grid.height gridWidth
+
+      # Add some margin to the grid, so it appears centered
+      margin = (height - gridWidth - 10) / 2
+      @grid.css
+        'margin': "#{margin}px 0"
+
+    else if orientation is 'portrait'
+      gridWidth = Math.round(width * 0.97 / 10) * 10  # grid size is 97% of viewport
+      @grid.width gridWidth
+      @grid.height gridWidth
+
+      # Add some margin to the grid, so it appears centered
+      margin = (width - gridWidth - 10) / 2
+      @grid.css
+        'margin': "0 #{margin}px"
+
+    @blockSize = gridWidth / 10
 
 module.exports = EditorScene
