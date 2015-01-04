@@ -1,10 +1,10 @@
-$ = require('../vendor/zepto')
-_ = require('underscore')
-Scene = require('../classes/scene')
-ENV = require('../utilities/env')
-template = require('../templates/editor')
+_         = require('underscore')
+$         = require('../vendor/zepto')
+Scene     = require('../classes/scene')
 DialogBox = require('../classes/dialog-box')
-Input = require('../utilities/input')
+Input     = require('../utilities/input')
+ENV       = require('../utilities/env')
+template  = require('../templates/editor')
 
 class EditorScene extends Scene
   events: ->
@@ -28,9 +28,10 @@ class EditorScene extends Scene
       'mousedown': 'onPointStart'
       'mouseup': 'onPointEnd'
 
-  MAX_GRID_SIZE: 10
-  MIN_GRID_SIZE: 5
-  gridSize: 10
+  MAX_CELL_COUNT: 10
+  MIN_CELL_COUNT: 5
+  GRID_SIZE_RATIO: 0.97
+  cellCount: 10
 
   initialize: ->
     _.bindAll(@, 'onPointStart', 'onPointMove', 'onPointEnd')
@@ -41,7 +42,7 @@ class EditorScene extends Scene
 
   # Append the view's elem to the DOM
   render: ->
-    @$el.append @elem
+    @$el.append(@elem)
 
     # Get some references to DOM elements that we need later
     @grid = @elem.find('.grid')
@@ -52,25 +53,67 @@ class EditorScene extends Scene
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'title'
 
-  # max: 10 squares
-  makeGridLarger: (e) ->
-    if @gridSize < @MAX_GRID_SIZE
-      @trigger 'sfx:play', 'button'
-      @gridSize += 1
-      @resizeGrid()
+  save: (e) ->
+    @trigger 'sfx:play', 'button'
 
-  # min: 5 squares
-  makeGridSmaller: (e) ->
-    if @gridSize > @MIN_GRID_SIZE
+    # TODO: Determine a way to give the puzzle a title, so as to store
+    # by key, rather than a dumb array
+    userLevels = localStorage.getObject('userLevels') || []
+
+    cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
+    levelData = _(cells).map (cell) ->
+      return if $(cell).hasClass('filled') then 1 else 0
+
+    userLevels.push(levelData)
+    localStorage.setObject('userLevels', userLevels)
+
+  makeGridLarger: (e) ->
+    if @cellCount < @MAX_CELL_COUNT
       @trigger 'sfx:play', 'button'
-      @gridSize -= 1
+      @cellCount += 1
       @resizeGrid()
+      @enableOrDisableGridResizeButtons()
+
+  makeGridSmaller: (e) ->
+    if @cellCount > @MIN_CELL_COUNT
+      @trigger 'sfx:play', 'button'
+      @cellCount -= 1
+      @resizeGrid()
+      @enableOrDisableGridResizeButtons()
+
+  enableOrDisableGridResizeButtons: ->
+    if @MIN_CELL_COUNT < @cellCount < @MAX_CELL_COUNT
+      @$('.larger').removeClass 'disabled'
+      @$('.smaller').removeClass 'disabled'
+    else
+      @$('.larger').addClass 'disabled' if @cellCount is @MAX_CELL_COUNT
+      @$('.smaller').addClass 'disabled' if @cellCount is @MIN_CELL_COUNT
 
   resizeGrid: ->
-    @grid.width(@gridSize * @blockSize)
-    @grid.height(@gridSize * @blockSize)
+    smallestDimension = if @orientation is 'landscape' then @height else @width
+    maxGridSize = Math.round(smallestDimension * @GRID_SIZE_RATIO / 10) * 10
+
+    @cellSize = maxGridSize / 10
+    @grid.width(@cellCount * @cellSize)
+    @grid.height(@cellCount * @cellSize)
+
+    if @orientation is 'landscape'
+      horizontalMargin = (@height - @grid.width() - 10) / 2
+      verticalMargin = (maxGridSize - @grid.height()) / 2
+    else if @orientation is 'portrait'
+      verticalMargin = (@width - @grid.height() - 10) / 2
+      horizontalMargin = (maxGridSize - @grid.width()) / 2
+
+    @grid.css
+      margin: "#{horizontalMargin}px #{verticalMargin}px"
+
+    # TODO: Can the rest of this method be optimized?
+    @grid.children('div').css
+      width: @cellSize
+      height: @cellSize
+
     @grid.children('div').each (index, element) =>
-      if index < Math.pow(@gridSize, 2)
+      if index < Math.pow(@cellCount, 2)
         $(element).show()
       else
         $(element).hide()
@@ -83,8 +126,8 @@ class EditorScene extends Scene
 
     position = Input.normalize(e)
 
-    row = Math.floor((position.y - @grid.offset().top) / @blockSize)
-    col = Math.floor((position.x - @grid.offset().left) / @blockSize)
+    row = Math.floor((position.y - @grid.offset().top) / @cellSize)
+    col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
     if 0 <= row <= 9 and 0 <= col <= 9
       @previousRow = row
@@ -97,11 +140,11 @@ class EditorScene extends Scene
 
     position = Input.normalize e
 
-    row = Math.floor((position.y - @grid.offset().top) / @blockSize)
-    col = Math.floor((position.x - @grid.offset().left) / @blockSize)
+    row = Math.floor((position.y - @grid.offset().top) / @cellSize)
+    col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
     # Only recognize movement if within grid bounds
-    if 0 <= row < @MAX_GRID_SIZE and 0 <= col < @MAX_GRID_SIZE
+    if 0 <= row < @MAX_CELL_COUNT and 0 <= col < @MAX_CELL_COUNT
       @fillBlock(row, col) if row != @previousRow or col != @previousCol
 
       @previousRow = row
@@ -117,7 +160,7 @@ class EditorScene extends Scene
     @previousRow = @previousCol = null
 
   fillBlock: (row, col) ->
-    index = row * @gridSize + col
+    index = row * @cellCount + col
     block = @grid.find('div').eq(index)
 
     if block.hasClass('filled') is true
@@ -128,34 +171,13 @@ class EditorScene extends Scene
       block.addClass 'filled'
 
   resize: (width, height, orientation) ->
-    # TODO: lots of duplication here, refactor!
-    # TODO: rename @gridSize; it's the # of cells in the grid, whereas
-    # @blockSize is an actual pixel size
-    if orientation is 'landscape'
-      maxGridSize = Math.round(height * 0.97 / 10) * 10   # Make sure grid background size is 97% of viewport
-      @blockSize = maxGridSize / 10
-      @grid.width(@gridSize * @blockSize)
-      @grid.height(@gridSize * @blockSize)
+    @width = width
+    @height = height
+    @orientation = orientation
+    @resizeGrid()
 
-      # Add some margin to the grid, so it appears centered
-      horizontalMargin = (height - @grid.width() - 10) / 2
-      verticalMargin = (maxGridSize - @grid.height()) / 2
-
-    else if orientation is 'portrait'
-      maxGridSize = Math.round(width * 0.97 / 10) * 10  # grid size is 97% of viewport
-      @blockSize = maxGridSize / 10
-      @grid.width(@gridSize * @blockSize)
-      @grid.height(@gridSize * @blockSize)
-
-      # Add some margin to the grid, so it appears centered
-      verticalMargin = (width - @grid.height() - 10) / 2
-      horizontalMargin = (maxGridSize - @grid.width()) / 2
-      
-    @grid.css
-      margin: "#{horizontalMargin}px #{verticalMargin}px"
-
-    @grid.children('div').css
-      width: @blockSize
-      height: @blockSize
+  show: (duration = 500, callback) ->
+    super duration, callback
+    @enableOrDisableGridResizeButtons()
 
 module.exports = EditorScene
