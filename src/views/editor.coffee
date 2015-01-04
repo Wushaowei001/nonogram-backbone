@@ -33,8 +33,6 @@ class EditorScene extends Scene
   gridSize: 10
 
   initialize: ->
-    # Ensure 'this' has correct context
-    #_.bindAll @, 'onPointStart', 'onPointMove', 'onPointEnd', 'fillBlock', 'checkCompleted', 'win', 'pause', 'changePoint', 'updateTimer', 'showTutorial', 'resize', 'hide', 'show'
     _.bindAll(@, 'onPointStart', 'onPointMove', 'onPointEnd')
 
     # View is initialized hidden
@@ -103,7 +101,7 @@ class EditorScene extends Scene
     col = Math.floor((position.x - @grid.offset().left) / @blockSize)
 
     # Only recognize movement if within grid bounds
-    if 0 <= row <= 9 and 0 <= col <= 9
+    if 0 <= row < @MAX_GRID_SIZE and 0 <= col < @MAX_GRID_SIZE
       @fillBlock(row, col) if row != @previousRow or col != @previousCol
 
       @previousRow = row
@@ -119,8 +117,7 @@ class EditorScene extends Scene
     @previousRow = @previousCol = null
 
   fillBlock: (row, col) ->
-    index = row * 10 + col
-
+    index = row * @gridSize + col
     block = @grid.find('div').eq(index)
 
     if block.hasClass('filled') is true
@@ -131,26 +128,34 @@ class EditorScene extends Scene
       block.addClass 'filled'
 
   resize: (width, height, orientation) ->
+    # TODO: lots of duplication here, refactor!
+    # TODO: rename @gridSize; it's the # of cells in the grid, whereas
+    # @blockSize is an actual pixel size
     if orientation is 'landscape'
-      gridWidth = Math.round(height * 0.97 / 10) * 10   # Make sure grid background size is 97% of viewport
-      @grid.width gridWidth
-      @grid.height gridWidth
+      maxGridSize = Math.round(height * 0.97 / 10) * 10   # Make sure grid background size is 97% of viewport
+      @blockSize = maxGridSize / 10
+      @grid.width(@gridSize * @blockSize)
+      @grid.height(@gridSize * @blockSize)
 
       # Add some margin to the grid, so it appears centered
-      margin = (height - gridWidth - 10) / 2
-      @grid.css
-        'margin': "#{margin}px 0"
+      horizontalMargin = (height - @grid.width() - 10) / 2
+      verticalMargin = (maxGridSize - @grid.height()) / 2
 
     else if orientation is 'portrait'
-      gridWidth = Math.round(width * 0.97 / 10) * 10  # grid size is 97% of viewport
-      @grid.width gridWidth
-      @grid.height gridWidth
+      maxGridSize = Math.round(width * 0.97 / 10) * 10  # grid size is 97% of viewport
+      @blockSize = maxGridSize / 10
+      @grid.width(@gridSize * @blockSize)
+      @grid.height(@gridSize * @blockSize)
 
       # Add some margin to the grid, so it appears centered
-      margin = (width - gridWidth - 10) / 2
-      @grid.css
-        'margin': "0 #{margin}px"
+      verticalMargin = (width - @grid.height() - 10) / 2
+      horizontalMargin = (maxGridSize - @grid.width()) / 2
+      
+    @grid.css
+      margin: "#{horizontalMargin}px #{verticalMargin}px"
 
-    @blockSize = gridWidth / 10
+    @grid.children('div').css
+      width: @blockSize
+      height: @blockSize
 
 module.exports = EditorScene
