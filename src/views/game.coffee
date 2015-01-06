@@ -26,6 +26,9 @@ class GameScene extends Scene
         'mousedown': 'onActionStart'
         'mouseup': 'onActionEnd'
 
+  GRID_SIZE_RATIO: 0.75
+  GRID_BACKGROUND_SIZE_RATIO: 0.97
+
   difficulty: "easy"
   level: 0
 
@@ -68,9 +71,6 @@ class GameScene extends Scene
     @grid = @elem.find('.grid')
     @gridBackground = @elem.find('.grid-background')
 
-    # Get size of grid blocks - round to nearest whole number to prevent weirdness w/ decimals
-    @blockSize = Math.round(@grid.width() / 10)
-
   # Triggered on mousedown or touchstart
   onActionStart: (e) ->
     e.preventDefault()
@@ -81,11 +81,10 @@ class GameScene extends Scene
 
     position = Input.normalize e
 
-    row = Math.floor((position.y - @grid.offset().top) / @blockSize)
-    col = Math.floor((position.x - @grid.offset().left) / @blockSize)
+    row = Math.floor((position.y - @grid.offset().top) / @cellSize)
+    col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
-    # Only recognize movement if within grid bounds
-    if 0 <= row <= 9 and 0 <= col <= 9
+    if 0 <= row < @cellCount and 0 <= col < @cellCount
       # Determine the row/col
       @startRow = @previousRow = row
       @startCol = @previousCol = col
@@ -107,11 +106,10 @@ class GameScene extends Scene
     position = Input.normalize e
 
     # Determine the row/col
-    row = Math.floor((position.y - @grid.offset().top) / @blockSize)
-    col = Math.floor((position.x - @grid.offset().left) / @blockSize)
+    row = Math.floor((position.y - @grid.offset().top) / @cellSize)
+    col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
-    # Only recognize movement if within grid bounds
-    if 0 <= row <= 9 and 0 <= col <= 9
+    if 0 <= row < @cellCount and 0 <= col < @cellCount
       if row != @previousRow or col != @previousCol
         # Update highlighted clue cells
         verticalClues = @$('.vertical.clue')
@@ -205,12 +203,12 @@ class GameScene extends Scene
     else if @action is 'mark'
       # Mark if block is empty
       if block.hasClass('marked') == false and block.hasClass('filled') == false and @actionLock != "remove"
-        block.addClass 'marked'
+        block.addClass 'marked pulse'
         @actionLock = "mark"
         @trigger 'sfx:play', 'mark'
       # Remove mark if already marked
       else if block.hasClass('marked') == true and block.hasClass('filled') == false and @actionLock != "mark"
-        block.removeClass 'marked'
+        block.removeClass 'marked pulse'
         @actionLock = "remove"
         @trigger 'sfx:play', 'mark'
       # Play a "click" noise if block is filled
@@ -456,57 +454,58 @@ class GameScene extends Scene
       }]
 
   resize: (width, height, orientation) ->
-    # Use Math.floor here to ensure the grid doesn't round up to be larger than width/height of container
-    if orientation is 'landscape'
-      gridBackgroundWidth = Math.round(height * 0.97)   # Make sure grid background size is 97% of viewport
-      @gridBackground.width gridBackgroundWidth
-      @gridBackground.height gridBackgroundWidth
+    @width = width
+    @height = height
+    @orientation = orientation
+    @resizeGrid()
 
-      # Add some margin to the grid, so it appears centered
-      margin = (height - gridBackgroundWidth - 10) / 2
-      @gridBackground.css
-        'margin': "#{margin}px 0"
+  resizeGrid: ->
+    smallestDimension = if @orientation is 'landscape' then @height else @width
+    gridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO / 10) * 10
 
-    else if orientation is 'portrait'
-      gridBackgroundWidth = Math.round(width * 0.97)  # grid size is 97% of viewport
-      @gridBackground.width gridBackgroundWidth
-      @gridBackground.height gridBackgroundWidth
+    @gridBackground.width(gridBackgroundSize)
+    @gridBackground.height(gridBackgroundSize)
 
-      # Add some margin to the grid, so it appears centered
-      margin = (width - gridBackgroundWidth - 10) / 2
-      @gridBackground.css
-        'margin': "0 #{margin}px"
+    if @orientation is 'landscape'
+      horizontalMargin = (@height - @gridBackground.width() - 10) / 2
+      verticalMargin = (gridBackgroundSize - @gridBackground.height()) / 2
+    else if @orientation is 'portrait'
+      verticalMargin = (@width - @gridBackground.height() - 10) / 2
+      horizontalMargin = (gridBackgroundSize - @gridBackground.width()) / 2
 
-    # Set dimensions of actual grid inside the container
-    gridWidth = Math.round(gridBackgroundWidth * 0.75 / 10) * 10  # Make sure grid size is 66% of background, and is a multiple of 10
-    @grid.width gridWidth
-    @grid.height gridWidth
+    @gridBackground.css
+      margin: "#{horizontalMargin}px #{verticalMargin}px"
 
-    @blockSize = gridWidth / 10
+    gridSize = Math.round(@gridBackground.width() * @GRID_SIZE_RATIO / 10) * 10
+    @grid.width(gridSize)
+    @grid.height(gridSize)
 
-    $('.vertical.clue', @gridBackground).css
-      "width": gridWidth / 10
-      "height": gridBackgroundWidth - gridWidth
+    @cellSize = gridSize / 10
 
-    $('.horizontal.clue', @gridBackground).css
-      "width": gridBackgroundWidth - gridWidth
-      "height": gridWidth / 10
+    @$('.vertical.clue', @gridBackground).css
+      width: @cellSize
+      height: gridBackgroundSize - gridSize
 
-    $('.minimap', @gridBackground).css
-      "width": gridBackgroundWidth - gridWidth
-      "height": gridBackgroundWidth - gridWidth
+    @$('.horizontal.clue', @gridBackground).css
+      width: gridBackgroundSize - gridSize
+      height: @cellSize
 
-    $('.blank', @grid).css
-      "width": gridWidth / 10
-      "height": gridWidth / 10
+    @$('.minimap', @gridBackground).css
+      width: gridBackgroundSize - gridSize
+      height: gridBackgroundSize - gridSize
+
+    @grid.children('div').css
+      width: @cellSize
+      height: @cellSize
 
     # Resize the icons on the game buttons to ensure correct aspect ratio
-    iconWidth = Math.round($('.actions.mark').height() * 0.5)
-    $('.actions .icon').width(iconWidth).height(iconWidth)
+    iconWidth = Math.round(@$('.actions.mark').height() * 0.5)
+    @$('.actions .icon').css
+      width: iconWidth
+      height: iconWidth
 
   # Remove event handlers and hide this view's elem
   hide: (duration = 500, callback) ->
-    # Call "super"
     super duration, callback
 
     # Do all this stuff after transition offscreen
@@ -543,7 +542,6 @@ class GameScene extends Scene
 
   # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
-    # Call "super"
     super duration, callback
 
     # Start timer
@@ -586,6 +584,8 @@ class GameScene extends Scene
     # Handle loading the tutorial
     if @tutorial
       @clues = levels.easy[0].clues
+
+    @cellCount = Math.sqrt(@clues.length)
 
     # Load level/parse clues
     for i in [0..9]
