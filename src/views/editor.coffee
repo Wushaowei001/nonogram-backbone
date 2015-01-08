@@ -129,7 +129,7 @@ class EditorScene extends Scene
     row = Math.floor((position.y - @grid.offset().top) / @cellSize)
     col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
-    if 0 <= row <= 9 and 0 <= col <= 9
+    if 0 <= row < @MAX_CELL_COUNT and 0 <= col < @MAX_CELL_COUNT
       @previousRow = row
       @previousCol = col
       @fillBlock(row, col)
@@ -143,7 +143,6 @@ class EditorScene extends Scene
     row = Math.floor((position.y - @grid.offset().top) / @cellSize)
     col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
-    # Only recognize movement if within grid bounds
     if 0 <= row < @MAX_CELL_COUNT and 0 <= col < @MAX_CELL_COUNT
       @fillBlock(row, col) if row != @previousRow or col != @previousCol
 
