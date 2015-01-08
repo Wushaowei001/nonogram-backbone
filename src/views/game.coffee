@@ -29,7 +29,7 @@ class GameScene extends Scene
   GRID_SIZE_RATIO: 0.75
   GRID_BACKGROUND_SIZE_RATIO: 0.97
 
-  difficulty: "easy"
+  difficulty: "beginner"
   level: 0
 
   timerId: null
@@ -121,7 +121,7 @@ class GameScene extends Scene
         horizontalClues.eq(row).addClass('highlight')
 
         # Try to mark or fill
-        @doAction row, col
+        @doAction(row, col)
 
       # Reset the "previous" values
       @previousRow = row
@@ -147,9 +147,9 @@ class GameScene extends Scene
 
   # Try to either mark or fill a grid cell
   doAction: (row, col) ->
-    index = row * 10 + col
+    index = row * @cellCount + col
 
-    # Determine if block is empty, filled, or marked
+    # TODO: need to only find visible cells here
     block = @grid.find('.blank').eq(index)
 
     valid = @clues[index] == 1
@@ -224,9 +224,9 @@ class GameScene extends Scene
 
     blocks = @grid.find('.blank')
 
-    for i in [0..9]
-      rowIndex = row * 10 + i
-      columnIndex = i * 10 + col
+    for i in [0 ... @cellCount]
+      rowIndex = row * @cellCount + i
+      columnIndex = i * @cellCount + col
 
       if blocks.eq(rowIndex).hasClass('filled') then completedRowTotal++
       if blocks.eq(columnIndex).hasClass('filled') then completedColumnTotal++
@@ -461,16 +461,18 @@ class GameScene extends Scene
 
   resizeGrid: ->
     smallestDimension = if @orientation is 'landscape' then @height else @width
-    gridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO / 10) * 10
+    # gridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO / 10) * 10
+    gridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO)
+    borderWidth = parseInt(@gridBackground.css('border-width'), 10) * 2
 
     @gridBackground.width(gridBackgroundSize)
     @gridBackground.height(gridBackgroundSize)
 
     if @orientation is 'landscape'
-      horizontalMargin = (@height - @gridBackground.width() - 10) / 2
+      horizontalMargin = (@height - @gridBackground.width() - borderWidth) / 2
       verticalMargin = (gridBackgroundSize - @gridBackground.height()) / 2
     else if @orientation is 'portrait'
-      verticalMargin = (@width - @gridBackground.height() - 10) / 2
+      verticalMargin = (@width - @gridBackground.height() - borderWidth) / 2
       horizontalMargin = (gridBackgroundSize - @gridBackground.width()) / 2
 
     @gridBackground.css
@@ -588,17 +590,17 @@ class GameScene extends Scene
     @cellCount = Math.sqrt(@clues.length)
 
     # Load level/parse clues
-    for i in [0..9]
-      horizontalClue = ""
-      verticalClue = ""
+    for i in [0 ... @cellCount]
+      horizontalClue = ''
+      verticalClue = ''
       horizontalCounter = 0
       verticalCounter = 0
       previousVertical = false
       previousHorizontal = false
 
       # Create horizontal clues
-      for j in [0..9]
-        index = i * 10 + j
+      for j in [0 ... @cellCount]
+        index = i * @cellCount + j
         if @clues[index] is 1
           horizontalCounter++
           @totalHits++
@@ -609,8 +611,8 @@ class GameScene extends Scene
           previousHorizontal = false
 
       # Create vertical clues
-      for j in [0..9]
-        index = j * 10 + i
+      for j in [0 ... @cellCount]
+        index = j * @cellCount + i
         if @clues[index] is 1
           verticalCounter++
           previousVertical = true
@@ -623,8 +625,8 @@ class GameScene extends Scene
       if previousHorizontal then horizontalClue += "#{horizontalCounter}"
       if previousVertical then verticalClue += "#{verticalCounter}<br>"
 
-      if horizontalClue == "" then horizontalClue = "0"
-      if verticalClue == "" then verticalClue = "0<br>"
+      if horizontalClue == '' then horizontalClue = '0'
+      if verticalClue == '' then verticalClue = '0<br>'
 
       match = verticalClue.match(/<br>/g)
       length = if match? then match.length else 0
@@ -634,9 +636,8 @@ class GameScene extends Scene
 
       # Add some manual padding for vertical clues so they are bottom aligned
       if length < 5
-        for [length..4]
+        for [length .. 4]
           verticalClue = "<br>#{verticalClue}"
-
 
       @$('.horizontal.clue', @elem).eq(i).html(horizontalClue)
       @$('.vertical.clue', @elem).eq(i).html(verticalClue)
