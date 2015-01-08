@@ -62,7 +62,6 @@ class LevelSelectScene extends Scene
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @selectedLevel }
 
-
   back: (e) ->
     e.preventDefault()
     @undelegateEvents() # Prevent multiple clicks
@@ -175,8 +174,8 @@ class LevelSelectScene extends Scene
                 else
                   levels.incomplete.clues
 
-        gridSize = Math.sqrt(levelData.clues.length)
-        canvasSize = Math.floor(canvas.width() / 10) * 10
+        gridSize = Math.sqrt(clues.length)
+        canvasSize = Math.floor(canvas.width() / gridSize) * gridSize
         pixelSize = Math.floor(canvasSize / gridSize)
 
         # Make each canvas an even multiple, so grids can
@@ -185,10 +184,10 @@ class LevelSelectScene extends Scene
         canvas.attr('height', canvasSize)
 
         for clue, index in clues
-            if clue is 1
-              x = index % gridSize
-              y = Math.floor(index / gridSize)
-              context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
+          if clue is 1
+            x = index % gridSize
+            y = Math.floor(index / gridSize)
+            context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
 
   select: (event) ->
     selected = @page * @perPage + $(event.target).index()
@@ -218,7 +217,6 @@ class LevelSelectScene extends Scene
     lastViewedLevel[@difficulty] = @selectedLevel
     localStorage.setObject 'lastViewedLevel', lastViewedLevel
 
-  # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
     super duration, callback
 
@@ -230,7 +228,7 @@ class LevelSelectScene extends Scene
     @enableOrDisablePagingButtons()
 
     # Update level stats based on localStorage
-    @stats = localStorage.getObject('stats')[@difficulty]
+    @stats = localStorage.getObject('stats')[@difficulty] || {}
 
     # Move alt canvases off-screen
     @altCanvases.animate({ transform: "translateX(-#{@width}px)" }, 0)
