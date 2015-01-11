@@ -6,15 +6,15 @@ template = require('../templates/title.html')
 class TitleScene extends Scene
   events: ->
     if ENV.mobile
-      events =
-        'touchend .play': 'play' 
-        'touchend .tutorial': 'tutorial' 
-        'touchend .about': 'about'
+      'touchend .play': 'play'
+      'touchend .tutorial': 'tutorial'
+      'touchend .editor': 'editor'
+      'touchend .about': 'about'
     else
-      events =
-        'click .play': 'play' 
-        'click .tutorial': 'tutorial' 
-        'click .about': 'about'
+      'click .play': 'play'
+      'click .tutorial': 'tutorial'
+      'click .editor': 'editor'
+      'click .about': 'about'
 
   initialize: ->
     @elem = $(template())
@@ -23,7 +23,7 @@ class TitleScene extends Scene
   play: (e) ->
     e.preventDefault()
     @undelegateEvents()
-    
+
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficulty'
 
@@ -33,6 +33,13 @@ class TitleScene extends Scene
 
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'game', { difficulty: 'easy', level: 0, tutorial: true }
+
+  editor: (e) ->
+    e.preventDefault()
+    @undelegateEvents()
+
+    @trigger 'sfx:play', 'button'
+    @trigger 'scene:change', 'editor'
 
   about: (e) ->
     e.preventDefault()
@@ -45,5 +52,5 @@ class TitleScene extends Scene
     super duration, callback
 
     @trigger 'music:play', 'bgm-one'
-  
+
 module.exports = TitleScene

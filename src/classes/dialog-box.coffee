@@ -35,8 +35,8 @@ class DialogBox extends Backbone.View
 
     if @options.animationTime? then @animationTime = @options.animationTime
 
-    _.bindAll @, 'resize'
-    $(window).on 'resize', @resize
+    _.bindAll(@, 'resize')
+    $(window).on('resize', @resize)
 
     # Create HTML contents here
     html = ''
@@ -47,14 +47,20 @@ class DialogBox extends Backbone.View
     if @options.message
       html += "<p>#{@options.message}</p>"
 
+    # Allow injection of raw HTML
+    if @options.html
+      html += @options.html
+
     for button in @options.buttons
-      html += '<div class="button" data-action="' + button.text.toLowerCase() + '"><span data-action="' + button.text.toLowerCase() + '">' + button.text + '</span></div>'
+      html += """
+      <div class="button" data-action="#{button.text.toLowerCase()}">
+        <span data-action="#{button.text.toLowerCase()}">#{button.text}</span>
+      </div>"""
 
     template = """
           <div class="dialog-box">
             #{html}
-          </div>
-           """
+          </div>"""
 
     @overlay = $('<div class="overlay"></div>')
 
@@ -71,10 +77,16 @@ class DialogBox extends Backbone.View
       top: -@elem.height()
 
     # animate box & overlay into place
-    @elem.animate { 'translateY': ((@$el.height() + @elem.height()) / 2) + 'px', 'opacity': 1 }, @animationTime
-    @overlay.animate { opacity: 0.7 }, @animationTime
+    @elem.animate
+      translateY: ((@$el.height() + @elem.height()) / 2) + 'px'
+      opacity: 1
+    , @animationTime
+    @overlay.animate
+      opacity: 0.7
+    , @animationTime
 
-  # Determine which button was clicked, call the appropriate callback, then close the dialog box view
+  # Determine which button was clicked, call the appropriate callback,
+  # and close the dialog box view
   onAction: (e) ->
     e.preventDefault()
 
@@ -92,8 +104,14 @@ class DialogBox extends Backbone.View
         _.delay button.callback, @animationTime
 
     # animate box & overlay into place
-    @elem.animate { 'translateY': -@elem.height() + 'px', 'opacity': 0 }, @animationTime
-    @overlay.animate { opacity: 0 }, @animationTime
+    @elem.animate
+      translateY: -@elem.height() + 'px'
+      opacity: 0
+    , @animationTime
+
+    @overlay.animate
+      opacity: 0
+    , @animationTime
 
     # Remove all this nonsense
     _.delay =>
@@ -111,6 +129,8 @@ class DialogBox extends Backbone.View
       left: (@$el.width() - @elem.width()) / 2
 
     # animate box into new position
-    @elem.animate { 'translateY': ((@$el.height() + @elem.height()) / 2) + 'px' }, @animationTime
+    @elem.animate
+      translateY: ((@$el.height() + @elem.height()) / 2) + 'px'
+    , @animationTime
 
 module.exports = DialogBox

@@ -8,6 +8,7 @@ GameScene = require('./views/game')
 AboutScene = require('./views/about')
 LevelSelectScene = require('./views/level-select')
 DifficultySelectScene = require('./views/difficulty-select')
+EditorScene = require('./views/editor')
 ENV = require('./utilities/env')
 
 # Extend local storage
@@ -30,7 +31,6 @@ Backbone.View.prototype.close = ->
   if typeof @onClose == "function"
     @onClose()
 
-# Define app obj
 class App extends Backbone.View
   el: null
   activeScene: null
@@ -50,6 +50,7 @@ class App extends Backbone.View
       about: new AboutScene { el: @el }
       levelSelect: new LevelSelectScene { el: @el }
       difficultySelect: new DifficultySelectScene { el: @el }
+      editor: new EditorScene { el: @el }
 
     # Differentiate between views that have platform-specific IAP code
     # if ENV.cordova and ENV.android
@@ -68,7 +69,7 @@ class App extends Backbone.View
       scene.hide 0
 
     # Set active scene
-    @activeScene = @scenes.title
+    @activeScene = @scenes.game
 
     # Add an additional class to game container if "installed" on iOS homescreen - currently unused
     if window.navigator.standalone then @el.addClass 'standalone'
@@ -129,12 +130,12 @@ class App extends Backbone.View
 
     # Do nothing if the same track is currently being played
     return if @currentMusic == id
-    
+
     # Play the same track that was previously playing if no arg is passed
     if not id and @currentMusic then id = @currentMusic
 
     @sona.stop(@currentMusic) if @currentMusic
-    
+
     @sona.loop(id)
     @currentMusic = id
 
@@ -159,37 +160,38 @@ class App extends Backbone.View
 
     switch scene
       when 'title' then @activeScene = @scenes.title
+      when 'editor' then @activeScene = @scenes.editor
       when 'about' then @activeScene = @scenes.about
       when 'difficulty' then @activeScene = @scenes.difficultySelect
       when 'level'
         @activeScene = @scenes.levelSelect
         @activeScene.difficulty = options.difficulty
-      when 'game' 
+      when 'game'
         # Set the game's diff & level props from the passed "options" arg
         @activeScene = @scenes.game
         @activeScene.difficulty = options.difficulty
         @activeScene.level = options.level
         @activeScene.tutorial = options.tutorial
       else
-        console.log "Error! Scene not defined in switch statement" 
+        console.log "Error! Scene not defined in switch statement"
         @activeScene = @titleScene
 
     @activeScene.show()
 
+  # Force a 2:3 aspect ratio
   resize: ->
-    # Attempt to force a 2:3 aspect ratio, so that the percentage-based CSS layout is consistant
     width = @el.width()
     height = @el.height()
 
-    # This obj will be used to store how much padding is needed for each scene's container
-    padding = 
+    # Store how much padding is needed for each scene's container
+    padding =
       width: 0
       height: 0
 
     if width > height
       @el.removeClass('portrait').addClass('landscape')
       orientation = 'landscape'
-    else 
+    else
       @el.removeClass('landscape').addClass('portrait')
       orientation = 'portrait'
 
@@ -200,7 +202,6 @@ class App extends Backbone.View
     # Aspect ratio to enforce
     ratio = 3 / 2
 
-    # Tweet: Started writing some commented-out psuedocode, but it turned out to be CoffeeScript, so I uncommented it.
     if orientation is 'landscape'
       if width / ratio > height     # Too wide; add padding to width
         newWidth = height * ratio
@@ -210,7 +211,8 @@ class App extends Backbone.View
         newHeight = width / ratio
         padding.height = height - newHeight
         height = newHeight
-      $('html').css { 'font-size': "#{width * 0.1302}%" }   # Dynamically update the font size - 0.1302% font size per pixel in width
+      # TODO: Also update universal line-height value here
+      $('html').css { 'font-size': "#{width * 0.1302}%" }
 
     else if orientation is 'portrait'
       if height / ratio > width     # Too high; add padding to height
@@ -221,7 +223,8 @@ class App extends Backbone.View
         newWidth = height / ratio
         padding.width = width - newWidth
         width = newWidth
-      $('html').css { 'font-size': "#{height * 0.1302}%" }  # Dynamically update the font size - 0.1302% font size per pixel in height
+      # TODO: Also update universal line-height value here
+      $('html').css { 'font-size': "#{height * 0.1302}%" }
 
     # Add the calculated padding to each scene <div>
     @el.find('.scene > .container').css
@@ -229,15 +232,15 @@ class App extends Backbone.View
       height: height
       padding: "#{padding.height / 2}px #{padding.width / 2}px"
 
-    # Call a "resize" method on other views that have elements that need to have their position manually calculated
+    # Call a "resize" method on other views
     for name, scene of @scenes
       scene.resize(width, height, orientation) if typeof scene.resize == 'function'
 
-  # Make sure that any data stored in localStorage is initialized to a default (read: expected) value
   initializeDefaults: ->
     # Obj that stores # of tries, best time, etc.
     if localStorage.getObject('stats') == null
-      stats = 
+      stats =
+        beginner: {}
         easy: {}
         medium: {}
         hard: {}
@@ -246,7 +249,8 @@ class App extends Backbone.View
 
     # Obj that stores # of completed levels per difficulty
     if localStorage.getObject('complete') == null
-      complete = 
+      complete =
+        beginner: 0
         easy: 0
         medium: 0
         hard: 0
@@ -255,7 +259,8 @@ class App extends Backbone.View
 
     # Obj that stores the most recently viewed level in a difficulty
     if localStorage.getObject('lastViewedLevel') == null
-      lastViewedLevel = 
+      lastViewedLevel =
+        beginner: 0
         easy: 0
         medium: 0
         hard: 0
@@ -273,7 +278,7 @@ class App extends Backbone.View
     if localStorage.getItem('playSfx') == null
       localStorage.setItem 'playSfx', "true"
 
-# Wait until "deviceready" event is fired, if necessary (Cordova only)
+# Cordova fires `deviceready` event when environment is ready
 if ENV.cordova
   document.addEventListener "deviceready", ->
     window.app = new App
