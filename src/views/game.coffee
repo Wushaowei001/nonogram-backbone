@@ -11,20 +11,18 @@ levels = require('../data/levels')
 class GameScene extends Scene
   events: ->
     if ENV.mobile
-      events =
-        'touchend .pause': 'pause'
-        'touchend .mark': 'changeAction'
-        'touchend .fill': 'changeAction'
-        'touchstart': 'onActionStart'
-        'touchmove': 'onActionMove'
-        'touchend': 'onActionEnd'
+      'touchend .pause': 'pause'
+      'touchend .mark': 'changeAction'
+      'touchend .fill': 'changeAction'
+      'touchstart': 'onActionStart'
+      'touchmove': 'onActionMove'
+      'touchend': 'onActionEnd'
     else
-      events =
-        'click .pause': 'pause'
-        'click .mark': 'changeAction'
-        'click .fill': 'changeAction'
-        'mousedown': 'onActionStart'
-        'mouseup': 'onActionEnd'
+      'click .pause': 'pause'
+      'click .mark': 'changeAction'
+      'click .fill': 'changeAction'
+      'mousedown': 'onActionStart'
+      'mouseup': 'onActionEnd'
 
   GRID_SIZE_RATIO: 0.75
   GRID_BACKGROUND_SIZE_RATIO: 0.97
@@ -461,40 +459,54 @@ class GameScene extends Scene
 
   resizeGrid: ->
     smallestDimension = if @orientation is 'landscape' then @height else @width
-    # gridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO / 10) * 10
-    gridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO)
+    maxGridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO)
+    maxGridSize = Math.round(maxGridBackgroundSize * @GRID_SIZE_RATIO / 10) * 10
+    remainingSize = maxGridBackgroundSize - maxGridSize
     borderWidth = parseInt(@gridBackground.css('border-width'), 10) * 2
+    @cellSize = maxGridSize / 10
 
-    @gridBackground.width(gridBackgroundSize)
-    @gridBackground.height(gridBackgroundSize)
+    # Hide/show elements
+    visibleIndex = Math.pow(@cellCount, 2)
+    @grid.children('div').each (i, cell) =>
+      $(cell).show() if i < visibleIndex
+      $(cell).hide() if i >= visibleIndex
+
+    @$('.horizontal.clue', @gridBackground).each (i, cell) =>
+      $(cell).show() if i < @cellCount
+      $(cell).hide() if i >= @cellCount
+
+    @$('.vertical.clue', @gridBackground).each (i, cell) =>
+      $(cell).show() if i < @cellCount
+      $(cell).hide() if i >= @cellCount
+
+    @grid.css
+      width: @cellCount * @cellSize
+      height: @cellCount * @cellSize
+
+    @gridBackground.width(@grid.width() + remainingSize)
+    @gridBackground.height(@grid.height() + remainingSize)
 
     if @orientation is 'landscape'
       horizontalMargin = (@height - @gridBackground.width() - borderWidth) / 2
-      verticalMargin = (gridBackgroundSize - @gridBackground.height()) / 2
+      verticalMargin = (maxGridBackgroundSize - @gridBackground.height()) / 2
     else if @orientation is 'portrait'
       verticalMargin = (@width - @gridBackground.height() - borderWidth) / 2
-      horizontalMargin = (gridBackgroundSize - @gridBackground.width()) / 2
+      horizontalMargin = (maxGridBackgroundSize - @gridBackground.width()) / 2
 
     @gridBackground.css
       margin: "#{horizontalMargin}px #{verticalMargin}px"
 
-    gridSize = Math.round(@gridBackground.width() * @GRID_SIZE_RATIO / 10) * 10
-    @grid.width(gridSize)
-    @grid.height(gridSize)
-
-    @cellSize = gridSize / 10
-
     @$('.vertical.clue', @gridBackground).css
       width: @cellSize
-      height: gridBackgroundSize - gridSize
+      height: remainingSize
 
     @$('.horizontal.clue', @gridBackground).css
-      width: gridBackgroundSize - gridSize
+      width: remainingSize
       height: @cellSize
 
     @$('.minimap', @gridBackground).css
-      width: gridBackgroundSize - gridSize
-      height: gridBackgroundSize - gridSize
+      width: remainingSize
+      height: remainingSize
 
     @grid.children('div').css
       width: @cellSize
@@ -642,8 +654,6 @@ class GameScene extends Scene
       @$('.horizontal.clue', @elem).eq(i).html(horizontalClue)
       @$('.vertical.clue', @elem).eq(i).html(verticalClue)
 
-    # DEBUG - mark the correct answers
-    # for clue, index in @clues
-    #   if clue is 1 then @$('.grid .blank').eq(index).addClass('marked')
+      @resizeGrid()
 
 module.exports = GameScene
