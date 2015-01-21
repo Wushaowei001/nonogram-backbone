@@ -69,9 +69,9 @@ class App extends Backbone.View
       scene.hide 0
 
     # Set active scene
-    @activeScene = @scenes.game
+    @activeScene = @scenes.title
 
-    # Add an additional class to game container if "installed" on iOS homescreen - currently unused
+    # Add class if pinned to iOS homescreen -- currently unused
     if window.navigator.standalone then @el.addClass 'standalone'
 
     # Handle desktop resize/orientation change
@@ -79,14 +79,10 @@ class App extends Backbone.View
 
     # Prevent content from dragging around
     if ENV.mobile
-      $('body').on 'touchmove', (e) ->
-        e.preventDefault()
-      $('body').on 'gesturestart', (e) ->
-        e.preventDefault()
-      $('body').on 'gesturechange', (e) ->
-        e.preventDefault()
-      $('body').on 'gestureend', (e) ->
-        e.preventDefault()
+      $('body').on 'touchmove', (e) -> e.preventDefault()
+      $('body').on 'gesturestart', (e) -> e.preventDefault()
+      $('body').on 'gesturechange', (e) -> e.preventDefault()
+      $('body').on 'gestureend', (e) -> e.preventDefault()
 
     # Handle being moved to the background in Cordova builds
     if ENV.cordova

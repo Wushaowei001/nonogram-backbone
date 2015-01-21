@@ -8,25 +8,25 @@ levels = require('../data/levels')
 class LevelSelectScene extends Scene
   events: ->
     if ENV.mobile
-      events =
-        'touchend .back': 'back'
-        'touchend .previous': 'previous'
-        'touchend .next': 'next'
-        'touchend .play': 'play'
-        'touchstart canvas': 'select'
+      'touchend .back': 'back'
+      'touchend .previous': 'previous'
+      'touchend .next': 'next'
+      'touchend .play': 'play'
+      'touchstart canvas': 'select'
     else
-      events =
-        'click .back': 'back'
-        'click .previous': 'previous'
-        'click .next': 'next'
-        'click .play': 'play'
-        'click canvas': 'select'
+      'click .back': 'back'
+      'click .previous': 'previous'
+      'click .next': 'next'
+      'click .play': 'play'
+      'click canvas': 'select'
 
   selectedLevel: 0
   page: 0
   perPage: 9
   difficulty: 'easy'
   stats: {}
+  THUMBNAIL_DELAY: 50
+  PAGE_DELAY: 150
 
   initialize: ->
     @elem = $(template())
@@ -112,9 +112,9 @@ class LevelSelectScene extends Scene
     @canvases.each (i, element) =>
       canvas = $(element)
       delayTime = if direction is "-"
-        i * 100
+        i * @THUMBNAIL_DELAY
       else
-        (@perPage * 100) - (i * 100)
+        (@perPage * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY)
 
       _.delay =>
         canvas.animate({
@@ -136,9 +136,9 @@ class LevelSelectScene extends Scene
     @canvases.each (i, element) =>
       canvas = $(element)
       delayTime = if direction is "-"
-        i * 100 + 250
+        i * @THUMBNAIL_DELAY + @PAGE_DELAY
       else
-        (@perPage * 100) - (i * 100) + 250
+        (@perPage * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY) + @PAGE_DELAY
 
       # Start offscreen
       canvas.animate({
@@ -192,6 +192,7 @@ class LevelSelectScene extends Scene
   select: (event) ->
     selected = @page * @perPage + $(event.target).index()
     return if @selectedLevel == selected
+    @trigger 'sfx:play', 'button'
     @selectedLevel = selected
     @highlightThumbnail()
 
