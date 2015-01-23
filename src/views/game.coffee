@@ -186,11 +186,11 @@ class GameScene extends Scene
 
         # Try to display a status message
         new FloatingText
-          'text': 'Oops!'
-          'el': @elem
-          'position':
-            'x': block.offset().left
-            'y': block.offset().top
+          text: 'Oops!'
+          el: @elem
+          position:
+            x: block.offset().left
+            y: block.offset().top
 
         # Instantly call the update method - this method adds 1 second, which is why the previous values are -1 second
         @updateTimer()
@@ -459,7 +459,8 @@ class GameScene extends Scene
 
   resizeGrid: ->
     smallestDimension = if @orientation is 'landscape' then @height else @width
-    maxGridBackgroundSize = Math.round(smallestDimension * @GRID_BACKGROUND_SIZE_RATIO)
+    maxGridBackgroundSize = Math.round(smallestDimension *
+                                        @GRID_BACKGROUND_SIZE_RATIO)
     maxGridSize = Math.round(maxGridBackgroundSize * @GRID_SIZE_RATIO / 10) * 10
     remainingSize = maxGridBackgroundSize - maxGridSize
     borderWidth = parseInt(@gridBackground.css('border-width'), 10) * 2
@@ -467,7 +468,7 @@ class GameScene extends Scene
 
     # Hide/show elements
     visibleIndex = Math.pow(@cellCount, 2)
-    @grid.children('div').each (i, cell) =>
+    @grid.children('div').each (i, cell) ->
       $(cell).show() if i < visibleIndex
       $(cell).hide() if i >= visibleIndex
 
@@ -483,15 +484,16 @@ class GameScene extends Scene
       width: @cellCount * @cellSize
       height: @cellCount * @cellSize
 
-    @gridBackground.width(@grid.width() + remainingSize)
-    @gridBackground.height(@grid.height() + remainingSize)
+    gridBackgroundSize = @grid.width() + remainingSize
+    @gridBackground.width(gridBackgroundSize)
+    @gridBackground.height(gridBackgroundSize)
 
     if @orientation is 'landscape'
-      horizontalMargin = (@height - @gridBackground.width() - borderWidth) / 2
-      verticalMargin = (maxGridBackgroundSize - @gridBackground.height()) / 2
+      horizontalMargin = (@height - gridBackgroundSize - borderWidth) / 2
+      verticalMargin = (maxGridBackgroundSize - gridBackgroundSize) / 2
     else if @orientation is 'portrait'
-      verticalMargin = (@width - @gridBackground.height() - borderWidth) / 2
-      horizontalMargin = (maxGridBackgroundSize - @gridBackground.width()) / 2
+      verticalMargin = (@width - gridBackgroundSize - borderWidth) / 2
+      horizontalMargin = (maxGridBackgroundSize - gridBackgroundSize) / 2
 
     @gridBackground.css
       margin: "#{horizontalMargin}px #{verticalMargin}px"

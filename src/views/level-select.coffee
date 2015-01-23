@@ -22,9 +22,9 @@ class LevelSelectScene extends Scene
 
   selectedLevel: 0
   page: 0
-  perPage: 9
   difficulty: 'easy'
   stats: {}
+  PER_PAGE: 9
   THUMBNAIL_DELAY: 50
   PAGE_DELAY: 150
 
@@ -60,7 +60,8 @@ class LevelSelectScene extends Scene
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @selectedLevel }
+    @trigger 'scene:change', 'game',
+      { difficulty: @difficulty, level: @selectedLevel }
 
   back: (e) ->
     e.preventDefault()
@@ -70,12 +71,11 @@ class LevelSelectScene extends Scene
     @trigger 'scene:change', 'difficulty'
 
   enableOrDisablePagingButtons: ->
-    if 0 < @page < @totalPages
-      @$('.next').removeClass 'disabled'
-      @$('.previous').removeClass 'disabled'
-    else
-      @$('.next').addClass 'disabled' if @page is @totalPages
-      @$('.previous').addClass 'disabled' if @page is 0
+    @$('.next').removeClass 'disabled'
+    @$('.previous').removeClass 'disabled'
+
+    @$('.next').addClass 'disabled' if @page is @totalPages
+    @$('.previous').addClass 'disabled' if @page is 0
 
   showLevelInfo: ->
     # TODO move this elsewhere
@@ -106,6 +106,7 @@ class LevelSelectScene extends Scene
 
   animateThumbnails: (direction = "") ->
     opposite = if direction == "-" then "" else "-"
+    offscreenWidth = @width * 1.5
 
     # Move existing thumbnails off
     @canvases.parent('.group').css('z-index': 0)
@@ -114,12 +115,12 @@ class LevelSelectScene extends Scene
       delayTime = if direction is "-"
         i * @THUMBNAIL_DELAY
       else
-        (@perPage * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY)
+        (@PER_PAGE * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY)
 
-      _.delay =>
+      _.delay ->
         canvas.animate({
-          "-webkit-transform": "translateX(#{direction}#{@width}px)" # Bug with Zepto/Safari
-          transform: "translateX(#{direction}#{@width}px)"
+          "-webkit-transform": "translateX(#{direction}#{offscreenWidth}px)" # Bug with Zepto/Safari
+          transform: "translateX(#{direction}#{offscreenWidth}px)"
         }, "fast", "ease-in-out")
       , delayTime
 
@@ -138,12 +139,12 @@ class LevelSelectScene extends Scene
       delayTime = if direction is "-"
         i * @THUMBNAIL_DELAY + @PAGE_DELAY
       else
-        (@perPage * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY) + @PAGE_DELAY
+        (@PER_PAGE * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY) + @PAGE_DELAY
 
       # Start offscreen
       canvas.animate({
-        "-webkit-transform": "translateX(#{opposite}#{@width}px)" # Bug with Zepto/Safari
-        transform: "translateX(#{opposite}#{@width}px)"
+        "-webkit-transform": "translateX(#{opposite}#{offscreenWidth}px)" # Bug with Zepto/Safari
+        transform: "translateX(#{opposite}#{offscreenWidth}px)"
       }, 0)
 
       _.delay ->
@@ -153,7 +154,7 @@ class LevelSelectScene extends Scene
         }, "fast", "ease-in-out")
       , delayTime
 
-    @selectedLevel = @page * @perPage
+    @selectedLevel = @page * @PER_PAGE
     @highlightThumbnail()
 
   drawThumbnails: ->
@@ -162,7 +163,7 @@ class LevelSelectScene extends Scene
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
 
-      index = @page * @perPage + i
+      index = @page * @PER_PAGE + i
       levelData = levels[@difficulty][index]
 
       if levelData is undefined
@@ -190,14 +191,14 @@ class LevelSelectScene extends Scene
             context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
 
   select: (event) ->
-    selected = @page * @perPage + $(event.target).index()
+    selected = @page * @PER_PAGE + $(event.target).index()
     return if @selectedLevel == selected
     @trigger 'sfx:play', 'button'
     @selectedLevel = selected
     @highlightThumbnail()
 
   highlightThumbnail: ->
-    index = @selectedLevel - @page * @perPage
+    index = @selectedLevel - @page * @PER_PAGE
     selected = @canvases.eq(index)
     @canvases.removeClass 'selected'
     selected.addClass 'selected'
@@ -221,10 +222,11 @@ class LevelSelectScene extends Scene
   show: (duration = 500, callback) ->
     super duration, callback
 
-    @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
+    @totalPages = Math.ceil(levels[@difficulty].length / @PER_PAGE) - 1 # 0-based index
+
     # Determine the last viewed level for this difficulty
     @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty] || 0
-    @page = Math.floor(@selectedLevel / @perPage)
+    @page = Math.floor(@selectedLevel / @PER_PAGE)
 
     @enableOrDisablePagingButtons()
 
@@ -232,7 +234,8 @@ class LevelSelectScene extends Scene
     @stats = localStorage.getObject('stats')[@difficulty] || {}
 
     # Move alt canvases off-screen
-    @altCanvases.animate({ transform: "translateX(-#{@width}px)" }, 0)
+    offscreenWidth = @width * 1.5
+    @altCanvases.animate({ transform: "translateX(-#{offscreenWidth}px)" }, 0)
 
     # Ensure on-screen group is clickable
     @altCanvases.parent('.group').css('z-index': 0)
