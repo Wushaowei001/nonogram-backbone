@@ -8,25 +8,25 @@ levels = require('../data/levels')
 class LevelSelectScene extends Scene
   events: ->
     if ENV.mobile
-      events =
-        'touchend .back': 'back' 
-        'touchend .previous': 'previous'
-        'touchend .next': 'next'
-        'touchend .play': 'play'
-        'touchend canvas': 'select'
+      'touchend .back': 'back'
+      'touchend .previous': 'previous'
+      'touchend .next': 'next'
+      'touchend .play': 'play'
+      'touchstart canvas': 'select'
     else
-      events =
-        'click .back': 'back' 
-        'click .previous': 'previous'
-        'click .next': 'next'
-        'click .play': 'play'
-        'click canvas': 'select'
+      'click .back': 'back'
+      'click .previous': 'previous'
+      'click .next': 'next'
+      'click .play': 'play'
+      'click canvas': 'select'
 
   selectedLevel: 0
   page: 0
-  perPage: 9
   difficulty: 'easy'
   stats: {}
+  PER_PAGE: 9
+  THUMBNAIL_DELAY: 50
+  PAGE_DELAY: 150
 
   initialize: ->
     @elem = $(template())
@@ -41,13 +41,9 @@ class LevelSelectScene extends Scene
     if @page > 0
       @page -= 1
 
-      # Handle dimming prev/next buttons
-      @$('.previous').addClass 'disabled' if @page is 0
-      @$('.next').removeClass 'disabled' if @page is @totalPages - 1
-
       @trigger 'sfx:play', 'button'
-
-      @animateThumbnails()
+      @enableOrDisablePagingButtons()
+      @animateThumbnails("-")
 
   next: (e) ->
     e.preventDefault()
@@ -55,12 +51,8 @@ class LevelSelectScene extends Scene
     if @page < @totalPages
       @page += 1
 
-      # Handle dimming prev/next buttons
-      @$('.next').addClass 'disabled' if @page is @totalPages
-      @$('.previous').removeClass 'disabled' if @page is 1
-
       @trigger 'sfx:play', 'button'
-
+      @enableOrDisablePagingButtons()
       @animateThumbnails()
 
   play: (e) ->
@@ -68,15 +60,22 @@ class LevelSelectScene extends Scene
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'game', { difficulty: @difficulty, level: @selectedLevel }
-
+    @trigger 'scene:change', 'game',
+      { difficulty: @difficulty, level: @selectedLevel }
 
   back: (e) ->
     e.preventDefault()
     @undelegateEvents() # Prevent multiple clicks
-    
+
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficulty'
+
+  enableOrDisablePagingButtons: ->
+    @$('.next').removeClass 'disabled'
+    @$('.previous').removeClass 'disabled'
+
+    @$('.next').addClass 'disabled' if @page is @totalPages
+    @$('.previous').addClass 'disabled' if @page is 0
 
   showLevelInfo: ->
     # TODO move this elsewhere
@@ -85,7 +84,7 @@ class LevelSelectScene extends Scene
       string = '0' + string while string.length < length
       return string
 
-    if @stats[@selectedLevel]?.time     
+    if @stats[@selectedLevel]?.time
       minutes = pad Math.floor(@stats[@selectedLevel].time / 60), 2
       seconds = pad @stats[@selectedLevel].time % 60, 2
       time = "#{minutes}:#{seconds}"
@@ -93,7 +92,7 @@ class LevelSelectScene extends Scene
       time = '--:--'
 
     attempts = @stats[@selectedLevel]?.attempts || "0"
-    
+
     @$('.attempts').html "Attempts: #{attempts}"
     @$('.best-time').html "Best Time: #{time}"
 
@@ -105,17 +104,25 @@ class LevelSelectScene extends Scene
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: ????"
 
-  animateThumbnails: (direction) ->
+  animateThumbnails: (direction = "") ->
+    opposite = if direction == "-" then "" else "-"
+    offscreenWidth = @width * 1.5
+
     # Move existing thumbnails off
     @canvases.parent('.group').css('z-index': 0)
     @canvases.each (i, element) =>
       canvas = $(element)
+      delayTime = if direction is "-"
+        i * @THUMBNAIL_DELAY
+      else
+        (@PER_PAGE * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY)
 
-      _.delay =>
-        # Animate offscreen
-        # "cubic-bezier(.5,-0.5,.5,1.5)"
-        canvas.animate({ transform: "translateX(-#{@width}px)" }, "fast", "ease-in-out")
-      , i * 100
+      _.delay ->
+        canvas.animate({
+          "-webkit-transform": "translateX(#{direction}#{offscreenWidth}px)" # Bug with Zepto/Safari
+          transform: "translateX(#{direction}#{offscreenWidth}px)"
+        }, "fast", "ease-in-out")
+      , delayTime
 
     # switch thumbnail groups
     tmp = @canvases
@@ -129,17 +136,25 @@ class LevelSelectScene extends Scene
     @canvases.parent('.group').css('z-index': 1)
     @canvases.each (i, element) =>
       canvas = $(element)
+      delayTime = if direction is "-"
+        i * @THUMBNAIL_DELAY + @PAGE_DELAY
+      else
+        (@PER_PAGE * @THUMBNAIL_DELAY) - (i * @THUMBNAIL_DELAY) + @PAGE_DELAY
 
-      # Move offscreen
-      canvas.animate({ transform: "translateX(#{@width}px)" }, 0)
+      # Start offscreen
+      canvas.animate({
+        "-webkit-transform": "translateX(#{opposite}#{offscreenWidth}px)" # Bug with Zepto/Safari
+        transform: "translateX(#{opposite}#{offscreenWidth}px)"
+      }, 0)
 
       _.delay ->
-        # Animate onscreen
-        # "cubic-bezier(.5,-0.5,.5,1.5)"
-        canvas.animate({ transform: "translateX(0)" }, "fast", "ease-in-out")
-      , i * 100 + 250
+        canvas.animate({
+          "-webkit-transform": "translateX(0)" # Bug with Zepto/Safari
+          transform: "translateX(0)"
+        }, "fast", "ease-in-out")
+      , delayTime
 
-    @selectedLevel = @page * @perPage
+    @selectedLevel = @page * @PER_PAGE
     @highlightThumbnail()
 
   drawThumbnails: ->
@@ -148,20 +163,20 @@ class LevelSelectScene extends Scene
       context = canvas[0].getContext('2d')
       context.clearRect(0, 0, canvas.width(), canvas.height())
 
-      index = @page * @perPage + i
+      index = @page * @PER_PAGE + i
       levelData = levels[@difficulty][index]
 
       if levelData is undefined
         canvas.hide()
       else
         canvas.show()
-        clues = if @stats[index]?.time 
+        clues = if @stats[index]?.time
                   levelData.clues
                 else
                   levels.incomplete.clues
 
-        gridSize = Math.sqrt(levelData.clues.length)
-        canvasSize = Math.floor(canvas.width() / 10) * 10
+        gridSize = Math.sqrt(clues.length)
+        canvasSize = Math.floor(canvas.width() / gridSize) * gridSize
         pixelSize = Math.floor(canvasSize / gridSize)
 
         # Make each canvas an even multiple, so grids can
@@ -170,19 +185,20 @@ class LevelSelectScene extends Scene
         canvas.attr('height', canvasSize)
 
         for clue, index in clues
-            if clue is 1
-              x = index % gridSize
-              y = Math.floor(index / gridSize)
-              context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
+          if clue is 1
+            x = index % gridSize
+            y = Math.floor(index / gridSize)
+            context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
 
   select: (event) ->
-    selected = @page * @perPage + $(event.target).index()
+    selected = @page * @PER_PAGE + $(event.target).index()
     return if @selectedLevel == selected
+    @trigger 'sfx:play', 'button'
     @selectedLevel = selected
     @highlightThumbnail()
 
   highlightThumbnail: ->
-    index = @selectedLevel - @page * @perPage
+    index = @selectedLevel - @page * @PER_PAGE
     selected = @canvases.eq(index)
     @canvases.removeClass 'selected'
     selected.addClass 'selected'
@@ -203,25 +219,27 @@ class LevelSelectScene extends Scene
     lastViewedLevel[@difficulty] = @selectedLevel
     localStorage.setObject 'lastViewedLevel', lastViewedLevel
 
-  # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
     super duration, callback
 
-    @totalPages = Math.ceil(levels[@difficulty].length / @perPage) - 1 # 0-based index
+    @totalPages = Math.ceil(levels[@difficulty].length / @PER_PAGE) - 1 # 0-based index
+
     # Determine the last viewed level for this difficulty
     @selectedLevel = localStorage.getObject('lastViewedLevel')[@difficulty] || 0
-    @page = Math.floor(@selectedLevel / @perPage)
-    
-    # disable/enable buttons
-    @$('.previous, .next').addClass 'disabled'
-    if @page > 0 then @$('.previous').removeClass 'disabled'
-    if @page < @totalPages then @$('.next').removeClass 'disabled'
+    @page = Math.floor(@selectedLevel / @PER_PAGE)
+
+    @enableOrDisablePagingButtons()
 
     # Update level stats based on localStorage
-    @stats = localStorage.getObject('stats')[@difficulty]
+    @stats = localStorage.getObject('stats')[@difficulty] || {}
 
     # Move alt canvases off-screen
-    @altCanvases.animate({ transform: "translateX(-#{@width}px)" }, 0)
+    offscreenWidth = @width * 1.5
+    @altCanvases.animate({ transform: "translateX(-#{offscreenWidth}px)" }, 0)
+
+    # Ensure on-screen group is clickable
+    @altCanvases.parent('.group').css('z-index': 0)
+    @canvases.parent('.group').css('z-index': 1)
 
     @drawThumbnails()
     @highlightThumbnail()

@@ -3228,7 +3228,7 @@ App = (function(_super) {
       scene.on('vfx:play', this.playVfx);
       scene.hide(0);
     }
-    this.activeScene = this.scenes.levelSelect;
+    this.activeScene = this.scenes.title;
     if (window.navigator.standalone) {
       this.el.addClass('standalone');
     }

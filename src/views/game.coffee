@@ -11,27 +11,28 @@ levels = require('../data/levels')
 class GameScene extends Scene
   events: ->
     if ENV.mobile
-      events = 
-        'touchend .pause': 'pause'
-        'touchend .mark': 'changeAction'
-        'touchend .fill': 'changeAction'
-        'touchstart': 'onActionStart'
-        'touchmove': 'onActionMove'
-        'touchend': 'onActionEnd'
-    else 
-      events = 
-        'click .pause': 'pause'
-        'click .mark': 'changeAction'
-        'click .fill': 'changeAction'
-        'mousedown': 'onActionStart'
-        'mouseup': 'onActionEnd'
+      'touchend .pause': 'pause'
+      'touchend .mark': 'changeAction'
+      'touchend .fill': 'changeAction'
+      'touchstart': 'onActionStart'
+      'touchmove': 'onActionMove'
+      'touchend': 'onActionEnd'
+    else
+      'click .pause': 'pause'
+      'click .mark': 'changeAction'
+      'click .fill': 'changeAction'
+      'mousedown': 'onActionStart'
+      'mouseup': 'onActionEnd'
 
-  difficulty: "easy"
+  GRID_SIZE_RATIO: 0.75
+  GRID_BACKGROUND_SIZE_RATIO: 0.97
+
+  difficulty: "beginner"
   level: 0
 
   timerId: null
   seconds: 0
-  
+
   clues: []
   grid: null
   action: "mark"
@@ -54,7 +55,7 @@ class GameScene extends Scene
 
   initialize: ->
     # Ensure 'this' has correct context
-    _.bindAll @, 'render', 'onActionStart', 'onActionMove', 'onActionEnd', 'doAction', 'checkCompleted', 'win', 'pause', 'changeAction', 'updateTimer', 'showTutorial', 'resize', 'hide', 'show'
+    _.bindAll @, 'onActionStart', 'onActionMove', 'onActionEnd', 'doAction', 'checkCompleted', 'win', 'pause', 'changeAction', 'updateTimer', 'showTutorial', 'resize', 'hide', 'show'
 
     # View is initialized hidden
     @elem = $(template())
@@ -62,14 +63,11 @@ class GameScene extends Scene
 
   # Append the view's elem to the DOM
   render: ->
-    @$el.append @elem
+    @$el.append(@elem)
 
     # Get some references to DOM elements that we need later
-    @grid = @$('.grid')
-    @gridBackground = @$('.grid-background')
-
-    # Get size of grid blocks - round to nearest whole number to prevent weirdness w/ decimals
-    @blockSize = Math.round @grid.width() / 10
+    @grid = @elem.find('.grid')
+    @gridBackground = @elem.find('.grid-background')
 
   # Triggered on mousedown or touchstart
   onActionStart: (e) ->
@@ -81,11 +79,10 @@ class GameScene extends Scene
 
     position = Input.normalize e
 
-    row = Math.floor((position.y - @grid.offset().top) / @blockSize)
-    col = Math.floor((position.x - @grid.offset().left) / @blockSize)
+    row = Math.floor((position.y - @grid.offset().top) / @cellSize)
+    col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
-    # Only recognize movement if within grid bounds
-    if 0 <= row <= 9 and 0 <= col <= 9
+    if 0 <= row < @cellCount and 0 <= col < @cellCount
       # Determine the row/col
       @startRow = @previousRow = row
       @startCol = @previousCol = col
@@ -107,11 +104,10 @@ class GameScene extends Scene
     position = Input.normalize e
 
     # Determine the row/col
-    row = Math.floor((position.y - @grid.offset().top) / @blockSize)
-    col = Math.floor((position.x - @grid.offset().left) / @blockSize)
+    row = Math.floor((position.y - @grid.offset().top) / @cellSize)
+    col = Math.floor((position.x - @grid.offset().left) / @cellSize)
 
-    # Only recognize movement if within grid bounds
-    if 0 <= row <= 9 and 0 <= col <= 9
+    if 0 <= row < @cellCount and 0 <= col < @cellCount
       if row != @previousRow or col != @previousCol
         # Update highlighted clue cells
         verticalClues = @$('.vertical.clue')
@@ -123,7 +119,7 @@ class GameScene extends Scene
         horizontalClues.eq(row).addClass('highlight')
 
         # Try to mark or fill
-        @doAction row, col
+        @doAction(row, col)
 
       # Reset the "previous" values
       @previousRow = row
@@ -149,16 +145,16 @@ class GameScene extends Scene
 
   # Try to either mark or fill a grid cell
   doAction: (row, col) ->
-    index = row * 10 + col
+    index = row * @cellCount + col
 
-    # Determine if block is empty, filled, or marked
+    # TODO: need to only find visible cells here
     block = @grid.find('.blank').eq(index)
 
     valid = @clues[index] == 1
 
     if @action is 'fill'
-      if block.hasClass('filled') is true
-        # Play a "click" noise if block is already filled
+      if block.hasClass('filled') is true or block.hasClass('marked')
+        # Play a "click" noise if block is already filled or marked
         @trigger 'sfx:play', 'invalid'
       else if valid
         # Do a bunch of crap when a successful move is made
@@ -167,34 +163,34 @@ class GameScene extends Scene
         @hits++
 
         $('.complete .percentage', @elem).html Math.round(@hits / @totalHits * 100)
-        
+
         # Check whether or not to dim clues in a row/col
         @checkCompleted row, col
 
         # Check if player has won
         if @hits == @totalHits then @win()
-        
+
         @trigger 'sfx:play', 'fill'
       else
         @trigger 'sfx:play', 'error'
         @misses++
-        
+
         if @misses is 1
           @seconds += 59  # Add an extra minute to the elapsed time
         else if @misses is 2
           @seconds += 119 # Add an extra two minutes to the elapsed time
         else if @misses is 3
           @seconds += 239 # Add an extra four minutes to the elapsed time
-        else 
+        else
           @seconds += 479 # Add an extra eight minutes to the elapsed time
 
         # Try to display a status message
         new FloatingText
-          'text': 'Oops!'
-          'el': @elem
-          'position':
-            'x': block.offset().left
-            'y': block.offset().top
+          text: 'Oops!'
+          el: @elem
+          position:
+            x: block.offset().left
+            y: block.offset().top
 
         # Instantly call the update method - this method adds 1 second, which is why the previous values are -1 second
         @updateTimer()
@@ -205,12 +201,12 @@ class GameScene extends Scene
     else if @action is 'mark'
       # Mark if block is empty
       if block.hasClass('marked') == false and block.hasClass('filled') == false and @actionLock != "remove"
-        block.addClass 'marked'
+        block.addClass 'marked pulse'
         @actionLock = "mark"
         @trigger 'sfx:play', 'mark'
       # Remove mark if already marked
       else if block.hasClass('marked') == true and block.hasClass('filled') == false and @actionLock != "mark"
-        block.removeClass 'marked'
+        block.removeClass 'marked pulse'
         @actionLock = "remove"
         @trigger 'sfx:play', 'mark'
       # Play a "click" noise if block is filled
@@ -226,9 +222,9 @@ class GameScene extends Scene
 
     blocks = @grid.find('.blank')
 
-    for i in [0..9]
-      rowIndex = row * 10 + i
-      columnIndex = i * 10 + col
+    for i in [0 ... @cellCount]
+      rowIndex = row * @cellCount + i
+      columnIndex = i * @cellCount + col
 
       if blocks.eq(rowIndex).hasClass('filled') then completedRowTotal++
       if blocks.eq(columnIndex).hasClass('filled') then completedColumnTotal++
@@ -272,9 +268,9 @@ class GameScene extends Scene
       el: @elem
       title: 'Puzzle solved!'
       buttons: [
-        { 
+        {
           text: 'OK'
-          callback: => 
+          callback: =>
             @ignoreInput = false
             if @tutorial
               @trigger 'scene:change', 'title'
@@ -286,7 +282,7 @@ class GameScene extends Scene
   # Go back to the level select screen
   pause: (e) ->
     e?.preventDefault()
-    
+
     # Handle a case when this "pause" method is called when user puts app into background
     if @ignoreInput is true then return
 
@@ -307,7 +303,7 @@ class GameScene extends Scene
             @timerId = window.setInterval @updateTimer, 1000
         }, {
           text: 'Quit'
-          callback: => 
+          callback: =>
             @ignoreInput = false
             if @tutorial
               # Reset the tutorial
@@ -338,7 +334,7 @@ class GameScene extends Scene
     else
       @action = 'fill'
       target.addClass 'active'
-    
+
 
   # Update timer elem
   updateTimer: ->
@@ -391,7 +387,7 @@ class GameScene extends Scene
       if success
         @tutorialStep++
         @showTutorial()
-            
+
 
   showTutorial: ->
     @ignoreInput = true
@@ -444,7 +440,7 @@ class GameScene extends Scene
     new DialogBox
       el: @elem
       title: text[@tutorialStep]
-      buttons: [{ 
+      buttons: [{
         text: 'OK'
         callback: =>
           @ignoreInput = false
@@ -456,61 +452,78 @@ class GameScene extends Scene
       }]
 
   resize: (width, height, orientation) ->
-    borderSize = 10
+    @width = width
+    @height = height
+    @orientation = orientation
+    @resizeGrid()
 
-    # Use Math.floor here to ensure the grid doesn't round up to be larger than width/height of container
-    if orientation is 'landscape'
-      gridBackgroundWidth = Math.round(height * 0.97)   # Make sure grid background size is 95% of viewport
-      @gridBackground.width gridBackgroundWidth
-      @gridBackground.height gridBackgroundWidth
+  resizeGrid: ->
+    smallestDimension = if @orientation is 'landscape' then @height else @width
+    maxGridBackgroundSize = Math.round(smallestDimension *
+                                        @GRID_BACKGROUND_SIZE_RATIO)
+    maxGridSize = Math.round(maxGridBackgroundSize * @GRID_SIZE_RATIO / 10) * 10
+    remainingSize = maxGridBackgroundSize - maxGridSize
+    borderWidth = parseInt(@gridBackground.css('border-width'), 10) * 2
+    @cellSize = maxGridSize / 10
 
-      # Add some margin to the grid, so it appears centered
-      margin = (height - gridBackgroundWidth - 10) / 2
-      @gridBackground.css
-        'margin': "#{margin}px 0"
+    # Hide/show elements
+    visibleIndex = Math.pow(@cellCount, 2)
+    @grid.children('div').each (i, cell) ->
+      $(cell).show() if i < visibleIndex
+      $(cell).hide() if i >= visibleIndex
 
-    else if orientation is 'portrait'
-      gridBackgroundWidth = Math.round(width * 0.97)  # grid size is 95% of viewport
-      @gridBackground.width gridBackgroundWidth
-      @gridBackground.height gridBackgroundWidth
+    @$('.horizontal.clue', @gridBackground).each (i, cell) =>
+      $(cell).show() if i < @cellCount
+      $(cell).hide() if i >= @cellCount
 
-      # Add some margin to the grid, so it appears centered
-      margin = (width - gridBackgroundWidth - 10) / 2
-      @gridBackground.css
-        'margin': "0 #{margin}px"
+    @$('.vertical.clue', @gridBackground).each (i, cell) =>
+      $(cell).show() if i < @cellCount
+      $(cell).hide() if i >= @cellCount
 
-    # Set dimensions of actual grid inside the container
-    gridWidth = Math.round(gridBackgroundWidth * 0.75 / 10) * 10  # Make sure grid size is 66% of background, and is a multiple of 10
-    @grid.width gridWidth
-    @grid.height gridWidth
+    @grid.css
+      width: @cellCount * @cellSize
+      height: @cellCount * @cellSize
 
-    @blockSize = gridWidth / 10
+    gridBackgroundSize = @grid.width() + remainingSize
+    @gridBackground.width(gridBackgroundSize)
+    @gridBackground.height(gridBackgroundSize)
 
-    $('.vertical.clue', @gridBackground).css
-      "width": gridWidth / 10
-      "height": gridBackgroundWidth - gridWidth
+    if @orientation is 'landscape'
+      horizontalMargin = (@height - gridBackgroundSize - borderWidth) / 2
+      verticalMargin = (maxGridBackgroundSize - gridBackgroundSize) / 2
+    else if @orientation is 'portrait'
+      verticalMargin = (@width - gridBackgroundSize - borderWidth) / 2
+      horizontalMargin = (maxGridBackgroundSize - gridBackgroundSize) / 2
 
-    $('.horizontal.clue', @gridBackground).css
-      "width": gridBackgroundWidth - gridWidth
-      "height": gridWidth / 10
+    @gridBackground.css
+      margin: "#{horizontalMargin}px #{verticalMargin}px"
 
-    $('.minimap', @gridBackground).css
-      "width": gridBackgroundWidth - gridWidth
-      "height": gridBackgroundWidth - gridWidth
+    @$('.vertical.clue', @gridBackground).css
+      width: @cellSize
+      height: remainingSize
 
-    $('.blank', @grid).css
-      "width": gridWidth / 10
-      "height": gridWidth / 10
+    @$('.horizontal.clue', @gridBackground).css
+      width: remainingSize
+      height: @cellSize
+
+    @$('.minimap', @gridBackground).css
+      width: remainingSize
+      height: remainingSize
+
+    @grid.children('div').css
+      width: @cellSize
+      height: @cellSize
 
     # Resize the icons on the game buttons to ensure correct aspect ratio
-    iconWidth = Math.round($('.actions.mark').height() * 0.5)
-    $('.actions .icon').width(iconWidth).height(iconWidth)
+    iconWidth = Math.round(@$('.actions.mark').height() * 0.5)
+    @$('.actions .icon').css
+      width: iconWidth
+      height: iconWidth
 
   # Remove event handlers and hide this view's elem
   hide: (duration = 500, callback) ->
-    # Call "super"
     super duration, callback
-    
+
     # Do all this stuff after transition offscreen
     _.delay =>
       # Make sure tutorial is hidden
@@ -524,7 +537,7 @@ class GameScene extends Scene
 
       # Reset percentage
       $('.complete .percentage', @elem).html "0"
-      
+
       # Reset grid
       $('.grid div.blank', @elem).removeClass 'marked filled hint'
 
@@ -545,7 +558,6 @@ class GameScene extends Scene
 
   # Re-delegate event handlers and show the view's elem
   show: (duration = 500, callback) ->
-    # Call "super"
     super duration, callback
 
     # Start timer
@@ -565,7 +577,7 @@ class GameScene extends Scene
 
       if not stats[@difficulty][@level]
         stats[@difficulty][@level] = { attempts: 1 }
-      else 
+      else
         stats[@difficulty][@level].attempts++
 
       localStorage.setObject 'stats', stats
@@ -589,18 +601,20 @@ class GameScene extends Scene
     if @tutorial
       @clues = levels.easy[0].clues
 
+    @cellCount = Math.sqrt(@clues.length)
+
     # Load level/parse clues
-    for i in [0..9]
-      horizontalClue = ""
-      verticalClue = ""
+    for i in [0 ... @cellCount]
+      horizontalClue = ''
+      verticalClue = ''
       horizontalCounter = 0
       verticalCounter = 0
       previousVertical = false
       previousHorizontal = false
 
       # Create horizontal clues
-      for j in [0..9]
-        index = i * 10 + j
+      for j in [0 ... @cellCount]
+        index = i * @cellCount + j
         if @clues[index] is 1
           horizontalCounter++
           @totalHits++
@@ -611,8 +625,8 @@ class GameScene extends Scene
           previousHorizontal = false
 
       # Create vertical clues
-      for j in [0..9]
-        index = j * 10 + i
+      for j in [0 ... @cellCount]
+        index = j * @cellCount + i
         if @clues[index] is 1
           verticalCounter++
           previousVertical = true
@@ -625,26 +639,23 @@ class GameScene extends Scene
       if previousHorizontal then horizontalClue += "#{horizontalCounter}"
       if previousVertical then verticalClue += "#{verticalCounter}<br>"
 
-      if horizontalClue == "" then horizontalClue = "0"
-      if verticalClue == "" then verticalClue = "0<br>"
+      if horizontalClue == '' then horizontalClue = '0'
+      if verticalClue == '' then verticalClue = '0<br>'
 
       match = verticalClue.match(/<br>/g)
       length = if match? then match.length else 0
-      
+
       # Determine if there are 5 clues in col, which means the font size needs to be stepped down
       # if length >= 4 then @$('.vertical.clue', @elem).eq(i).addClass 'pinch'
 
       # Add some manual padding for vertical clues so they are bottom aligned
       if length < 5
-        for [length..4]
+        for [length .. 4]
           verticalClue = "<br>#{verticalClue}"
-
 
       @$('.horizontal.clue', @elem).eq(i).html(horizontalClue)
       @$('.vertical.clue', @elem).eq(i).html(verticalClue)
 
-    # DEBUG - mark the correct answers
-    # for clue, index in @clues
-    #   if clue is 1 then @$('.grid .blank').eq(index).addClass('marked')
+      @resizeGrid()
 
 module.exports = GameScene
