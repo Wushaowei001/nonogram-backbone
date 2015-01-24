@@ -111,7 +111,7 @@ class App extends Backbone.View
 
     @sona.load =>
       @resize() # Do an initial resize of the content area to ensure a 2:3 ratio
-      navigator.splashscreen.hide() if ENV.cordova # Manually remove the Cordova splash screen; prevent a white flash while UIWebView is initialized
+      navigator.splashscreen.hide() if ENV.cordova
       @activeScene.show()
 
   # Callback to play a sound effect
