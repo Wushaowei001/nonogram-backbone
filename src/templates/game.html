@@ -3,7 +3,9 @@
 
 		<div class="top">
 			<div class="button actions pause">
-				<span><span class="text">Pause</span></span>
+        <div class="bevel">
+          <span><span class="text">Pause</span></span>
+        </div>
 			</div>
 
 			<div class="info complete">
@@ -15,7 +17,7 @@
 				Time<br>
 				<span class="minutes">00</span><span>:</span><span class="seconds">00</span>
 			</div>
-		</div>
+    </div>  <!-- /.top -->
 
 		<div class="grid-background">
 			<div class="minimap"></div>
@@ -56,18 +58,23 @@
 			<div class="horizontal clue"></div>
 		</div>	<!-- /.grid-background -->
 
-		<div class="bottom">
-			<div class="button actions mark">
-				<span><span class="text">
-						<span class="icon"></span> Mark
-				</span></span>
-			</div>
-			<div class="button actions fill">
-				<span><span class="text">
-					<span class="icon"></span> Fill
-				</span></span>
-			</div>
-		</div>	<!-- /.bottom -->
+    <div class="bottom">
+      <div class="button actions mark">
+        <div class="bevel">
+          <span class="text">
+            <span class="icon"></span> Mark
+          </span>
+        </div>
+      </div>
 
-	</div>
-</div>
+      <div class="button actions fill">
+        <div class="bevel">
+          <span class="text">
+            <span class="icon"></span> Fill
+          </span>
+        </div>
+      </div>
+    </div>	<!-- /.bottom -->
+
+  </div> <!-- /.container -->
+</div> <!-- /.scene -->

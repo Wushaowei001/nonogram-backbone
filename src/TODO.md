@@ -4,7 +4,8 @@
     when pages are flipped
 [ ] Fix tutorial
 [ ] Re-work landscape layout
-[ ] Add landscape layout for About page
+[x] Add landscape layout for About page
+[ ] Add underscore template for modal box
 
 # Future
 
@@ -18,7 +19,7 @@
 # Roadmap for v1 App Store release
 [ ] Verify layout correctness on iPhone 5
   [ ] Button borders are too thick (create < 320px media query?)
-  [ ] Puzzle grid is offset too far to the left
+  [x] Puzzle grid is offset too far to the left
   [X] Button line height is too high (switch to percentage-based?)
 [ ] Hide editor button on homepage
 [ ] Add sound effect to modal buttons

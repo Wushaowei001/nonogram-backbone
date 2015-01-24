@@ -109,7 +109,7 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   .overlay { position: absolute; width: 100%; height: 100%; left: 0px; top: 0px; background: rgba(0,0,0,0.65); background: radial-gradient(center, ellipse cover, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%); z-index: 3; opacity: 0; }
   .dialog-box { background: #fff; color: #000; padding: 3%; border: 5px solid #000; .box-shadow; position: absolute; width: 70%; z-index: 4; opacity: 0;
     h3 { margin: 1%; font-size: 2.5rem; font-weight: normal; }
-    .button { width: 70%; height: 10%; line-height: 0.9; margin-top: 3%; }
+    .button { width: 70%; height: 20%; margin-top: 3%; }
   }
 
   #title {
@@ -230,14 +230,14 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
     .scene { background-size: contain; }
 
     .button { width: 35%; height: 15%;
-      &.small { width: 25%; height: 11%; font-size: 1em; line-height: 1; }
-      &.back { float: left; width: 20%; font-size: 1em; line-height: 1; }
-      &.previous, &.next { width: 10%; }
+      &.small { width: 25%; height: 11%; }
+      &.back { float: left; width: 20%; }
+      &.previous,
+      &.next { width: 10%; }
     }
 
     .dialog-box { padding: 1%; width: 50%;
-      h3 { font-size: 1.3em; }
-      .button { width: auto; margin-top: 3%; line-height: 1.1; }
+      .button { margin-top: 3%; height: 40%; }
     }
 
     #title {
@@ -248,18 +248,16 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
     #about {
       h2 { margin: 1%; padding-top: 0; }
-      p { font-size: 1em; padding: 3%; width: 40%; display: inline-block; vertical-align: top; }
-      .button { display: inline-block; margin: 3% 6%; }
-      .reset { font-size: 1.5em; line-height: 1; }
+      p { padding: 3%; width: 40%; float: left;}
+      .sfx,
+      .music,
+      .reset { float: right; }
     }
 
     #difficulty-select {
       h2 { margin-bottom: 0; padding-top: 0; }
 
-      .easy,
-      .medium,
-      .hard,
-      .random { width: 40%; height: 25%; line-height: 1.5; font-size: 2.4em; }
+      .select { width: 45%; height: 15%; margin: 2%; }
     }
 
     #level-select {
@@ -269,9 +267,8 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
       ul.info { margin: 0 0 0 1.5%; float: left; text-align: left; width: 54%; }
 
-      .previous { float: left; margin-top: -7%; margin-left: 7%; width: 10%; height: 14%; }
-      .next { float: right; margin-top: -7%; margin-right: 2%; width: 10%; height: 14%; }
-      .previous, .next { line-height: 0.8; font-size: 1.8em; }
+      .previous { float: left; margin-top: -7%; margin-left: 10%; width: 10%; height: 14%; }
+      .next { float: right; margin-top: -7%; margin-right: 4%; width: 10%; height: 14%; }
 
       .preview { width: 40%; height: 60%; float: right; margin: 4% 1.5% 0 0; position: relative; }
     }

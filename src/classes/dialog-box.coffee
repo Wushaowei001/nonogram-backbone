@@ -24,11 +24,9 @@ class DialogBox extends Backbone.View
 
   events: ->
     if ENV.mobile
-      events =
-        'touchend .button': 'onAction'
+      'touchend .button': 'onAction'
     else
-      events =
-        'click .button': 'onAction'
+      'click .button': 'onAction'
 
   initialize: (options) ->
     @options = options
@@ -41,20 +39,19 @@ class DialogBox extends Backbone.View
     # Create HTML contents here
     html = ''
 
-    if @options.title
-      html += "<h3>#{@options.title}</h3>"
+    html += "<h3>#{@options.title}</h3>" if @options.title
 
-    if @options.message
-      html += "<p>#{@options.message}</p>"
+    html += "<p>#{@options.message}</p>" if @options.message
 
     # Allow injection of raw HTML
-    if @options.html
-      html += @options.html
+    html += @options.html if @options.html
 
     for button in @options.buttons
       html += """
       <div class="button" data-action="#{button.text.toLowerCase()}">
-        <span data-action="#{button.text.toLowerCase()}">#{button.text}</span>
+        <div class="bevel">
+          <span class="text">#{button.text}</span>
+        </div>
       </div>"""
 
     template = """
@@ -75,6 +72,7 @@ class DialogBox extends Backbone.View
     @elem.css
       left: (@$el.width() - @elem.width()) / 2
       top: -@elem.height()
+      height: "#{@elem.height()}px"
 
     # animate box & overlay into place
     @elem.animate
@@ -91,17 +89,19 @@ class DialogBox extends Backbone.View
     e.preventDefault()
 
     # Allow button to only be clicked once
-    if !@doCallback then return
+    return if @doCallback is false
     @doCallback = false
 
-    buttonAction = $(e.target).attr 'data-action'
+    button = $(e.target)
+    button = button.parents('.button') unless button.data('action')
+    buttonAction = button.data('action')
 
     # window.sounds['button']?.play()
 
-    # Search through the buttons array, looking for the callback associated w/ the clicked button
+    # Look for clicked callback
     for button in @options.buttons
-      if button.text.toLowerCase() is buttonAction and typeof button.callback is "function"
-        _.delay button.callback, @animationTime
+      if button.text.toLowerCase() is buttonAction and typeof button.callback is 'function'
+        _.delay(button.callback, @animationTime)
 
     # animate box & overlay into place
     @elem.animate
