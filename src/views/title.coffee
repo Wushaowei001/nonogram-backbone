@@ -32,7 +32,7 @@ class TitleScene extends Scene
     @undelegateEvents()
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'game', { difficulty: 'easy', level: 0, tutorial: true }
+    @trigger 'scene:change', 'game', { difficulty: 'beginner', level: 0, tutorial: true }
 
   editor: (e) ->
     e.preventDefault()

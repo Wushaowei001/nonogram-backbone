@@ -6,6 +6,7 @@
 [ ] Re-work landscape layout
 [x] Add landscape layout for About page
 [ ] Add underscore template for modal box
+[ ] Add preview for completed random levels
 
 # Future
 
@@ -18,13 +19,13 @@
 
 # Roadmap for v1 App Store release
 [ ] Verify layout correctness on iPhone 5
-  [ ] Button borders are too thick (create < 320px media query?)
+  [X] Button borders are too thick (create < 320px media query?)
   [x] Puzzle grid is offset too far to the left
   [X] Button line height is too high (switch to percentage-based?)
 [ ] Hide editor button on homepage
 [ ] Add sound effect to modal buttons
-[x] Don't allow "fill" attempts on blocks that have been marked :/
-[ ] Change to 30min limit which counts down
+[X] Don't allow "fill" attempts on blocks that have been marked :/
+[X] Change to 30min limit which counts down
 [ ] Review each puzzle to ensure no cheap "guesswork" puzzles
   [ ] Beginner
   [ ] Easy

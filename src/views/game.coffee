@@ -585,7 +585,7 @@ class GameScene extends Scene
     # Grab clues out of data structure
     @clues = levels[@difficulty][@level].clues
 
-    # Handle the random levels
+    # Generate clues for random levels
     if @difficulty is "random"
       @clues = []
       switch @level
@@ -596,10 +596,6 @@ class GameScene extends Scene
       while @clues.length < 100
         random = if Math.random() < percentage then 1 else 0
         @clues.push random
-
-    # Handle loading the tutorial
-    if @tutorial
-      @clues = levels.easy[0].clues
 
     @cellCount = Math.sqrt(@clues.length)
 
