@@ -21,14 +21,14 @@ Storage.prototype.getObject = (key) ->
 
 Storage.prototype.getBoolean = (key) ->
   value = @getItem(key)
-  value == "true"
+  value == 'true'
 
 # Extend Backbone
 Backbone.View.prototype.close = ->
   @elem.remove()
   @undelegateEvents()
 
-  if typeof @onClose == "function"
+  if typeof @onClose == 'function'
     @onClose()
 
 class App extends Backbone.View
@@ -86,14 +86,14 @@ class App extends Backbone.View
 
     # Handle being moved to the background in Cordova builds
     if ENV.cordova
-      document.addEventListener "pause", =>
-        if typeof @activeScene.pause is "function" then @activeScene.pause()
+      document.addEventListener 'pause', =>
+        if typeof @activeScene.pause is 'function' then @activeScene.pause()
         @stopMusic()
         @pausedMusic = @currentMusic
       , false
 
       # Handle resuming from background
-      document.addEventListener "resume", =>
+      document.addEventListener 'resume', =>
         @playMusic @pausedMusic
       , false
 
@@ -120,7 +120,6 @@ class App extends Backbone.View
 
     @sona.play(id)
 
-  # Callback to play music
   playMusic: (id) ->
     return unless localStorage.getBoolean('playMusic')
 
@@ -135,7 +134,6 @@ class App extends Backbone.View
     @sona.loop(id)
     @currentMusic = id
 
-  # Stop music!
   stopMusic: ->
     return if not @currentMusic
 
@@ -152,25 +150,14 @@ class App extends Backbone.View
 
   # Handle hiding/showing the active scene
   changeScene: (scene, options) ->
-    @activeScene.hide()
+    throw new Error("Invalid scene '#{scene}") if @scenes[scene] == undefined
 
-    switch scene
-      when 'title' then @activeScene = @scenes.title
-      when 'editor' then @activeScene = @scenes.editor
-      when 'about' then @activeScene = @scenes.about
-      when 'difficulty' then @activeScene = @scenes.difficultySelect
-      when 'level'
-        @activeScene = @scenes.levelSelect
-        @activeScene.difficulty = options.difficulty
-      when 'game'
-        # Set the game's diff & level props from the passed "options" arg
-        @activeScene = @scenes.game
-        @activeScene.difficulty = options.difficulty
-        @activeScene.level = options.level
-        @activeScene.tutorial = options.tutorial
-      else
-        console.log "Error! Scene not defined in switch statement"
-        @activeScene = @titleScene
+    @activeScene.hide()
+    @activeScene = @scenes[scene]
+
+    if options != undefined
+      for key, value of options
+        @activeScene[key] = value
 
     @activeScene.show()
 
@@ -207,7 +194,6 @@ class App extends Backbone.View
         newHeight = width / ratio
         padding.height = height - newHeight
         height = newHeight
-      # TODO: Also update universal line-height value here
       $('html').css { 'font-size': "#{width * 0.1302}%" }
 
     else if orientation is 'portrait'
@@ -219,7 +205,6 @@ class App extends Backbone.View
         newWidth = height / ratio
         padding.width = width - newWidth
         width = newWidth
-      # TODO: Also update universal line-height value here
       $('html').css { 'font-size': "#{height * 0.1302}%" }
 
     # Add the calculated padding to each scene <div>
@@ -228,12 +213,11 @@ class App extends Backbone.View
       height: height
       padding: "#{padding.height / 2}px #{padding.width / 2}px"
 
-    # Call a "resize" method on other views
+    # Resize other views
     for name, scene of @scenes
       scene.resize(width, height, orientation) if typeof scene.resize == 'function'
 
   initializeDefaults: ->
-    # Obj that stores # of tries, best time, etc.
     if localStorage.getObject('stats') == null
       stats =
         beginner: {}
@@ -243,7 +227,6 @@ class App extends Backbone.View
         random: {}
       localStorage.setObject 'stats', stats
 
-    # Obj that stores # of completed levels per difficulty
     if localStorage.getObject('complete') == null
       complete =
         beginner: 0
@@ -253,7 +236,6 @@ class App extends Backbone.View
         random: 0
       localStorage.setObject 'complete', complete
 
-    # Obj that stores the most recently viewed level in a difficulty
     if localStorage.getObject('lastViewedLevel') == null
       lastViewedLevel =
         beginner: 0
@@ -263,20 +245,18 @@ class App extends Backbone.View
         random: 0
       localStorage.setObject 'lastViewedLevel', lastViewedLevel
 
-    # Array that contains purchased IAP product IDs
     if localStorage.getObject('purchased') == null
       localStorage.setObject 'purchased', []
 
-    # Whether to play music/SFX
     if localStorage.getItem('playMusic') == null
-      localStorage.setItem 'playMusic', "true"
+      localStorage.setItem 'playMusic', 'true'
 
     if localStorage.getItem('playSfx') == null
-      localStorage.setItem 'playSfx', "true"
+      localStorage.setItem 'playSfx', 'true'
 
 # Cordova fires `deviceready` event when environment is ready
 if ENV.cordova
-  document.addEventListener "deviceready", ->
+  document.addEventListener 'deviceready', ->
     window.app = new App
   , false
 else
