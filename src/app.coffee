@@ -111,7 +111,7 @@ class App extends Backbone.View
 
     @sona.load =>
       @resize() # Do an initial resize of the content area to ensure a 2:3 ratio
-      navigator.splashscreen.hide() if ENV.cordova
+      # navigator.splashscreen.hide() if ENV.cordova
       @activeScene.show()
 
   # Callback to play a sound effect
@@ -257,8 +257,8 @@ class App extends Backbone.View
 # Cordova fires `deviceready` event when environment is ready
 if ENV.cordova
   document.addEventListener 'deviceready', ->
-    window.app = new App
+    window.app = new App()
   , false
 else
   $ ->
-    window.app = new App
+    window.app = new App()
