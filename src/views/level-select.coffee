@@ -68,7 +68,7 @@ class LevelSelectScene extends Scene
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'difficulty'
+    @trigger 'scene:change', 'difficultySelect'
 
   enableOrDisablePagingButtons: ->
     @$('.next').removeClass 'disabled'

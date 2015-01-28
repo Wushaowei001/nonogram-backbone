@@ -28,7 +28,7 @@ class DifficultySelectScene extends Scene
     @undelegateEvents()
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'level', { difficulty: button.data('difficulty') }
+    @trigger 'scene:change', 'levelSelect', { difficulty: button.data('difficulty') }
 
   # Go back to title
   back: (e) ->

@@ -115,7 +115,7 @@ define [
 			if button.data('purchased') is 'yes'
 				# Prevent multiple clicks
 				@undelegateEvents()
-				@trigger 'scene:change', 'level', { difficulty: button.data 'difficulty' }
+				@trigger 'scene:change', 'levelSelect', { difficulty: button.data 'difficulty' }
 			else
 				new DialogBox
 					el: @elem

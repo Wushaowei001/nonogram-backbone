@@ -25,7 +25,7 @@ class TitleScene extends Scene
     @undelegateEvents()
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'difficulty'
+    @trigger 'scene:change', 'difficultySelect'
 
   tutorial: (e) ->
     e.preventDefault()

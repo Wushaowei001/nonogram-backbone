@@ -275,7 +275,7 @@ class GameScene extends Scene
             if @tutorial
               @trigger 'scene:change', 'title'
             else
-              @trigger 'scene:change', 'level', { difficulty: @difficulty }
+              @trigger 'scene:change', 'levelSelect', { difficulty: @difficulty }
         }
       ]
 
@@ -312,7 +312,7 @@ class GameScene extends Scene
               # Go back to title
               @trigger 'scene:change', 'title'
             else
-              @trigger 'scene:change', 'level', { difficulty: @difficulty }
+              @trigger 'scene:change', 'levelSelect', { difficulty: @difficulty }
         }
       ]
 
