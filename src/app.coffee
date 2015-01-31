@@ -1,15 +1,16 @@
-$ = require('./vendor/zepto')
-_ = require('underscore')
-Backbone = require('backbone')
+_          = require('underscore')
+$          = require('./vendor/zepto')
+Backbone   = require('backbone')
 Backbone.$ = $
-Sona = require('sona')
-TitleScene = require('./views/title')
-GameScene = require('./views/game')
-AboutScene = require('./views/about')
-LevelSelectScene = require('./views/level-select')
+Sona       = require('sona')
+ENV        = require('./lib/env')
+
+TitleScene            = require('./views/title')
+GameScene             = require('./views/game')
+AboutScene            = require('./views/about')
+LevelSelectScene      = require('./views/level-select')
 DifficultySelectScene = require('./views/difficulty-select')
-EditorScene = require('./views/editor')
-ENV = require('./utilities/env')
+EditorScene           = require('./views/editor')
 
 # Extend local storage
 Storage.prototype.setObject = (key, value) ->

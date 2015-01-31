@@ -7,6 +7,11 @@
 [x] Add landscape layout for About page
 [ ] Add underscore template for modal box
 [ ] Add preview for completed random levels
+[x] Make modal buttons same height as normal buttons
+[ ] Ensure thumbnail previews are offscreen after an orientation change
+[ ] Ensure "mark" & "fill" button handlers correctly keep the button pressed
+[ ] Make width/spacing for pause button and info windows consistant
+[ ] Make text in pause button vertical
 
 # Future
 

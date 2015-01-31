@@ -87,14 +87,14 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   h1 { font: normal 4rem/1.5 @font-family; margin: 3%; .text-shadow; }
   h2 { font: normal 3.5rem/1.5 @font-family; margin: 3%; .text-shadow; }
 
-  .button { font: normal 2.3rem/0 @font-family; width: 50%; height: 9%; border: 5px solid #000; padding: 0; background: #665945; color: #fff; text-align: center; text-decoration: none; display: inline-block; margin: 1.5%; .box-shadow; .border-box;
+  .button { font: normal 2.3rem/0 @font-family; width: 50%; height: 10%; border: 5px solid #000; padding: 0; background: #665945; color: #fff; text-align: center; text-decoration: none; display: inline-block; margin: 1.5%; .box-shadow; .border-box;
     .bevel { display: block; width: 100%; height: 100%; border: 5px solid #fff; border-color: #7b6c55 #3c362c #3c362c #7b6c55; .border-box;
       .text { position: relative; top: 40%; }
     }
 
     &:active,
     &.active { position: relative; left: 5px; top: 5px; box-shadow: none; color: @alt-color; }
-    &.small { width: 30%; height: 7%; font-size: 1.5rem; }
+    &.small { width: 30%; height: 8%; font-size: 1.5rem; }
     &.back { float: left; }
     &.disabled { opacity: 0.3;
       &:active { position: static; color: #fff; .box-shadow; }
@@ -109,7 +109,7 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   .overlay { position: absolute; width: 100%; height: 100%; left: 0px; top: 0px; background: rgba(0,0,0,0.65); background: radial-gradient(center, ellipse cover, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%); z-index: 3; opacity: 0; }
   .dialog-box { background: #fff; color: #000; padding: 3%; border: 5px solid #000; .box-shadow; position: absolute; width: 70%; z-index: 4; opacity: 0;
     h3 { margin: 1%; font-size: 2.5rem; font-weight: normal; }
-    .button { width: 70%; margin-top: 3%; }
+    .button { margin-top: 3%; }
   }
 
   #title {
@@ -240,7 +240,7 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
     }
 
     .dialog-box { padding: 1%; width: 50%;
-      .button { margin-top: 3%; height: 40%; }
+      .button { margin-top: 3%; }
     }
 
     #title {
