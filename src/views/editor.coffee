@@ -1,9 +1,9 @@
 _         = require('underscore')
 $         = require('../vendor/zepto')
-Scene     = require('../classes/scene')
-DialogBox = require('../classes/dialog-box')
-Input     = require('../utilities/input')
-ENV       = require('../utilities/env')
+Scene     = require('../lib/scene')
+DialogBox = require('../lib/dialog-box')
+Input     = require('../lib/input')
+ENV       = require('../lib/env')
 template  = require('../templates/editor')
 
 class EditorScene extends Scene

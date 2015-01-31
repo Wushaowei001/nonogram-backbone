@@ -1,9 +1,9 @@
-$ = require('../vendor/zepto')
-_ = require('underscore')
-Scene = require('../classes/scene')
-ENV = require('../utilities/env')
-template = require('../templates/difficulty-select')
-DialogBox = require('../classes/dialog-box')
+$         = require('../vendor/zepto')
+_         = require('underscore')
+ENV       = require('../lib/env')
+Scene     = require('../lib/scene')
+DialogBox = require('../lib/dialog-box')
+template  = require('../templates/difficulty-select')
 
 class DifficultySelectScene extends Scene
   events: ->

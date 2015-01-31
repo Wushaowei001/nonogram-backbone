@@ -1,6 +1,6 @@
-$ = require('../vendor/zepto')
-Scene = require('../classes/scene')
-ENV = require('../utilities/env')
+$        = require('../vendor/zepto')
+ENV      = require('../lib/env')
+Scene    = require('../lib/scene')
 template = require('../templates/title.html')
 
 class TitleScene extends Scene

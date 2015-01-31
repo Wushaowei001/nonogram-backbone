@@ -1,12 +1,12 @@
-$ = require('../vendor/zepto')
-_ = require('underscore')
-Scene = require('../classes/scene')
-FloatingText = require('../classes/floating-text')
-DialogBox = require('../classes/dialog-box')
-ENV = require('../utilities/env')
-Input = require('../utilities/input')
-template = require('../templates/game')
-levels = require('../data/levels')
+$            = require('../vendor/zepto')
+_            = require('underscore')
+ENV          = require('../lib/env')
+Scene        = require('../lib/scene')
+FloatingText = require('../lib/floating-text')
+DialogBox    = require('../lib/dialog-box')
+Input        = require('../lib/input')
+template     = require('../templates/game')
+levels       = require('../data/levels')
 
 class GameScene extends Scene
   events: ->
@@ -236,7 +236,7 @@ class GameScene extends Scene
     if columnTotal == completedColumnTotal then @$('.vertical.clue', @elem).eq(col).addClass('complete')
 
   # Actions when player solves the puzzle
-  win: () ->
+  win: ->
     @ignoreInput = true
 
     # Ensure this event handler is removed, even if user doesn't "unclick"
@@ -245,7 +245,7 @@ class GameScene extends Scene
     @trigger 'music:stop'
     @trigger 'sfx:play', 'win'
 
-    window.clearInterval @timerIdId
+    window.clearInterval @timerId
 
     if not @tutorial
       stats = localStorage.getObject 'stats'
@@ -413,6 +413,34 @@ class GameScene extends Scene
       "Column #2 has 9 filled blocks, and the first block is empty. Go ahead and fill this column." #10
       # Action
       "I think you've got the hang of it. Try to finish the rest of the puzzle yourself!" # 11
+    ]
+    text = [
+      "Welcome to Nonogram Madness! Nonograms are logic puzzles that reveal an image when solved.", 
+      "Solve each puzzle using the numeric clues on the top and left of the grid.",
+      "Each number represents squares in the grid that are \"filled\" in a row or column.",
+      "Clues with multiple numbers mean a gap of one (or more) between filled squares.",
+      "Look at the first column. The clue is \"5\". Tap \"fill\" then tap all 5 squares.",
+      # Action
+      "The second column is harder. We don't know where the two single filled squares are.",
+      "Skip difficult rows or columns and come back to them later.",
+      "Look at the third column. The clue is \"1 1 1\". There's a gap between each filled square.",
+      "Make sure the \"fill\" button is selected, then fill in three squares with a gap between each.",
+      # Action
+      "You can use the \"mark\" action to protect blocks that are supposed to be empty.",
+      "Erase a marked square by tapping it again. Don't worry about making a mistake.",
+      "#{capitalActionWord} \"mark\" and mark the empty squares so you don't accidentally try to fill them in later.",
+      # Action
+      "Check out the fourth column. The clue is \"1 3\". Fill one square, leave a gap, then fill three more.",
+      # Action
+      "The fifth column is empty. \"Mark\" all those squares to show they don't need to be filled in.",
+      # Action
+      "Next, look at the horizontal clues. The first row has four sequential filled squares.",
+      "Fill in the only open square in this row to complete it.",
+      # Action
+      "The second, third, and fourth rows are already complete. Mark all the open squares in them.",
+      # Action
+      "I think you've got the hang of it. Try to finish the rest of the puzzle yourself!"
+      # Action
     ]
 
     blocks = @grid.find('.blank')

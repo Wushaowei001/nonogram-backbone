@@ -1,26 +1,24 @@
-$ = require('../vendor/zepto')
-_ = require('underscore')
-Scene = require('../classes/scene')
-ENV = require('../utilities/env')
-template = require('../templates/about')
-DialogBox = require('../classes/dialog-box')
+$         = require('../vendor/zepto')
+_         = require('underscore')
+ENV       = require('../lib/env')
+Scene     = require('../lib/scene')
+DialogBox = require('../lib/dialog-box')
+template  = require('../templates/about')
 
 class AboutScene extends Scene
   events: ->
     if ENV.mobile
-      events =
-        'touchend .back': 'back' 
-        'touchend .reset': 'reset'
-        'touchend .sfx': 'toggleSfx'
-        'touchend .music': 'toggleMusic'
-        'touchend .feedback': 'feedback'
+      'touchend .back': 'back' 
+      'touchend .reset': 'reset'
+      'touchend .sfx': 'toggleSfx'
+      'touchend .music': 'toggleMusic'
+      'touchend .feedback': 'feedback'
     else
-      events =
-        'click .back': 'back'
-        'click .reset': 'reset'
-        'click .sfx': 'toggleSfx'
-        'click .music': 'toggleMusic'
-        'click .feedback': 'feedback'
+      'click .back': 'back'
+      'click .reset': 'reset'
+      'click .sfx': 'toggleSfx'
+      'click .music': 'toggleMusic'
+      'click .feedback': 'feedback'
 
   initialize: ->
     @elem = $(template())

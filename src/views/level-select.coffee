@@ -1,9 +1,9 @@
-$ = require('../vendor/zepto')
-_ = require('underscore')
-Scene = require('../classes/scene')
-ENV = require('../utilities/env')
+$        = require('../vendor/zepto')
+_        = require('underscore')
+ENV      = require('../lib/env')
+Scene    = require('../lib/scene')
 template = require('../templates/level-select')
-levels = require('../data/levels')
+levels   = require('../data/levels')
 
 class LevelSelectScene extends Scene
   events: ->
