@@ -1,26 +1,34 @@
-###
-pass args object like this
-{
-  title: "string"
-  message: "string"
+### USAGE
+new DialogBox
+  title: 'string'
+  message: 'string'
   buttons: [
     {
       text: 'OK'
       callback: ->
-        dostuf()
+        console.log 'u cliked me bro'
     }
   ]
-}
 ###
 
-$ = require('../vendor/zepto')
-_ = require('underscore')
+$        = require('../vendor/zepto')
+_        = require('underscore')
 Backbone = require('backbone')
-ENV = require('../utilities/env')
+ENV      = require('../lib/env')
 
 class DialogBox extends Backbone.View
   animationTime: 300
-  doCallback: true
+  callbackCompleted: false
+
+  # Dynamically size buttons in this modal; can't use percentages since the
+  # height of the containing <div> changes based on length of content
+  BUTTON_SIZE:
+    landscape:
+      width: 0.2
+      height: 0.13
+    portrait:
+      width: 0.3
+      height: 0.07
 
   events: ->
     if ENV.mobile
@@ -65,14 +73,15 @@ class DialogBox extends Backbone.View
     @render()
 
   render: ->
-    @$el.append @elem
-    @elem.after @overlay
+    @$el.append(@elem)
+    @elem.after(@overlay)
+
+    @resizeButtons()
 
     # Dynamically position dialog box
     @elem.css
       left: (@$el.width() - @elem.width()) / 2
       top: -@elem.height()
-      height: "#{@elem.height()}px"
 
     # animate box & overlay into place
     @elem.animate
@@ -89,8 +98,8 @@ class DialogBox extends Backbone.View
     e.preventDefault()
 
     # Allow button to only be clicked once
-    return if @doCallback is false
-    @doCallback = false
+    return if @callbackCompleted is true
+    @callbackCompleted = true
 
     button = $(e.target)
     button = button.parents('.button') unless button.data('action')
@@ -105,7 +114,7 @@ class DialogBox extends Backbone.View
 
     # animate box & overlay into place
     @elem.animate
-      translateY: -@elem.height() + 'px'
+      translateY: "-#{@elem.height()}px"
       opacity: 0
     , @animationTime
 
@@ -123,6 +132,19 @@ class DialogBox extends Backbone.View
   onClose: ->
     $(window).off 'resize', @resize
 
+  resizeButtons: ->
+    parentWidth = @$el.width()
+    parentHeight = @$el.height()
+
+    orientation = if parentWidth > parentHeight
+      'landscape'
+    else
+      'portrait'
+
+    @elem.find('.button').css
+      width: @BUTTON_SIZE[orientation].width * parentWidth
+      height: @BUTTON_SIZE[orientation].height * parentHeight
+
   # Update position of dialog box when orientation changes
   resize: (e) ->
     @elem.css
@@ -132,5 +154,7 @@ class DialogBox extends Backbone.View
     @elem.animate
       translateY: ((@$el.height() + @elem.height()) / 2) + 'px'
     , @animationTime
+
+    @resizeButtons()
 
 module.exports = DialogBox

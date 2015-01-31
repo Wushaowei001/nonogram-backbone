@@ -1,5 +1,5 @@
 Backbone = require('backbone')
-_ = require('underscore')
+_        = require('underscore')
 
 class Scene extends Backbone.View
   render: ->
