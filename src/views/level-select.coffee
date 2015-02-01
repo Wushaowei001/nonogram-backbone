@@ -195,13 +195,14 @@ class LevelSelectScene extends Scene
     return if @selectedLevel == selected
     @trigger 'sfx:play', 'button'
     @selectedLevel = selected
-    @highlightThumbnail()
+    @highlightThumbnail(animate = true)
 
-  highlightThumbnail: ->
+  highlightThumbnail: (animate = false) ->
     index = @selectedLevel - @page * @PER_PAGE
     selected = @canvases.eq(index)
-    @canvases.removeClass 'selected'
-    selected.addClass 'selected'
+    @canvases.removeClass('selected')
+    selected.addClass('selected')
+    selected.animate('pulse', 'fast', 'cubic-bezier(.0,.0,.5,1.5)') if animate
     @showLevelInfo()
 
   resize: (width, height, orientation) ->
@@ -210,6 +211,9 @@ class LevelSelectScene extends Scene
 
     @width = width
     @height = height
+
+    offscreenWidth = @width * 1.5
+    @altCanvases.animate({ transform: "translateX(-#{offscreenWidth}px)" }, 0)
 
   hide: (duration = 500, callback) ->
     super duration, callback
