@@ -321,19 +321,20 @@ class GameScene extends Scene
     e.preventDefault()
     target = $(e.target)
 
-    @trigger 'sfx:play', 'button'
+    # User is probably actually clicking an element inside the button
+    unless target.hasClass('button') then target = target.parents('.button')
+    return if target.hasClass('active')
 
-    # User is probably actually clicking a span inside the button
-    if target.is 'span' then target = target.parents '.button'
+    @trigger('sfx:play', 'button')
 
-    @$(".button.#{@action}", @elem).removeClass 'active'
+    @elem.find(".button.#{@action}").removeClass('active')
 
-    if target.hasClass 'mark'
+    if target.hasClass('mark')
       @action = 'mark'
-      target.addClass 'active'
+      target.addClass('active')
     else
       @action = 'fill'
-      target.addClass 'active'
+      target.addClass('active')
 
 
   # Update timer elem
