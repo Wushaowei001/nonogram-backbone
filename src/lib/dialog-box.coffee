@@ -15,9 +15,9 @@ $        = require('../vendor/zepto')
 _        = require('underscore')
 Backbone = require('backbone')
 ENV      = require('../lib/env')
+template = require('../templates/dialog-box')
 
 class DialogBox extends Backbone.View
-  animationTime: 300
   callbackCompleted: false
 
   # Dynamically size buttons in this modal; can't use percentages since the
@@ -36,40 +36,20 @@ class DialogBox extends Backbone.View
     else
       'click .button': 'onAction'
 
-  initialize: (options) ->
-    @options = options
+  initialize: (options = {}) ->
+    defaults = {
+      animationTime: 300
+      buttons: []
+    }
 
-    if @options.animationTime? then @animationTime = @options.animationTime
+    @options = _.extend(defaults, options)
 
-    _.bindAll(@, 'resize')
+    _.bind(@, 'resize')
     $(window).on('resize', @resize)
-
-    # Create HTML contents here
-    html = ''
-
-    html += "<h3>#{@options.title}</h3>" if @options.title
-
-    html += "<p>#{@options.message}</p>" if @options.message
-
-    # Allow injection of raw HTML
-    html += @options.html if @options.html
-
-    for button in @options.buttons
-      html += """
-      <div class="button" data-action="#{button.text.toLowerCase()}">
-        <div class="bevel">
-          <span class="text">#{button.text}</span>
-        </div>
-      </div>"""
-
-    template = """
-          <div class="dialog-box">
-            #{html}
-          </div>"""
 
     @overlay = $('<div class="overlay"></div>')
 
-    @elem = $(template)
+    @elem = $(template({ context: options }))
     @render()
 
   render: ->
@@ -87,10 +67,10 @@ class DialogBox extends Backbone.View
     @elem.animate
       translateY: ((@$el.height() + @elem.height()) / 2) + 'px'
       opacity: 1
-    , @animationTime
+    , @options.animationTime
     @overlay.animate
       opacity: 0.7
-    , @animationTime
+    , @options.animationTime
 
   # Determine which button was clicked, call the appropriate callback,
   # and close the dialog box view
@@ -110,23 +90,23 @@ class DialogBox extends Backbone.View
     # Look for clicked callback
     for button in @options.buttons
       if button.text.toLowerCase() is buttonAction and typeof button.callback is 'function'
-        _.delay(button.callback, @animationTime)
+        _.delay(button.callback, @options.animationTime)
 
     # animate box & overlay into place
     @elem.animate
       translateY: "-#{@elem.height()}px"
       opacity: 0
-    , @animationTime
+    , @options.animationTime
 
     @overlay.animate
       opacity: 0
-    , @animationTime
+    , @options.animationTime
 
     # Remove all this nonsense
     _.delay =>
       @overlay.remove()
       @close()
-    , @animationTime
+    , @options.animationTime
 
   # Remove the resize event listener
   onClose: ->
@@ -153,7 +133,7 @@ class DialogBox extends Backbone.View
     # animate box into new position
     @elem.animate
       translateY: ((@$el.height() + @elem.height()) / 2) + 'px'
-    , @animationTime
+    , @options.animationTime
 
     @resizeButtons()
 

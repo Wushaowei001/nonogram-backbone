@@ -1,0 +1,21 @@
+<div class="dialog-box">
+<% if (context.title) { %>
+	<h3><%= context.title %></h3>
+<% } %>
+
+<% if (context.message) { %>
+	<p><%= context.message %></p>
+<% } %>
+
+<% if (context.html) { %>
+	<%= context.html %>
+<% } %>
+
+<% context.buttons.forEach(function (button) { %>
+	<div class="button" data-action="<%= button.text.toLowerCase() %>">
+		<div class="bevel">
+			<span class="text"><%= button.text %></span>
+		</div>
+	</div>
+<% }); %>
+</div>	<!-- /.dialog-box -->
