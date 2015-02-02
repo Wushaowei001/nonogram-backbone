@@ -44,12 +44,16 @@ class DialogBox extends Backbone.View
 
     @options = _.extend(defaults, options)
 
-    _.bind(@, 'resize')
+    _.bind(@resize, @)
     $(window).on('resize', @resize)
 
-    @overlay = $('<div class="overlay"></div>')
+    @.on('sfx:play', (soundId) =>
+      @options.parent.trigger('sfx:play', soundId)
+    , @)
 
+    @overlay = $('<div class="overlay"></div>')
     @elem = $(template({ context: options }))
+
     @render()
 
   render: ->
@@ -68,8 +72,9 @@ class DialogBox extends Backbone.View
       translateY: ((@$el.height() + @elem.height()) / 2) + 'px'
       opacity: 1
     , @options.animationTime
+
     @overlay.animate
-      opacity: 0.7
+      opacity: 1
     , @options.animationTime
 
   # Determine which button was clicked, call the appropriate callback,
@@ -81,11 +86,11 @@ class DialogBox extends Backbone.View
     return if @callbackCompleted is true
     @callbackCompleted = true
 
+    @trigger('sfx:play', 'button')
+
     button = $(e.target)
     button = button.parents('.button') unless button.data('action')
     buttonAction = button.data('action')
-
-    # window.sounds['button']?.play()
 
     # Look for clicked callback
     for button in @options.buttons
@@ -108,9 +113,10 @@ class DialogBox extends Backbone.View
       @close()
     , @options.animationTime
 
-  # Remove the resize event listener
+  # Remove all event listeners
   onClose: ->
-    $(window).off 'resize', @resize
+    @off()
+    $(window).off('resize', @resize)
 
   resizeButtons: ->
     parentWidth = @$el.width()
