@@ -87,6 +87,7 @@ class AboutScene extends Scene
     
     new DialogBox
       el: @elem
+      parent: @
       title: 'Erase saved data?'
       buttons: [
         { 

@@ -1,46 +1,50 @@
 # Now
-[ ] Break SFX/Music code out into a "sound controller" singleton/object
-[ ] Change level select highlight tween to be code-based to allow it to be disabled
+[x] Break SFX/Music code out into a "sound controller" singleton/object
+[x] Change level select highlight tween to be code-based to allow it to be disabled
     when pages are flipped
-[ ] Fix tutorial
-[ ] Re-work landscape layout
 [x] Add landscape layout for About page
-[ ] Add underscore template for modal box
-[ ] Add preview for completed random levels
 [x] Make modal buttons same height as normal buttons
-[ ] Ensure thumbnail previews are offscreen after an orientation change
-[ ] Ensure "mark" & "fill" button handlers correctly keep the button pressed
-[ ] Make width/spacing for pause button and info windows consistant
-[ ] Make text in pause button vertical
+[x] Add underscore template for modal box
+[x] Ensure thumbnail previews are offscreen after an orientation change
+[x] Ensure "mark" & "fill" button handlers correctly keep the button pressed
+[x] Make width/spacing for pause button and info windows consistant
+[x] Make text in pause button vertical
+[x] Allow "bump" animation when marking to happen cross-level
+[ ] Save currently selected level across game sessions
+[ ] Fix tutorial
+[ ] Re-work "game" landscape layout
+[ ] Add preview for completed "random-"difficulty levels
 
 # Future
 
 [ ] "Share" feature -- append base64 encoded level data at end of URL, point to ganbarugames.com
-[ ] Add router to allow players to directly access a shared puzzle
+[ ] Add router to allow players to directly access puzzles
 [ ] Investigate app cache to allow offline access
-[ ] Add thumbnail and level name for post-win modal
-[ ] Break scene transition out into a "scene controller" singleton/object
+[ ] Add thumbnail to post-win modal
+[x] Add level name to post-win modal
 [ ] Change scene transition to be code based - allow for an extra parameter, "forward" or "back", which dictates the direction the transition occurs
 
 # Roadmap for v1 App Store release
-[ ] Verify layout correctness on iPhone 5
+[x] Verify layout correctness on iPhone 5
   [X] Button borders are too thick (create < 320px media query?)
   [x] Puzzle grid is offset too far to the left
   [X] Button line height is too high (switch to percentage-based?)
-[ ] Hide editor button on homepage
-[ ] Add sound effect to modal buttons
+[x] Hide editor button on homepage
+[x] Add sound effect to modal buttons
 [X] Don't allow "fill" attempts on blocks that have been marked :/
 [X] Change to 30min limit which counts down
 [ ] Review each puzzle to ensure no cheap "guesswork" puzzles
-  [ ] Beginner
+  [x] Beginner
   [ ] Easy
   [ ] Medium
   [ ] Hard
+[ ] Create some more beginner level puzzles - take some of the cheap ones
+    and re-work them w/ a smaller grid
 [ ] Redistribute puzzles across difficulties to balance numbers out
-[ ] Get Cordova build running
-  [ ] Create iOS project
-  [ ] Create gulp task to copy built files over
-[ ] Create Acorn file for 1024x1024 app icon
+[x] Get Cordova build running
+  [x] Create iOS project
+  [x] Create gulp task to copy built files over
+[x] Create Acorn file for 1024x1024 app icon
 [ ] Write JS interface for IAP plugin
 [ ] Create demo video
 [ ] Screenshots for various iOS devices

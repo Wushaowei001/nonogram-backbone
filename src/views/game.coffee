@@ -147,18 +147,17 @@ class GameScene extends Scene
   doAction: (row, col) ->
     index = row * @cellCount + col
 
-    # TODO: need to only find visible cells here
     block = @grid.find('.blank').eq(index)
 
     valid = @clues[index] == 1
 
     if @action is 'fill'
       if block.hasClass('filled') is true or block.hasClass('marked')
-        # Play a "click" noise if block is already filled or marked
-        @trigger 'sfx:play', 'invalid'
+        # Do nothing
+        @trigger('sfx:play', 'invalid')
       else if valid
-        # Do a bunch of crap when a successful move is made
-        block.addClass 'filled pulse'
+        block.addClass('filled')
+        block.animate('pulse', 'fast', 'ease-in-out')
 
         @hits++
 
@@ -265,8 +264,10 @@ class GameScene extends Scene
       @tutorialStep = 0
 
     new DialogBox
+      parent: @
       el: @elem
       title: 'Puzzle solved!'
+      message: levels[@difficulty][@level].title
       buttons: [
         {
           text: 'OK'
@@ -293,11 +294,12 @@ class GameScene extends Scene
     window.clearInterval @timerId
 
     new DialogBox
+      parent: @
       el: @elem
       title: 'Paused'
       buttons: [
         {
-          text: 'Resume'
+          text: 'Play'
           callback: =>
             @ignoreInput = false
             @timerId = window.setInterval @updateTimer, 1000
@@ -467,6 +469,7 @@ class GameScene extends Scene
           blocks.eq(i * 10 + 1).addClass 'hint'
 
     new DialogBox
+      parent: @
       el: @elem
       title: text[@tutorialStep]
       buttons: [{
