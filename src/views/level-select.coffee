@@ -104,6 +104,11 @@ class LevelSelectScene extends Scene
     else
       @$('.level-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selectedLevel + 1}: ????"
 
+    # Store as "last viewed level"
+    lastViewedLevel = localStorage.getObject('lastViewedLevel')
+    lastViewedLevel[@difficulty] = @selectedLevel
+    localStorage.setObject 'lastViewedLevel', lastViewedLevel
+
   animateThumbnails: (direction = "") ->
     opposite = if direction == "-" then "" else "-"
     offscreenWidth = @width * 1.5
@@ -217,11 +222,6 @@ class LevelSelectScene extends Scene
 
   hide: (duration = 500, callback) ->
     super duration, callback
-
-    # Store the last viewed level for this difficulty
-    lastViewedLevel = localStorage.getObject('lastViewedLevel')
-    lastViewedLevel[@difficulty] = @selectedLevel
-    localStorage.setObject 'lastViewedLevel', lastViewedLevel
 
   show: (duration = 500, callback) ->
     super duration, callback
