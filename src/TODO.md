@@ -10,16 +10,17 @@
 [x] Make width/spacing for pause button and info windows consistant
 [x] Make text in pause button vertical
 [x] Allow "bump" animation when marking to happen cross-level
-[ ] Save currently selected level across game sessions
+[x] Save currently selected level across game sessions
 [ ] Fix tutorial
-[ ] Re-work "game" landscape layout
-[ ] Add preview for completed "random-"difficulty levels
+[x] Re-work "game.html" landscape layout
+[x] Add preview for completed "random-"difficulty levels
 
 # Future
 
 [ ] "Share" feature -- append base64 encoded level data at end of URL, point to ganbarugames.com
 [ ] Add router to allow players to directly access puzzles
 [ ] Investigate app cache to allow offline access
+[ ] Add "% complete" to difficulty select
 [ ] Add thumbnail to post-win modal
 [x] Add level name to post-win modal
 [ ] Change scene transition to be code based - allow for an extra parameter, "forward" or "back", which dictates the direction the transition occurs
@@ -29,6 +30,7 @@
   [X] Button borders are too thick (create < 320px media query?)
   [x] Puzzle grid is offset too far to the left
   [X] Button line height is too high (switch to percentage-based?)
+[ ] Check layout on all versions of iPhone/iPad hardware
 [x] Hide editor button on homepage
 [x] Add sound effect to modal buttons
 [X] Don't allow "fill" attempts on blocks that have been marked :/
@@ -41,10 +43,12 @@
 [ ] Create some more beginner level puzzles - take some of the cheap ones
     and re-work them w/ a smaller grid
 [ ] Redistribute puzzles across difficulties to balance numbers out
+[ ] Add an app store rating "feedback" button
 [x] Get Cordova build running
   [x] Create iOS project
   [x] Create gulp task to copy built files over
 [x] Create Acorn file for 1024x1024 app icon
+[ ] Create test IAP users
 [ ] Write JS interface for IAP plugin
 [ ] Create demo video
 [ ] Screenshots for various iOS devices
