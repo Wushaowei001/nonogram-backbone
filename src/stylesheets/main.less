@@ -199,7 +199,7 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
     .grid-background { width: 100%; height: 67%; overflow: hidden; background: #fff; border: 5px solid #000; .box-shadow;
       .minimap { width: 25%; height: 25%; float: left; .border-box; }
-      .clue { float: left; .border-box; color: #000; font-size: 1.2rem;
+      .clue { float: left; .border-box; color: #000; font-size: 1.3rem;
         &.horizontal { height: 7.5%; width: 25%; line-height: 2; padding-right: 2%; border-top: 1px solid #000; text-align: right;
           &:nth-child(2n - 1) { background-color: #d6e8ee; }
         }
@@ -273,24 +273,26 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
     #game {
       .actions { width: 100%;
-        &.pause { height: 20%; margin-bottom: 0;
-          .text { transform: none; margin: 0; }
+        &.pause { height: 20%; margin: 0 0 3% 0;
+          .text { transform: none; margin: 0; display: inline; }
         }
 
         &.mark,
-        &.fill { width: 100%; height: 40%; display: block; margin-bottom: 3%;
+        &.fill { width: 100%; height: 40%; display: block; margin: 0;
           .text {
             .icon { width: 18%; height: 80%; }
           }
         }
+        &.mark {  }
+        &.fill { margin-top: 5%; }
       }
 
-      .info { margin-bottom: 0; width: 100%; height: 38%;
-        &.complete { font-size: 0.9em;
-          .percentage { font-size: 3em; line-height: 0.5; padding: 8%; }
+      .info { margin: 0; width: 100%; height: 38%;
+        &.complete { margin: 0 0 3% 0; padding: 0 5%; line-height: 1;
+          .percentage { line-height: 0.6; padding: 5%; }
         }
-        &.timer { font-size: 1.6em; padding-top: 0;
-          span { font-size: 1em; }
+        &.timer { margin: 0 0 3% 0; line-height: 1.2;
+          span {  }
           .seconds { width: 23%; }
         }
       }
