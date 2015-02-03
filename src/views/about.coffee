@@ -94,18 +94,21 @@ class AboutScene extends Scene
           text: 'Yes'
           callback: => 
             stats = 
+              beginner: {}
               easy: {}
               medium: {}
               hard: {}
               random: {}
 
-            complete = 
+            complete =
+              beginner: 0 
               easy: 0
               medium: 0
               hard: 0
               random: 0
 
             lastViewedLevel = 
+              beginner: 0
               easy: 0
               medium: 0
               hard: 0
