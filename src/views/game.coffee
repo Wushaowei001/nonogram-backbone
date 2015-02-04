@@ -54,10 +54,8 @@ class GameScene extends Scene
   hint: null
 
   initialize: ->
-    # Ensure 'this' has correct context
-    _.bindAll @, 'onActionStart', 'onActionMove', 'onActionEnd', 'doAction', 'checkCompleted', 'win', 'pause', 'changeAction', 'updateTimer', 'showTutorial', 'resize', 'hide', 'show'
+    _.bindAll(@, 'updateTimer')
 
-    # View is initialized hidden
     @elem = $(template())
     @render()
 
@@ -137,7 +135,9 @@ class GameScene extends Scene
     @$('.vertical.clue').eq(@previousCol).removeClass('highlight')
     @$('.horizontal.clue').eq(@previousRow).removeClass('highlight')
 
-    # Unset the "mark lock" -- If user starts marking blocks, only allow marking for the duration of that touch, so that they don't accidentally un-mark a block
+    # Unset the "mark lock" -- If user starts marking blocks, only allow
+    # marking for the duration of that touch, so that they don't accidentally
+    # un-mark a block
     @actionLock = "none"
 
     # Clear out previous touch data
@@ -191,7 +191,8 @@ class GameScene extends Scene
             x: block.offset().left
             y: block.offset().top
 
-        # Instantly call the update method - this method adds 1 second, which is why the previous values are -1 second
+        # Instantly call the update method - this method adds 1 second,
+        # which is why the previous values are -1 second
         @updateTimer()
 
         # Try to have some visual indication that you made a wrong move
@@ -200,12 +201,12 @@ class GameScene extends Scene
     else if @action is 'mark'
       # Mark if block is empty
       if block.hasClass('marked') == false and block.hasClass('filled') == false and @actionLock != "remove"
-        block.addClass 'marked pulse'
+        block.addClass('marked')
         @actionLock = "mark"
         @trigger 'sfx:play', 'mark'
       # Remove mark if already marked
       else if block.hasClass('marked') == true and block.hasClass('filled') == false and @actionLock != "mark"
-        block.removeClass 'marked pulse'
+        block.removeClass('marked')
         @actionLock = "remove"
         @trigger 'sfx:play', 'mark'
       # Play a "click" noise if block is filled
@@ -225,14 +226,18 @@ class GameScene extends Scene
       rowIndex = row * @cellCount + i
       columnIndex = i * @cellCount + col
 
-      if blocks.eq(rowIndex).hasClass('filled') then completedRowTotal++
-      if blocks.eq(columnIndex).hasClass('filled') then completedColumnTotal++
+      if blocks.eq(rowIndex).hasClass('filled')
+        completedRowTotal += 1
+      if blocks.eq(columnIndex).hasClass('filled')
+        completedColumnTotal += 1
 
-      if @clues[rowIndex] is 1 then rowTotal++
-      if @clues[columnIndex] is 1 then columnTotal++
+      if @clues[rowIndex] is 1 then rowTotal += 1
+      if @clues[columnIndex] is 1 then columnTotal += 1
 
-    if rowTotal == completedRowTotal then @$('.horizontal.clue', @elem).eq(row).addClass('complete')
-    if columnTotal == completedColumnTotal then @$('.vertical.clue', @elem).eq(col).addClass('complete')
+    if rowTotal is completedRowTotal
+      @$('.horizontal.clue', @elem).eq(row).addClass('complete')
+    if columnTotal is completedColumnTotal
+      @$('.vertical.clue', @elem).eq(col).addClass('complete')
 
   # Actions when player solves the puzzle
   win: ->
@@ -283,9 +288,7 @@ class GameScene extends Scene
   # Go back to the level select screen
   pause: (e) ->
     e?.preventDefault()
-
-    # Handle a case when this "pause" method is called when user puts app into background
-    if @ignoreInput is true then return
+    return if @ignoreInput
 
     @ignoreInput = true
 
@@ -362,33 +365,50 @@ class GameScene extends Scene
       # Check if user placed the correct rect
       switch @tutorialStep
         when 4
-          # Make sure first column is filled
+          # Ensure first column is filled correctly
           stepCompleted = true
-          for i in [0..9]
-            if blocks.eq(i * 10).hasClass('filled') is false then stepCompleted = false
-          success = stepCompleted
-        when 5
-          # Make sure last row is filled
-          stepCompleted = true
-          for i in [91..99]
+          for i in [0, 5, 10, 15, 20]
             if blocks.eq(i).hasClass('filled') is false then stepCompleted = false
           success = stepCompleted
         when 8
-          # Make sure first row/last column are marked
+          # Ensure 3rd column is filled correctly
           stepCompleted = true
-          for i in [1..9]
-            if blocks.eq(i).hasClass('marked') is false then stepCompleted = false
-          for i in [0..8]
-            if blocks.eq(i * 10 + 9).hasClass('marked') is false then stepCompleted = false
+          for i in [2, 12, 22]
+            if blocks.eq(i).hasClass('filled') is false then stepCompleted = false
           success = stepCompleted
-        when 10
+        when 11
+          # Ensure 3rd column is marked correctly
           stepCompleted = true
-          for i in [1..9]
-            if blocks.eq(i * 10 + 1).hasClass('filled') is false then stepCompleted = false
+          for i in [7, 17]
+            if blocks.eq(i).hasClass('marked') is false then stepCompleted = false
+          success = stepCompleted
+        when 12
+          # Ensure 4th column is filled correctly
+          stepCompleted = true
+          for i in [3, 13, 18, 23]
+            if blocks.eq(i).hasClass('filled') is false then stepCompleted = false
+          success = stepCompleted
+        when 13
+          # Ensure 5th column is all marked
+          stepCompleted = true
+          for i in [4, 9, 14, 19, 24]
+            if blocks.eq(i).hasClass('marked') is false then stepCompleted = false
+          success = stepCompleted
+        when 15
+          # Ensure 1st row is filled correctly
+          stepCompleted = true
+          for i in [0...4]
+            if blocks.eq(i).hasClass('filled') is false then stepCompleted = false
+          success = stepCompleted
+        when 16
+          # Ensure rest of squares marked correctly
+          stepCompleted = true
+          for i in [6, 7, 8, 11, 16, 17]
+            if blocks.eq(i).hasClass('marked') is false then stepCompleted = false
           success = stepCompleted
 
       if success
-        @tutorialStep++
+        @tutorialStep += 1
         @showTutorial()
 
 
@@ -400,50 +420,31 @@ class GameScene extends Scene
     capitalActionWord = if ENV.mobile then "Tap" else "Click"
 
     text = [
-      "Welcome to Nonogram Madness! Nonograms are logic puzzles that reveal an image when solved." # 0
-      "Solve each puzzle using the numeric clues on the top and left of the grid." # 1
-      "Each number represents squares in the grid that are \"filled\" in a row or column." # 2
-      "Clues with multiple numbers represent a gap between filled squares." # 3
-      "Look at the first column. The clue is \"10\". #{capitalActionWord} the \"fill\" button then #{actionWord} all 10 squares." # 4
-      # Action
-      "Check out the last row. Its clue is also \"10\". #{capitalActionWord} all 10 squares in the bottom row." # 5
-      # Action
-      "Notice that when you complete a row or column, its clues dim slightly, so you know you're done." # 6
-      "You can also mark squares that you know are blank, then focus on other areas of the puzzle." #7
-      "#{capitalActionWord} the \"mark\" button and mark the row and column that are complete." #8
-      # Action
-      "You can now logically solve the rest of the rows and columns." #9
-      "Column #2 has 9 filled blocks, and the first block is empty. Go ahead and fill this column." #10
-      # Action
-      "I think you've got the hang of it. Try to finish the rest of the puzzle yourself!" # 11
-    ]
-    text = [
       "Welcome to Nonogram Madness! Nonograms are logic puzzles that reveal an image when solved.", 
       "Solve each puzzle using the numeric clues on the top and left of the grid.",
       "Each number represents squares in the grid that are \"filled\" in a row or column.",
       "Clues with multiple numbers mean a gap of one (or more) between filled squares.",
       "Look at the first column. The clue is \"5\". Tap \"fill\" then tap all 5 squares.",
-      # Action
+      # Action - 4
       "The second column is harder. We don't know where the two single filled squares are.",
       "Skip difficult rows or columns and come back to them later.",
       "Look at the third column. The clue is \"1 1 1\". There's a gap between each filled square.",
       "Make sure the \"fill\" button is selected, then fill in three squares with a gap between each.",
-      # Action
+      # Action - 8
       "You can use the \"mark\" action to protect blocks that are supposed to be empty.",
-      "Erase a marked square by tapping it again. Don't worry about making a mistake.",
+      "Erase a marked square by selecting it again.",
       "#{capitalActionWord} \"mark\" and mark the empty squares so you don't accidentally try to fill them in later.",
-      # Action
+      # Action - 11
       "Check out the fourth column. The clue is \"1 3\". Fill one square, leave a gap, then fill three more.",
-      # Action
+      # Action - 12
       "The fifth column is empty. \"Mark\" all those squares to show they don't need to be filled in.",
-      # Action
+      # Action - 13
       "Next, look at the horizontal clues. The first row has four sequential filled squares.",
       "Fill in the only open square in this row to complete it.",
-      # Action
+      # Action - 15
       "The second, third, and fourth rows are already complete. Mark all the open squares in them.",
-      # Action
-      "I think you've got the hang of it. Try to finish the rest of the puzzle yourself!"
-      # Action
+      # Action - 16
+      "I think you've got the hang of it. Finish the rest of the puzzle yourself!"
     ]
 
     blocks = @grid.find('.blank')
@@ -454,19 +455,26 @@ class GameScene extends Scene
     # Show hint overlays here
     switch @tutorialStep
       when 4
-        for i in [0..9]
-          blocks.eq(i * 10).addClass 'hint'
-      when 5
-        for i in [91..99]
-          blocks.eq(i).addClass 'hint'
+        for i in [0, 5, 10, 15, 20]
+          blocks.eq(i).addClass('hint')
       when 8
-        for i in [1..9]
-          blocks.eq(i).addClass 'hint'
-        for i in [0..8]
-          blocks.eq(i * 10 + 9).addClass 'hint'
-      when 10
-        for i in [1..9]
-          blocks.eq(i * 10 + 1).addClass 'hint'
+        for i in [2, 12, 22]
+          blocks.eq(i).addClass('hint')
+      when 11
+        for i in [7, 17]
+          blocks.eq(i).addClass('hint')
+      when 12
+        for i in [3, 13, 18, 23]
+          blocks.eq(i).addClass('hint')
+      when 13
+        for i in [4, 9, 14, 19, 24]
+          blocks.eq(i).addClass('hint')
+      when 15
+        for i in [0...4]
+          blocks.eq(i).addClass('hint')
+      when 16
+        for i in [6, 8, 11, 16]
+          blocks.eq(i).addClass('hint')
 
     new DialogBox
       parent: @
@@ -478,8 +486,8 @@ class GameScene extends Scene
           @ignoreInput = false
 
           # These steps indicate where the player has to take action
-          if [ 4, 5, 8, 10 ].indexOf(@tutorialStep) == -1 and @tutorialStep < text.length - 1
-            @tutorialStep++
+          if [4, 8, 11, 12, 13, 15, 16].indexOf(@tutorialStep) == -1 and @tutorialStep < text.length - 1
+            @tutorialStep += 1
             @showTutorial()
       }]
 
