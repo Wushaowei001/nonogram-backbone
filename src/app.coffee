@@ -21,8 +21,7 @@ Storage.prototype.getObject = (key) ->
   return value and JSON.parse value
 
 Storage.prototype.getBoolean = (key) ->
-  value = @getItem(key)
-  value == 'true'
+  @getItem(key) is 'true'
 
 # Extend Backbone
 Backbone.View.prototype.close = ->

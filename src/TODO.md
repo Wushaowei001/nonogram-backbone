@@ -11,9 +11,20 @@
 [x] Make text in pause button vertical
 [x] Allow "bump" animation when marking to happen cross-level
 [x] Save currently selected level across game sessions
-[ ] Fix tutorial
+[x] Fix tutorial
 [x] Re-work "game.html" landscape layout
 [x] Add preview for completed "random-"difficulty levels
+[ ] Add back the editor so as to make new puzzles on the actual device
+  [ ] Need a way to name the puzzle
+  [ ] Need a "level select" layout for user-created puzzles
+[ ] Add a "feedback" button on About view - email on web, App Store rate on Cordova
+[ ] Undo/redo in editor
+  * Store all touched blocks in an array per touch
+  * Push array onto "undo" stack
+  * If user hits "undo," replay all those touched blocks, then move group onto "redo" stack
+  * Hitting "redo" will replay the touches, then move goup onto "undo" stack again
+  * New user input clears out the "redo" stack - otherwise you'd be redoing on top of 
+    new input, which would be confusing/wrong
 
 # Future
 
@@ -43,7 +54,6 @@
 [ ] Create some more beginner level puzzles - take some of the cheap ones
     and re-work them w/ a smaller grid
 [ ] Redistribute puzzles across difficulties to balance numbers out
-[ ] Add an app store rating "feedback" button
 [x] Get Cordova build running
   [x] Create iOS project
   [x] Create gulp task to copy built files over

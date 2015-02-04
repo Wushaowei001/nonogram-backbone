@@ -159,15 +159,12 @@ class GameScene extends Scene
         block.addClass('filled')
         block.animate('pulse', 'fast', 'ease-in-out')
 
-        @hits++
-
-        $('.complete .percentage', @elem).html Math.round(@hits / @totalHits * 100)
-
         # Check whether or not to dim clues in a row/col
-        @checkCompleted row, col
+        @checkCompleted(row, col)
 
-        # Check if player has won
-        if @hits == @totalHits then @win()
+        @hits += 1
+        $('.complete .percentage', @elem).html Math.round(@hits / @totalHits * 100)
+        @win() if @hits is @totalHits
 
         @trigger 'sfx:play', 'fill'
       else

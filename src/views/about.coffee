@@ -25,12 +25,12 @@ class AboutScene extends Scene
     @render()
 
     # Update the text on these toggle buttons
-    if localStorage.getItem('playMusic') == "true"
+    if localStorage.getBoolean('playMusic')
       @$('.button.music span', @elem).html 'Music ON'
     else
       @$('.button.music span', @elem).html 'Music OFF'
     
-    if localStorage.getItem('playSfx') == "true"
+    if localStorage.getBoolean('playSfx')
       @$('.button.sfx span', @elem).html 'Sound ON'
     else
       @$('.button.sfx span', @elem).html 'Sound OFF'
@@ -50,11 +50,11 @@ class AboutScene extends Scene
 
     @trigger 'sfx:play', 'button'
 
-    preference = localStorage.getItem('playSfx') == "true"  # This casts the string that is stored in localStorage into a boolean
+    preference = localStorage.getBoolean('playSfx')
     preference = !preference
-    localStorage.setItem 'playSfx', preference
+    localStorage.setItem('playSfx', preference)
 
-    if preference == true
+    if preference
       @$('.button.sfx span', @elem).html 'Sound ON'
     else
       @$('.button.sfx span', @elem).html 'Sound OFF'
@@ -65,11 +65,11 @@ class AboutScene extends Scene
 
     @trigger 'sfx:play', 'button'
 
-    preference = localStorage.getItem('playMusic') == "true"  # This casts the string that is stored in localStorage into a boolean
+    preference = localStorage.getBoolean('playMusic')
     preference = !preference
-    localStorage.setItem 'playMusic', preference
+    localStorage.setItem('playMusic', preference)
 
-    if preference == true
+    if preference
       @$('.button.music span', @elem).html 'Music ON'
       @trigger 'music:play', 'bgm-one'
     else

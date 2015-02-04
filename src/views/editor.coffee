@@ -12,7 +12,7 @@ class EditorScene extends Scene
       'touchend .save': 'save'
       'touchend .quit': 'quit'
       'touchend .undo': 'undo'
-      'touchend .undo': 'help'
+      'touchend .redo': 'redo'
       'touchend .larger': 'makeGridLarger'
       'touchend .smaller': 'makeGridSmaller'
       'touchstart': 'onPointStart'
@@ -22,7 +22,7 @@ class EditorScene extends Scene
       'click .save': 'save'
       'click .quit': 'quit'
       'click .undo': 'undo'
-      'click .undo': 'help'
+      'click .redo': 'redo'
       'click .larger': 'makeGridLarger'
       'click .smaller': 'makeGridSmaller'
       'mousedown': 'onPointStart'
@@ -32,11 +32,10 @@ class EditorScene extends Scene
   MIN_CELL_COUNT: 5
   GRID_SIZE_RATIO: 0.97
   cellCount: 10
+  undoList: []
+  redoList: []
 
   initialize: ->
-    _.bindAll(@, 'onPointStart', 'onPointMove', 'onPointEnd')
-
-    # View is initialized hidden
     @elem = $(template())
     @render()
 
@@ -50,27 +49,48 @@ class EditorScene extends Scene
   quit: (e) ->
     @undelegateEvents() # Prevent multiple clicks
 
-    @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'title'
+    @trigger('sfx:play', 'button')
+    @trigger('scene:change', 'title')
 
   save: (e) ->
-    @trigger 'sfx:play', 'button'
+    @trigger('sfx:play', 'button')
+    @ignoreInput = true
 
-    # TODO: Determine a way to give the puzzle a title, so as to store
-    # by key, rather than a dumb array
-    userLevels = localStorage.getObject('userLevels') || []
+    new DialogBox
+      el: @elem
+      parent: @
+      title: 'Save Level'
+      html: """<input type="text" id="level-name" placeholder="Enter name here" value="#{@ignoreInput}">"""
+      buttons: [
+        {
+          text: 'Save'
+          callback: =>
+            name = @$('#level-name').val()
 
-    cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
-    levelData = _(cells).map (cell) ->
-      return if $(cell).hasClass('filled') then 1 else 0
+            @ignoreInput = false
+            # TODO: Determine a way to give the puzzle a title, so as to store
+            # by key, rather than a dumb array
+            userLevels = localStorage.getObject('userLevels') || []
 
-    userLevels.push(levelData)
-    localStorage.setObject('userLevels', userLevels)
+            cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
+            levelData = _(cells).map (cell) ->
+              return if $(cell).hasClass('filled') then 1 else 0
+
+            userLevels.push(levelData)
+            localStorage.setObject('userLevels', userLevels)
+        },
+        { 
+          text: 'Cancel'
+          callback: =>
+            @ignoreInput = false
+        }
+      ]
 
   makeGridLarger: (e) ->
     if @cellCount < @MAX_CELL_COUNT
       @trigger 'sfx:play', 'button'
       @cellCount += 1
+      @grid.children('div').removeClass('filled')
       @resizeGrid()
       @enableOrDisableGridResizeButtons()
 
@@ -78,31 +98,34 @@ class EditorScene extends Scene
     if @cellCount > @MIN_CELL_COUNT
       @trigger 'sfx:play', 'button'
       @cellCount -= 1
+      @grid.children('div').removeClass('filled')
       @resizeGrid()
       @enableOrDisableGridResizeButtons()
 
   enableOrDisableGridResizeButtons: ->
     if @MIN_CELL_COUNT < @cellCount < @MAX_CELL_COUNT
-      @$('.larger').removeClass 'disabled'
-      @$('.smaller').removeClass 'disabled'
+      @$('.larger').removeClass('disabled')
+      @$('.smaller').removeClass('disabled')
     else
-      @$('.larger').addClass 'disabled' if @cellCount is @MAX_CELL_COUNT
-      @$('.smaller').addClass 'disabled' if @cellCount is @MIN_CELL_COUNT
+      @$('.larger').addClass('disabled') if @cellCount is @MAX_CELL_COUNT
+      @$('.smaller').addClass('disabled') if @cellCount is @MIN_CELL_COUNT
 
   resizeGrid: ->
     smallestDimension = if @orientation is 'landscape' then @height else @width
     maxGridSize = Math.round(smallestDimension * @GRID_SIZE_RATIO / 10) * 10
-
+    borderWidth = parseInt(@grid.css('border-width'), 10) * 2
     @cellSize = maxGridSize / 10
-    @grid.width(@cellCount * @cellSize)
-    @grid.height(@cellCount * @cellSize)
+    gridSize = @cellCount * @cellSize
+
+    @grid.width(gridSize)
+    @grid.height(gridSize)
 
     if @orientation is 'landscape'
-      horizontalMargin = (@height - @grid.width() - 10) / 2
-      verticalMargin = (maxGridSize - @grid.height()) / 2
+      horizontalMargin = (@height - gridSize - borderWidth) / 2
+      verticalMargin = (maxGridSize - gridSize) / 2
     else if @orientation is 'portrait'
-      verticalMargin = (@width - @grid.height() - 10) / 2
-      horizontalMargin = (maxGridSize - @grid.width()) / 2
+      verticalMargin = (@width - gridSize - borderWidth) / 2
+      horizontalMargin = (maxGridSize - gridSize) / 2
 
     @grid.css
       margin: "#{horizontalMargin}px #{verticalMargin}px"
@@ -120,9 +143,10 @@ class EditorScene extends Scene
 
   onPointStart: (e) ->
     e.preventDefault()
+    return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
-    if e.type == 'mousedown' then @elem.on 'mousemove', @onPointMove
+    if e.type is 'mousedown' then @elem.on('mousemove', @onPointMove)
 
     position = Input.normalize(e)
 
@@ -137,6 +161,7 @@ class EditorScene extends Scene
   # Triggered on mousemove or touchmove
   onPointMove: (e) ->
     e.preventDefault()
+    return if @ignoreInput
 
     position = Input.normalize e
 
@@ -152,9 +177,10 @@ class EditorScene extends Scene
   # Triggered on mouseup or touchend
   onPointEnd: (e) ->
     e.preventDefault()
+    return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
-    if e.type == 'mouseup' then @elem.off 'mousemove', @onPointMove
+    if e.type is 'mouseup' then @elem.off('mousemove', @onPointMove)
 
     @previousRow = @previousCol = null
 
@@ -162,12 +188,13 @@ class EditorScene extends Scene
     index = row * @cellCount + col
     block = @grid.find('div').eq(index)
 
+    @trigger('sfx:play', 'mark')
+
     if block.hasClass('filled') is true
-      @trigger 'sfx:play', 'mark'
-      block.removeClass 'filled'
+      block.removeClass('filled')
     else
-      @trigger 'sfx:play', 'mark'
-      block.addClass 'filled'
+      block.addClass('filled')
+      block.animate('pulse', 'fast', 'ease-in-out')
 
   resize: (width, height, orientation) ->
     @width = width
