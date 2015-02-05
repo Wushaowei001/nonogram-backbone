@@ -54,7 +54,7 @@ class GameScene extends Scene
   hint: null
 
   initialize: ->
-    _.bindAll(@, 'updateTimer')
+    _.bindAll(@, 'updateTimer', 'onActionMove')
 
     @elem = $(template())
     @render()
@@ -69,7 +69,6 @@ class GameScene extends Scene
 
   # Triggered on mousedown or touchstart
   onActionStart: (e) ->
-    e.preventDefault()
     return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
@@ -94,7 +93,6 @@ class GameScene extends Scene
 
   # Triggered on mousemove or touchmove
   onActionMove: (e) ->
-    e.preventDefault()
     return if @ignoreInput
     return if @startRow is -1 or @startCol is -1
 
@@ -125,7 +123,6 @@ class GameScene extends Scene
 
   # Triggered on mouseup or touchend
   onActionEnd: (e) ->
-    e.preventDefault()
     return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
@@ -284,7 +281,6 @@ class GameScene extends Scene
 
   # Go back to the level select screen
   pause: (e) ->
-    e?.preventDefault()
     return if @ignoreInput
 
     @ignoreInput = true
@@ -320,7 +316,6 @@ class GameScene extends Scene
 
   # Change the current user action
   changeAction: (e) ->
-    e.preventDefault()
     target = $(e.target)
 
     # User is probably actually clicking an element inside the button

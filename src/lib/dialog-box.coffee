@@ -80,8 +80,6 @@ class DialogBox extends Backbone.View
   # Determine which button was clicked, call the appropriate callback,
   # and close the dialog box view
   onAction: (e) ->
-    e.preventDefault()
-
     # Allow button to only be clicked once
     return if @callbackCompleted is true
     @callbackCompleted = true

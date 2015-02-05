@@ -36,8 +36,6 @@ class LevelSelectScene extends Scene
     @altCanvases = @$('.preview .group:last-child canvas')
 
   previous: (e) ->
-    e.preventDefault()
-
     if @page > 0
       @page -= 1
 
@@ -46,8 +44,6 @@ class LevelSelectScene extends Scene
       @animateThumbnails("-")
 
   next: (e) ->
-    e.preventDefault()
-
     if @page < @totalPages
       @page += 1
 
@@ -56,7 +52,6 @@ class LevelSelectScene extends Scene
       @animateThumbnails()
 
   play: (e) ->
-    e.preventDefault()
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'
@@ -64,7 +59,6 @@ class LevelSelectScene extends Scene
       { difficulty: @difficulty, level: @selectedLevel }
 
   back: (e) ->
-    e.preventDefault()
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger 'sfx:play', 'button'

@@ -36,6 +36,7 @@ class EditorScene extends Scene
   redoList: []
 
   initialize: ->
+    _.bindAll(@, 'onPointMove')
     @elem = $(template())
     @render()
 
@@ -60,7 +61,7 @@ class EditorScene extends Scene
       el: @elem
       parent: @
       title: 'Save Level'
-      html: """<input type="text" id="level-name" placeholder="Enter name here" value="#{@ignoreInput}">"""
+      html: """<input type="text" id="level-name" placeholder="Enter name here" value="">"""
       buttons: [
         {
           text: 'Save'
@@ -70,13 +71,16 @@ class EditorScene extends Scene
             @ignoreInput = false
             # TODO: Determine a way to give the puzzle a title, so as to store
             # by key, rather than a dumb array
+            # TODO: Think about re-organizing levels to be stored in an object,
+            # rather than an array
             userLevels = localStorage.getObject('userLevels') || []
 
             cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
-            levelData = _(cells).map (cell) ->
+            data = _(cells).map (cell) ->
               return if $(cell).hasClass('filled') then 1 else 0
 
-            userLevels.push(levelData)
+            userLevels.push({ title: name, clues: data })
+            console.log { title: name, clues: data }
             localStorage.setObject('userLevels', userLevels)
         },
         { 
@@ -142,7 +146,6 @@ class EditorScene extends Scene
         $(element).hide()
 
   onPointStart: (e) ->
-    e.preventDefault()
     return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
@@ -160,7 +163,6 @@ class EditorScene extends Scene
 
   # Triggered on mousemove or touchmove
   onPointMove: (e) ->
-    e.preventDefault()
     return if @ignoreInput
 
     position = Input.normalize e
@@ -176,7 +178,6 @@ class EditorScene extends Scene
 
   # Triggered on mouseup or touchend
   onPointEnd: (e) ->
-    e.preventDefault()
     return if @ignoreInput
 
     # Determine if event was caused by mouse or finger
