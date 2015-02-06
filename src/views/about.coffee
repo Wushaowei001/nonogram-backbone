@@ -107,7 +107,7 @@ class AboutScene extends Scene
               hard: 0
               random: 0
 
-            lastViewedLevel = 
+            lastViewedPuzzle = 
               beginner: 0
               easy: 0
               medium: 0
@@ -116,7 +116,7 @@ class AboutScene extends Scene
 
             localStorage.setObject 'stats', stats
             localStorage.setObject 'complete', complete
-            localStorage.setObject 'lastViewedLevel', lastViewedLevel
+            localStorage.setObject 'lastViewedPuzzle', lastViewedPuzzle
         },
         {
           text: 'No'

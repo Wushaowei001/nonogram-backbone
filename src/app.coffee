@@ -9,6 +9,7 @@ TitleScene            = require('./views/title')
 GameScene             = require('./views/game')
 AboutScene            = require('./views/about')
 LevelSelectScene      = require('./views/level-select')
+UserPuzzleSelectScene = require('./views/user-puzzle-select')
 DifficultySelectScene = require('./views/difficulty-select')
 EditorScene           = require('./views/editor')
 
@@ -18,7 +19,7 @@ Storage.prototype.setObject = (key, value) ->
 
 Storage.prototype.getObject = (key) ->
   value = @getItem key
-  return value and JSON.parse value
+  return value and JSON.parse(value)
 
 Storage.prototype.getBoolean = (key) ->
   @getItem(key) is 'true'
@@ -49,6 +50,7 @@ class App extends Backbone.View
       game: new GameScene { el: @el }
       about: new AboutScene { el: @el }
       levelSelect: new LevelSelectScene { el: @el }
+      userPuzzleSelect: new UserPuzzleSelectScene { el: @el }
       difficultySelect: new DifficultySelectScene { el: @el }
       editor: new EditorScene { el: @el }
 
@@ -236,14 +238,14 @@ class App extends Backbone.View
         random: 0
       localStorage.setObject 'complete', complete
 
-    if localStorage.getObject('lastViewedLevel') == null
-      lastViewedLevel =
+    if localStorage.getObject('lastViewedPuzzle') == null
+      lastViewedPuzzle =
         beginner: 0
         easy: 0
         medium: 0
         hard: 0
         random: 0
-      localStorage.setObject 'lastViewedLevel', lastViewedLevel
+      localStorage.setObject 'lastViewedPuzzle', lastViewedPuzzle
 
     if localStorage.getObject('purchased') == null
       localStorage.setObject 'purchased', []

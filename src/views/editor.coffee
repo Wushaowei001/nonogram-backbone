@@ -61,27 +61,33 @@ class EditorScene extends Scene
       el: @elem
       parent: @
       title: 'Save Level'
-      html: """<input type="text" id="level-name" placeholder="Enter name here" value="">"""
+      html: """<input type="text" id="puzzle-title" placeholder="Enter name here" value="">"""
       buttons: [
         {
           text: 'Save'
           callback: =>
-            name = @$('#level-name').val()
-
             @ignoreInput = false
             # TODO: Determine a way to give the puzzle a title, so as to store
             # by key, rather than a dumb array
             # TODO: Think about re-organizing levels to be stored in an object,
             # rather than an array
-            userLevels = localStorage.getObject('userLevels') || []
+            userPuzzles = localStorage.getObject('userPuzzles') || []
 
+            title = @$('#puzzle-title').val()
             cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
             data = _(cells).map (cell) ->
               return if $(cell).hasClass('filled') then 1 else 0
 
-            userLevels.push({ title: name, clues: data })
-            console.log { title: name, clues: data }
-            localStorage.setObject('userLevels', userLevels)
+            # Search for puzzle w/ same name; if found, overwrite
+            for puzzle, index in userPuzzles
+              if puzzle.title is title
+                userPuzzles.splice(index, 1, { title: name, clues: data })
+                replaced = true
+                break
+
+            userPuzzles.push({ title: name, clues: data }) unless replaced?
+
+            localStorage.setObject('userPuzzles', userPuzzles)
         },
         { 
           text: 'Cancel'
