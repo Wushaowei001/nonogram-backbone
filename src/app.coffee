@@ -5,24 +5,14 @@ Backbone.$ = $
 Sona       = require('sona')
 ENV        = require('./lib/env')
 
+require('./lib/localstorage-extensions')
+
 TitleScene            = require('./views/title')
 GameScene             = require('./views/game')
 AboutScene            = require('./views/about')
-LevelSelectScene      = require('./views/level-select')
-UserPuzzleSelectScene = require('./views/user-puzzle-select')
+PuzzleSelectScene     = require('./views/puzzle-select')
 DifficultySelectScene = require('./views/difficulty-select')
 EditorScene           = require('./views/editor')
-
-# Extend local storage
-Storage.prototype.setObject = (key, value) ->
-  @setItem key, JSON.stringify value
-
-Storage.prototype.getObject = (key) ->
-  value = @getItem key
-  return value and JSON.parse(value)
-
-Storage.prototype.getBoolean = (key) ->
-  @getItem(key) is 'true'
 
 # Extend Backbone
 Backbone.View.prototype.close = ->
@@ -49,8 +39,7 @@ class App extends Backbone.View
       title: new TitleScene { el: @el }
       game: new GameScene { el: @el }
       about: new AboutScene { el: @el }
-      levelSelect: new LevelSelectScene { el: @el }
-      userPuzzleSelect: new UserPuzzleSelectScene { el: @el }
+      puzzleSelect: new PuzzleSelectScene { el: @el }
       difficultySelect: new DifficultySelectScene { el: @el }
       editor: new EditorScene { el: @el }
 
@@ -246,6 +235,9 @@ class App extends Backbone.View
         hard: 0
         random: 0
       localStorage.setObject 'lastViewedPuzzle', lastViewedPuzzle
+
+    if localStorage.getObject('userPuzzles') == null
+      localStorage.setObject 'userPuzzles', []
 
     if localStorage.getObject('purchased') == null
       localStorage.setObject 'purchased', []

@@ -51,7 +51,7 @@ class EditorScene extends Scene
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger('sfx:play', 'button')
-    @trigger('scene:change', 'title')
+    @trigger('scene:change', 'puzzleSelect', { difficulty: 'user' })
 
   save: (e) ->
     @trigger('sfx:play', 'button')

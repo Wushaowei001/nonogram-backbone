@@ -39,7 +39,7 @@ class TitleScene extends Scene
     @undelegateEvents()
 
     @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'userPuzzleSelect'
+    @trigger 'scene:change', 'puzzleSelect', { difficulty: 'user' }
 
   about: (e) ->
     e.preventDefault()

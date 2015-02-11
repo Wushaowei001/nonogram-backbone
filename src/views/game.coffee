@@ -6,7 +6,7 @@ FloatingText = require('../lib/floating-text')
 DialogBox    = require('../lib/dialog-box')
 Input        = require('../lib/input')
 template     = require('../templates/game')
-levels       = require('../data/levels')
+puzzles      = require('../data/puzzles')
 
 class GameScene extends Scene
   events: ->
@@ -266,7 +266,7 @@ class GameScene extends Scene
       parent: @
       el: @elem
       title: 'Puzzle solved!'
-      message: levels[@difficulty][@level].title
+      message: puzzles[@difficulty][@level].title
       buttons: [
         {
           text: 'OK'
@@ -615,9 +615,9 @@ class GameScene extends Scene
       localStorage.setObject 'stats', stats
 
     # Grab clues out of data structure
-    @clues = levels[@difficulty][@level].clues
+    @clues = puzzles[@difficulty][@level].clues
 
-    # Generate clues for random levels
+    # Generate clues for random puzzles
     if @difficulty is "random"
       @clues = []
       switch @level
