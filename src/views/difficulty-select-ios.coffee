@@ -126,7 +126,7 @@ define [
 
 			if button.data('purchased') is 'yes'
 				@trigger 'sfx:play', 'button'
-				@trigger 'scene:change', 'levelSelect', { difficulty: button.data 'difficulty' }
+				@trigger 'scene:change', 'puzzleSelect', { difficulty: button.data 'difficulty' }
 			else
 				productId = "com.ganbarugames.shikakumadnessfree.#{button.data 'difficulty'}"
 
