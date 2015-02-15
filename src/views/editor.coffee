@@ -38,30 +38,30 @@ class EditorScene extends Scene
   initialize: ->
     _.bindAll(@, 'onPointMove')
     @elem = $(template())
-    @render()
-
-  # Append the view's elem to the DOM
-  render: ->
-    @$el.append(@elem)
 
     # Get some references to DOM elements that we need later
     @grid = @elem.find('.grid')
+
+    @render()
 
   quit: (e) ->
     @undelegateEvents() # Prevent multiple clicks
 
     @trigger('sfx:play', 'button')
-    @trigger('scene:change', 'puzzleSelect', { difficulty: 'user' })
+    @trigger('scene:change', 'userPuzzleSelect')
 
   save: (e) ->
     @trigger('sfx:play', 'button')
     @ignoreInput = true
 
+    userPuzzles = localStorage.getObject('userPuzzles')
+    title = userPuzzles[@puzzle].title
+
     new DialogBox
       el: @elem
       parent: @
       title: 'Save Level'
-      html: """<input type="text" id="puzzle-title" placeholder="Enter name here" value="">"""
+      html: """<input type="text" id="puzzle-title" placeholder="Enter name here" value="#{title}">"""
       buttons: [
         {
           text: 'Save'
@@ -71,7 +71,6 @@ class EditorScene extends Scene
             # by key, rather than a dumb array
             # TODO: Think about re-organizing levels to be stored in an object,
             # rather than an array
-            userPuzzles = localStorage.getObject('userPuzzles') || []
 
             title = @$('#puzzle-title').val()
             cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
@@ -89,7 +88,7 @@ class EditorScene extends Scene
 
             localStorage.setObject('userPuzzles', userPuzzles)
         },
-        { 
+        {
           text: 'Cancel'
           callback: =>
             @ignoreInput = false
@@ -113,12 +112,11 @@ class EditorScene extends Scene
       @enableOrDisableGridResizeButtons()
 
   enableOrDisableGridResizeButtons: ->
-    if @MIN_CELL_COUNT < @cellCount < @MAX_CELL_COUNT
-      @$('.larger').removeClass('disabled')
-      @$('.smaller').removeClass('disabled')
-    else
-      @$('.larger').addClass('disabled') if @cellCount is @MAX_CELL_COUNT
-      @$('.smaller').addClass('disabled') if @cellCount is @MIN_CELL_COUNT
+    @$('.larger').removeClass('disabled')
+    @$('.smaller').removeClass('disabled')
+
+    @$('.larger').addClass('disabled') if @cellCount is @MAX_CELL_COUNT
+    @$('.smaller').addClass('disabled') if @cellCount is @MIN_CELL_COUNT
 
   resizeGrid: ->
     smallestDimension = if @orientation is 'landscape' then @height else @width
@@ -209,8 +207,24 @@ class EditorScene extends Scene
     @orientation = orientation
     @resizeGrid()
 
+  hide: (duration = 500, callback) ->
+    super(duration, callback)
+    @puzzle = null
+
   show: (duration = 500, callback) ->
-    super duration, callback
+    super(duration, callback)
     @enableOrDisableGridResizeButtons()
+
+    return unless @puzzle
+
+    userPuzzles = localStorage.getObject('userPuzzles')
+    clues = userPuzzles[@puzzle].clues
+
+    @cellCount = Math.sqrt(clues.length)
+    @resizeGrid()
+    @enableOrDisableGridResizeButtons()
+
+    clues.forEach (element, i) =>
+      @grid.find('div').eq(i).addClass('filled') if element is 1
 
 module.exports = EditorScene

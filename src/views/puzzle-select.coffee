@@ -1,9 +1,9 @@
-$               = require('../vendor/zepto')
-_               = require('underscore')
-ENV             = require('../lib/env')
-Scene           = require('../lib/scene')
-template        = require('../templates/puzzle-select')
-defaultPuzzles  = require('../data/puzzles')
+$        = require('../vendor/zepto')
+_        = require('underscore')
+ENV      = require('../lib/env')
+Scene    = require('../lib/scene')
+template = require('../templates/puzzle-select')
+puzzleData  = require('../data/puzzles')
 
 class PuzzleSelectScene extends Scene
   events: ->
@@ -12,14 +12,12 @@ class PuzzleSelectScene extends Scene
       'touchend .previous': 'previous'
       'touchend .next': 'next'
       'touchend .play': 'play'
-      'touchend .create': 'create'
       'touchstart canvas': 'select'
     else
       'click .back': 'back'
       'click .previous': 'previous'
       'click .next': 'next'
       'click .play': 'play'
-      'click .create': 'create'
       'click canvas': 'select'
 
   selected: 0
@@ -31,13 +29,13 @@ class PuzzleSelectScene extends Scene
   PAGE_DELAY: 150
 
   initialize: ->
-    @puzzles = defaultPuzzles
-
     @elem = $(template())
     @render()
 
-    @canvases = @$('.preview .group:first-child canvas')
-    @altCanvases = @$('.preview .group:last-child canvas')
+    @canvases = $('.preview .group:first-child canvas', @elem)
+    @altCanvases = $('.preview .group:last-child canvas', @elem)
+
+    @puzzles = puzzleData
 
   previous: ->
     return unless @page > 0
@@ -66,18 +64,12 @@ class PuzzleSelectScene extends Scene
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'difficultySelect'
 
-  create: ->
-    @undelegateEvents() # Prevent multiple clicks
-
-    @trigger 'sfx:play', 'button'
-    @trigger 'scene:change', 'editor'
-
   enableOrDisablePagingButtons: ->
-    @$('.next').removeClass 'disabled'
-    @$('.previous').removeClass 'disabled'
+    @$('.next', @elem).removeClass 'disabled'
+    @$('.previous', @elem).removeClass 'disabled'
 
-    @$('.next').addClass 'disabled' if @page is @totalPages
-    @$('.previous').addClass 'disabled' if @page is 0
+    @$('.next', @elem).addClass 'disabled' if @page is @totalPages
+    @$('.previous', @elem).addClass 'disabled' if @page is 0
 
   showPuzzleInfo: ->
     # TODO move this elsewhere
@@ -85,6 +77,9 @@ class PuzzleSelectScene extends Scene
       string = String(number)
       string = '0' + string while string.length < length
       return string
+
+    String::capitalize = ->
+      @.charAt(0).toUpperCase() + @.slice(1)
 
     if @stats[@selected]?.time
       minutes = pad Math.floor(@stats[@selected].time / 60), 2
@@ -102,9 +97,9 @@ class PuzzleSelectScene extends Scene
 
     # If puzzle is completed, show preview, title, etc.
     if time != '--:--'
-      @$('.puzzle-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selected + 1}: #{puzzle.title}"
+      @$('.puzzle-number').html "#{@difficulty.capitalize()} ##{@selected + 1}: #{puzzle.title}"
     else
-      @$('.puzzle-number').html "#{@difficulty.charAt(0).toUpperCase() + @difficulty.slice(1)} ##{@selected + 1}: ????"
+      @$('.puzzle-number').html "#{@difficulty.capitalize()} ##{@selected + 1}: ????"
 
     # Store as "last viewed puzzle"
     lastViewedPuzzle = localStorage.getObject('lastViewedPuzzle')
@@ -177,10 +172,13 @@ class PuzzleSelectScene extends Scene
         canvas.hide()
       else
         canvas.show()
-        clues = if @stats[index]?.time
-                  puzzle.clues
-                else
-                  defaultPuzzles.incomplete.clues
+
+        # Always show user-created puzzles and completed puzzles
+        # TODO a better check here to see if thumbnail should be shown
+        if @difficulty == 'user' || @stats[index]?.time
+          clues = puzzle.clues
+        else
+          clues =  @puzzles.incomplete.clues
 
         gridSize = Math.sqrt(clues.length)
         canvasSize = Math.floor(canvas.width() / gridSize) * gridSize
@@ -225,9 +223,8 @@ class PuzzleSelectScene extends Scene
   show: (duration = 500, callback) ->
     super duration, callback
 
-    @showUserOrDefaultPuzzles()
-
-    @totalPages = Math.ceil(@puzzles[@difficulty].length / @PER_PAGE) - 1 # 0-based index
+    # 0-based index
+    @totalPages = Math.ceil(@puzzles[@difficulty].length / @PER_PAGE) - 1
 
     # Determine the last viewed puzzle for this difficulty
     @selected = localStorage.getObject('lastViewedPuzzle')[@difficulty] || 0
@@ -250,23 +247,5 @@ class PuzzleSelectScene extends Scene
     @highlightThumbnail()
 
     @trigger 'music:play', 'bgm-tutorial'
-
-  showUserOrDefaultPuzzles: ->
-    if @difficulty == 'user'
-      @puzzles = { user: localStorage.getObject('userPuzzles') }
-      @$('.back.button.difficulty').hide()
-      @$('.back.button.title').show()
-
-      @$('.button.edit').show()
-      @$('.button.share').show()
-      @$('.button.play').hide()
-    else
-      @puzzles = defaultPuzzles
-      @$('.back.button.difficulty').show()
-      @$('.back.button.title').hide()
-
-      @$('.button.edit').hide()
-      @$('.button.share').hide()
-      @$('.button.play').show()
 
 module.exports = PuzzleSelectScene

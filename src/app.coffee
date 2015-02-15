@@ -11,6 +11,7 @@ TitleScene            = require('./views/title')
 GameScene             = require('./views/game')
 AboutScene            = require('./views/about')
 PuzzleSelectScene     = require('./views/puzzle-select')
+UserPuzzleSelectScene     = require('./views/user-puzzle-select')
 DifficultySelectScene = require('./views/difficulty-select')
 EditorScene           = require('./views/editor')
 
@@ -40,6 +41,7 @@ class App extends Backbone.View
       game: new GameScene { el: @el }
       about: new AboutScene { el: @el }
       puzzleSelect: new PuzzleSelectScene { el: @el }
+      userPuzzleSelect: new UserPuzzleSelectScene { el: @el }
       difficultySelect: new DifficultySelectScene { el: @el }
       editor: new EditorScene { el: @el }
 

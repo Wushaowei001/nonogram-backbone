@@ -130,7 +130,8 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
     .select { width: 80%; height: 12%; font-size: 3rem; text-align: center; }
   }
 
-  #level-select {
+  #puzzle-select,
+  #user-puzzle-select {
     .back { width: 40%; }
     .previous { float: left; }
     .next { float: right; }
@@ -148,6 +149,18 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
     ul.info { margin: 1% 0; font-size: 2rem;
       li { .text-shadow; }
+    }
+  }
+
+  #user-puzzle-select {
+    .create { float: right; }
+    .back { width: 30%; }
+
+    .play,
+    .edit,
+    .share,
+    .remove {
+      width: 45%;
     }
   }
 
@@ -259,7 +272,7 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
       .select { width: 45%; height: 15%; margin: 2%; }
     }
 
-    #level-select {
+    #puzzle-select {
       .back { width: 25%; }
       .play { float: left; margin: 3% 0 0 1.5%; }
       h2 { padding: 0; float: left; margin: 3% 0 0 1.5%; }
