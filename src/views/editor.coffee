@@ -55,7 +55,7 @@ class EditorScene extends Scene
     @ignoreInput = true
 
     userPuzzles = localStorage.getObject('userPuzzles')
-    title = userPuzzles[@puzzle].title
+    title = userPuzzles[@puzzle]?.title || ''
 
     new DialogBox
       el: @elem
@@ -74,17 +74,20 @@ class EditorScene extends Scene
 
             title = @$('#puzzle-title').val()
             cells = @grid.children('div').slice(0, Math.pow(@cellCount, 2))
-            data = _(cells).map (cell) ->
+            clues = _(cells).map (cell) ->
               return if $(cell).hasClass('filled') then 1 else 0
+
+            newPuzzle = { title: title, clues: clues }
 
             # Search for puzzle w/ same name; if found, overwrite
             for puzzle, index in userPuzzles
               if puzzle.title is title
-                userPuzzles.splice(index, 1, { title: name, clues: data })
+                userPuzzles.splice(index, 1, newPuzzle)
                 replaced = true
                 break
 
-            userPuzzles.push({ title: name, clues: data }) unless replaced?
+            # Otherwise assume new, and push on top
+            userPuzzles.push(newPuzzle) unless replaced?
 
             localStorage.setObject('userPuzzles', userPuzzles)
         },

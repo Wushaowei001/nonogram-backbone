@@ -33,7 +33,7 @@ class TitleScene extends Scene
 
     @trigger 'sfx:play', 'button'
     @trigger 'scene:change', 'game',
-      { difficulty: 'beginner', level: 0, tutorial: true }
+      { difficulty: 'beginner', puzzle: 0, tutorial: true }
 
   editor: (e) ->
     e.preventDefault()

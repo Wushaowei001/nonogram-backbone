@@ -1,7 +1,7 @@
-$        = require('../vendor/zepto')
-_        = require('underscore')
-ENV      = require('../lib/env')
-template = require('../templates/user-puzzle-select')
+$                 = require('../vendor/zepto')
+_                 = require('underscore')
+ENV               = require('../lib/env')
+template          = require('../templates/user-puzzle-select')
 PuzzleSelectScene = require('./puzzle-select')
 
 class UserPuzzleSelectScene extends PuzzleSelectScene
@@ -63,10 +63,20 @@ class UserPuzzleSelectScene extends PuzzleSelectScene
     @trigger('scene:change', 'editor', { puzzle: @selected })
 
   remove: ->
-    console.log 'remove'
-    # Show "are you sure?" dialog
+    # @undelegateEvents() # Prevent multiple clicks
+
+    @trigger('sfx:play', 'button')
+
+    # TODO show "are you sure?" dialog
+    @puzzles['user'].splice(@selected, 1)
+    localStorage.setObject('userPuzzles', @puzzles['user'])
+
+    @selected -= 1 if @selected > 0
+    @drawThumbnails()
+    @highlightThumbnail()
 
   share: ->
+    @trigger('sfx:play', 'button')
     console.log 'share'
 
   showPuzzleInfo: ->
@@ -76,12 +86,12 @@ class UserPuzzleSelectScene extends PuzzleSelectScene
     localStorage.setObject('lastViewedPuzzle', lastViewedPuzzle)
 
     puzzle = @puzzles[@difficulty][@selected]
-    @elem.find('.title').html "##{@selected + 1}: #{puzzle.title}"
+    @elem.find('.title').html "##{@selected + 1}: #{puzzle.title}" if puzzle
 
   show: (duration = 500, callback) ->
-    super duration, callback
-
-    # Reload into memory
+    # Reload any potential changes into memory
     @puzzles = { user: localStorage.getObject('userPuzzles') }
+
+    super(duration, callback)
 
 module.exports = UserPuzzleSelectScene

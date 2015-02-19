@@ -65,11 +65,11 @@ class PuzzleSelectScene extends Scene
     @trigger 'scene:change', 'difficultySelect'
 
   enableOrDisablePagingButtons: ->
-    @$('.next', @elem).removeClass 'disabled'
-    @$('.previous', @elem).removeClass 'disabled'
+    $('.next', @elem).removeClass 'disabled'
+    $('.previous', @elem).removeClass 'disabled'
 
-    @$('.next', @elem).addClass 'disabled' if @page is @totalPages
-    @$('.previous', @elem).addClass 'disabled' if @page is 0
+    $('.next', @elem).addClass 'disabled' if @page is @totalPages
+    $('.previous', @elem).addClass 'disabled' if @page is 0
 
   showPuzzleInfo: ->
     # TODO move this elsewhere
@@ -90,16 +90,16 @@ class PuzzleSelectScene extends Scene
 
     attempts = @stats[@selected]?.attempts || "0"
 
-    @$('.attempts').html "Attempts: #{attempts}"
-    @$('.best-time').html "Best Time: #{time}"
+    @elem.find('.attempts').html "Attempts: #{attempts}"
+    @elem.find('.best-time').html "Best Time: #{time}"
 
     puzzle = @puzzles[@difficulty][@selected]
 
     # If puzzle is completed, show preview, title, etc.
     if time != '--:--'
-      @$('.puzzle-number').html "#{@difficulty.capitalize()} ##{@selected + 1}: #{puzzle.title}"
+      @elem.find('.puzzle-number').html "#{@difficulty.capitalize()} ##{@selected + 1}: #{puzzle.title}"
     else
-      @$('.puzzle-number').html "#{@difficulty.capitalize()} ##{@selected + 1}: ????"
+      @elem.find('.puzzle-number').html "#{@difficulty.capitalize()} ##{@selected + 1}: ????"
 
     # Store as "last viewed puzzle"
     lastViewedPuzzle = localStorage.getObject('lastViewedPuzzle')
@@ -218,7 +218,10 @@ class PuzzleSelectScene extends Scene
     @height = height
 
     offscreenWidth = @width * 1.5
-    @altCanvases.animate({ transform: "translateX(-#{offscreenWidth}px)" }, 0)
+    @altCanvases.animate({
+      "-webkit-transform": "translateX(-#{offscreenWidth}px)" # Bug with Zepto/Safari
+      transform: "translateX(-#{offscreenWidth}px)"
+    }, 0)
 
   show: (duration = 500, callback) ->
     super duration, callback
@@ -237,7 +240,10 @@ class PuzzleSelectScene extends Scene
 
     # Move alt canvases off-screen
     offscreenWidth = @width * 1.5
-    @altCanvases.animate({ transform: "translateX(-#{offscreenWidth}px)" }, 0)
+    @altCanvases.animate({ 
+      "-webkit-transform": "translateX(-#{offscreenWidth}px)" # Bug with Zepto/Safari
+      transform: "translateX(-#{offscreenWidth}px)"
+    }, 0)
 
     # Ensure on-screen group is clickable
     @altCanvases.parent('.group').css('z-index': 0)
