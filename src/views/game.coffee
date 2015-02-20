@@ -6,7 +6,7 @@ FloatingText = require('../lib/floating-text')
 DialogBox    = require('../lib/dialog-box')
 Input        = require('../lib/input')
 template     = require('../templates/game')
-levels       = require('../data/levels')
+puzzles      = require('../data/puzzles')
 
 class GameScene extends Scene
   events: ->
@@ -57,15 +57,12 @@ class GameScene extends Scene
     _.bindAll(@, 'updateTimer', 'onActionMove')
 
     @elem = $(template())
-    @render()
-
-  # Append the view's elem to the DOM
-  render: ->
-    @$el.append(@elem)
 
     # Get some references to DOM elements that we need later
     @grid = @elem.find('.grid')
     @gridBackground = @elem.find('.grid-background')
+
+    @render()
 
   # Triggered on mousedown or touchstart
   onActionStart: (e) ->
@@ -249,13 +246,13 @@ class GameScene extends Scene
       stats = localStorage.getObject 'stats'
 
       # If level hasn't been completed before...
-      if not stats[@difficulty][@level].time
-        stats[@difficulty][@level].time = @seconds
+      if not stats[@difficulty][@puzzle].time
+        stats[@difficulty][@puzzle].time = @seconds
         complete = localStorage.getObject 'complete'
         complete[@difficulty]++
         localStorage.setObject 'complete', complete
-      else if stats[@difficulty][@level].time > @seconds
-        stats[@difficulty][@level].time = @seconds
+      else if stats[@difficulty][@puzzle].time > @seconds
+        stats[@difficulty][@puzzle].time = @seconds
 
       localStorage.setObject 'stats', stats
     else
@@ -266,7 +263,7 @@ class GameScene extends Scene
       parent: @
       el: @elem
       title: 'Puzzle solved!'
-      message: levels[@difficulty][@level].title
+      message: puzzles[@difficulty][@puzzle].title
       buttons: [
         {
           text: 'OK'
@@ -275,7 +272,7 @@ class GameScene extends Scene
             if @tutorial
               @trigger 'scene:change', 'title'
             else
-              @trigger 'scene:change', 'levelSelect', { difficulty: @difficulty }
+              @trigger 'scene:change', 'puzzleSelect', { difficulty: @difficulty }
         }
       ]
 
@@ -310,7 +307,7 @@ class GameScene extends Scene
               # Go back to title
               @trigger 'scene:change', 'title'
             else
-              @trigger 'scene:change', 'levelSelect', { difficulty: @difficulty }
+              @trigger 'scene:change', 'puzzleSelect', { difficulty: @difficulty }
         }
       ]
 
@@ -607,20 +604,20 @@ class GameScene extends Scene
       # Record attempts
       stats = localStorage.getObject 'stats'
 
-      if not stats[@difficulty][@level]
-        stats[@difficulty][@level] = { attempts: 1 }
+      if not stats[@difficulty][@puzzle]
+        stats[@difficulty][@puzzle] = { attempts: 1 }
       else
-        stats[@difficulty][@level].attempts++
+        stats[@difficulty][@puzzle].attempts++
 
       localStorage.setObject 'stats', stats
 
     # Grab clues out of data structure
-    @clues = levels[@difficulty][@level].clues
+    @clues = puzzles[@difficulty][@puzzle].clues
 
-    # Generate clues for random levels
+    # Generate clues for random puzzles
     if @difficulty is "random"
       @clues = []
-      switch @level
+      switch @puzzle
         when 0 then percentage = 0.68
         when 1 then percentage = 0.62
         when 2 then percentage = 0.55

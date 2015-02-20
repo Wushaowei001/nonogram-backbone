@@ -14,9 +14,9 @@ gulp.task('coffee', function () {
             extensions: ['.coffee', '.html'],
             debug: true // source maps
         }))
-        .pipe(uglify())
-        .pipe(rename('app.js'))
-        .pipe(gulp.dest('dist'));
+        // .pipe(uglify())
+        .pipe(rename('nonogram-madness.js'))
+        .pipe(gulp.dest('dist/javascript'));
 });
 
 gulp.task('less', function () {
@@ -35,8 +35,19 @@ gulp.task('build', function () {
     gulp.start(['coffee', 'less']);
 });
 
+gulp.task('copy', function () {
+    gulp.src(['dist/javascript/**', 'dist/assets/**'], { base: './dist' })
+        .pipe(gulp.dest('cordova/www'));
+});
+
 gulp.task('watch', function () {
     gulp.watch(['src/**/*.coffee', 'src/**/*.html'], ['coffee']);
-
     gulp.watch(['src/stylesheets/main.less'], ['less']);
+});
+
+gulp.task('cordova', function () {
+   gulp.watch([
+    'src/**/*.coffee',
+    'src/**/*.html',
+    'src/stylesheets/main.less'], ['build', 'copy']);
 });
