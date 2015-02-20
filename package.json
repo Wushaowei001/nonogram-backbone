@@ -6,6 +6,7 @@
   "dependencies": {},
   "devDependencies": {
     "backbone": "^1.1.2",
+    "coffeeify": "^1.0.0",
     "gulp": "^3.8.10",
     "gulp-autoprefixer": "^1.0.1",
     "gulp-browserify": "^0.5.0",
