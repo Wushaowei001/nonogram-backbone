@@ -409,7 +409,7 @@ class GameScene extends Scene
     capitalActionWord = if ENV.mobile then "Tap" else "Click"
 
     text = [
-      "Welcome to Nonogram Madness! Nonograms are logic puzzles that reveal an image when solved.", 
+      "Welcome to Nonogram Madness! Nonograms are logic puzzles that reveal an image when solved.",
       "Solve each puzzle using the numeric clues on the top and left of the grid.",
       "Each number represents squares in the grid that are \"filled\" in a row or column.",
       "Clues with multiple numbers mean a gap of one (or more) between filled squares.",
@@ -664,8 +664,12 @@ class GameScene extends Scene
       if previousHorizontal then horizontalClue += "#{horizontalCounter}"
       if previousVertical then verticalClue += "#{verticalCounter}<br>"
 
-      if horizontalClue == '' then horizontalClue = '0'
-      if verticalClue == '' then verticalClue = '0<br>'
+      if horizontalClue == ''
+        horizontalClue = '0'
+        @elem.find('.horizontal.clue').eq(i).addClass('complete')
+      if verticalClue == ''
+        verticalClue = '0<br>'
+        @elem.find('.vertical.clue').eq(i).addClass('complete')
 
       match = verticalClue.match(/<br>/g)
       length = if match? then match.length else 0
@@ -678,8 +682,8 @@ class GameScene extends Scene
         for [length .. 4]
           verticalClue = "<br>#{verticalClue}"
 
-      @$('.horizontal.clue', @elem).eq(i).html(horizontalClue)
-      @$('.vertical.clue', @elem).eq(i).html(verticalClue)
+      @elem.find('.horizontal.clue').eq(i).html(horizontalClue)
+      @elem.find('.vertical.clue').eq(i).html(verticalClue)
 
       @resizeGrid()
 
