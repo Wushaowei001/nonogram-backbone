@@ -2,12 +2,34 @@
 @alt-color: #fb9a00;
 @font-family: 'uni_05_53', sans-serif;
 
-.text-shadow(@size: 5px) {
-  text-shadow: @size @size 0 rgba(0, 0, 0, 0.5);
+// http://blog.scur.pl/2012/06/variable-media-queries-less-css/
+@highdensity: ~"only screen and (-webkit-min-device-pixel-ratio: 1.5)",
+              ~"only screen and (min--moz-device-pixel-ratio: 1.5)",
+              ~"only screen and (-o-min-device-pixel-ratio: 3/2)",
+              ~"only screen and (min-device-pixel-ratio: 1.5)";
+@iphone5:     ~"only screen and (max-width: 568px)";
+@iphone6:     ~"only screen and (max-width: 667px)";
+@iphone6plus: ~"only screen and (max-width: 736px)";
+@tablet:      ~"only screen and (min-width: 530px) and (max-width: 949px)";
+@desktop:     ~"only screen and (min-width: 950px) and (max-width: 1128px)";
+@desktop-xl:  ~"only screen and (min-width: 1129px)";
+
+.text-shadow {
+  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+  @media @iphone6 { text-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5); }
+  @media @iphone6plus { text-shadow: 7px 7px 0 rgba(0, 0, 0, 0.5); }
 }
 
-.box-shadow(@size: 5px) {
-  box-shadow: @size @size 0 rgba(0, 0, 0, 0.5);
+.box-shadow {
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+  @media @iphone6 { box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5); }
+  @media @iphone6plus { box-shadow: 7px 7px 0 rgba(0, 0, 0, 0.5); }
+}
+
+.border {
+  border: 5px solid #000;
+  @media @iphone6 { border-width: 6px; }
+  @media @iphone6plus { border-width: 7px; }
 }
 
 /* Prevents user select */
@@ -71,7 +93,7 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 /****************************/
 /*          DEFAULT         */
 /****************************/
-#nonograms { position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow: hidden; font: normal 1.6rem/1.5 @font-family; text-align: center; color: @text-color; background: url('../images/ipad-startup-portrait.png') center center no-repeat #000; background-size: cover; .user-select-none;
+#nonograms { width: 100%; height: 100%; font: normal 1.6rem/1.5 @font-family; text-align: center; color: @text-color; background: url('../images/ipad-startup-portrait.png') center center no-repeat #000; background-size: cover; .user-select-none;
   .scene { position: absolute; left: 100%; width: 100%; height: 100%; background: url('../images/background.png'); background-size: cover; overflow: hidden;
     .container { overflow: hidden; }
     &.in {
@@ -87,8 +109,8 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   h1 { font: normal 4rem/1.5 @font-family; margin: 3%; .text-shadow; }
   h2 { font: normal 3.5rem/1.5 @font-family; margin: 3%; .text-shadow; }
 
-  .button { font: normal 2.3rem/0 @font-family; width: 50%; height: 10%; border: 5px solid #000; padding: 0; background: #665945; color: #fff; text-align: center; text-decoration: none; display: inline-block; margin: 1.5%; .box-shadow; .border-box;
-    .bevel { display: block; width: 100%; height: 100%; border: 5px solid #fff; border-color: #7b6c55 #3c362c #3c362c #7b6c55; .border-box;
+  .button { font: normal 2.3rem/0 @font-family; width: 50%; height: 10%; .border; padding: 0; background: #665945; color: #fff; text-align: center; text-decoration: none; display: inline-block; margin: 1.5%; .box-shadow; .border-box;
+    .bevel { display: block; width: 100%; height: 100%; .border; border-color: #7b6c55 #3c362c #3c362c #7b6c55; .border-box;
       .text { position: relative; top: 40%; }
     }
 
@@ -107,136 +129,17 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   p { margin: 0; }
 
   .overlay { position: absolute; width: 100%; height: 100%; left: 0px; top: 0px; background: rgba(0, 0, 0, 0.5); z-index: 3; opacity: 0; }
-  .dialog-box { background: #fff; color: #000; padding: 3%; border: 5px solid #000; .box-shadow; position: absolute; width: 70%; z-index: 4; opacity: 0;
+  .dialog-box { background: #fff; color: #000; padding: 3%; .border; .box-shadow; position: absolute; width: 70%; z-index: 4; opacity: 0;
     h3 { margin: 1%; font-size: 2.5rem; font-weight: normal; }
     .button { margin-top: 3%; }
     input { width: 80%; z-index: 100; font: 400 1.6rem/1.5 @font-family; padding: 2% 4%; }
   }
 
-  #title {
-    h1 { margin: 10%; }
-    .copyright { .text-shadow; text-align: center; margin-top: 10%; }
-  }
-
-
-  #about { color: #fff;
-    h2 { clear: left; padding-top: 3%; }
-    p { .text-shadow; font-size: 2rem; margin: 5%; }
-  }
-
-  #difficulty-select {
-    .restore { float: right; display: none; }
-    h2 { clear: both; }
-    .select { width: 80%; height: 12%; font-size: 3rem; text-align: center; }
-  }
-
-  #puzzle-select,
-  #user-puzzle-select {
-    .back { width: 40%; }
-    .previous { float: left; }
-    .next { float: right; }
-    .previous,
-    .next { margin-top: 25%; font-size: 2.8rem; }
-
-    h2 { clear: left; }
-
-    .preview { width: 60%; height: 40%; overflow: visible; margin: 0 auto; padding-top: 4%; position: relative;
-      .group { width: 100%; height: 100%; position: absolute; top: 0; }
-      canvas { width: 30%; height: 30%; margin: -2% 3% 3% 0; image-rendering: -webkit-optimize-contrast; background: #fff; .box-shadow; .border-box;
-        &.selected { border: 5px solid orange; }
-      }
-    }
-
-    ul.info { margin: 1% 0; font-size: 2rem;
-      li { .text-shadow; }
-    }
-  }
-
-  #user-puzzle-select {
-    .create { float: right; }
-    .back { width: 30%; }
-
-    .play,
-    .edit,
-    .share,
-    .remove {
-      width: 45%;
-    }
-  }
-
-  #editor {
-    .button.create { float: right; }
-    .top { height: 22%;
-      .button { width: 45%; height: 40%; margin: 1% 2%; }
-    }
-    .bottom { height: 11%;
-      .button { width: 45%; height: 85%; margin: 3% 2.5% 0 2.5%; }
-    }
-
-    .grid { width: 100%; height: 67%; background: #fff; border: 5px solid #000; .box-shadow;
-      div { width: 10%; height: 10%; border-top: 1px solid #000; border-left: 1px solid #000; float: left; .border-box;
-        &.filled { background-image: url('../images/filled.png'); background-size: 100%; }
-      }
-    }
-  }
-
-  #game {
-    .floating-text { position: absolute; color: #333; font: normal 2em/1.5 @font-family; .text-shadow; }
-    .top { height: 20%; width: 100%; }
-    .bottom { height: 10%; width: 100%; }
-
-    .actions { width: 45%; height: 100%; margin: 2%;
-      &.highlight { color: rgb(251, 154, 0); }
-      &.pause { width: 14%; height: 100%; float: left; font-size: 2.2rem;
-        .text {  transform: rotateZ(-90deg); display: block; margin-top: 240%; }
-      }
-
-      &.mark,
-      &.fill { height: 90%;
-        .icon { display: inline-block; border: 0; background-size: cover; width: 19%; height: 80%; margin-top: -20%; vertical-align: sub; }
-      }
-      &.mark {
-        .icon { background-image: url('../images/marked.png'); background-color: #fff; border: 1px solid black; }
-      }
-      &.fill {
-        .icon { background-image: url('../images/filled.png'); }
-      }
-    }
-
-    .info { background: #fff; font-size: 1.8em; vertical-align: top; height: 100%; margin: 2%; line-height: 1.3; color: #000; border: 5px solid #000; display: inline-block; overflow: hidden; .box-shadow; .border-box;
-      &.complete { font-size: 1.5rem; width: 34%;
-        .percentage { font-size: 2.5em; line-height: 0.6; padding: 10% 0; }
-      }
-      &.timer { font-size: 2.5rem; width: 40%; padding-top: 2%;
-        span { display: inline-block; font-size: 1.2em; }
-        .minutes { text-align: right; }
-        .seconds { text-align: left; width: 35%; }
-      }
-    }
-
-    .grid-background { width: 100%; height: 67%; overflow: hidden; background: #fff; border: 5px solid #000; .box-shadow;
-      .minimap { width: 25%; height: 25%; float: left; .border-box; }
-      .clue { float: left; .border-box; color: #000; font-size: 1.3rem;
-        &.horizontal { height: 7.5%; width: 25%; line-height: 2; padding-right: 2%; border-top: 1px solid #000; text-align: right;
-          &:nth-child(2n - 1) { background-color: #d6e8ee; }
-        }
-        &.vertical { height: 25%; width: 7.5%; border-left: 1px solid #000; line-height: 1.2;
-          &:nth-child(2n) { background-color: #d6e8ee; }
-        }
-        &.highlight { background-color: rgba(251, 154, 0, 0.7) !important; }
-        &.complete { color: #999; }
-        &.pinch { font-size: 0.8rem; }
-      }
-
-      .grid { width: 75%; height: 75%; float: right;
-        div { width: 10%; height: 10%; border-top: 1px solid #000; border-left: 1px solid #000; float: left; .border-box;
-          &.marked { background-image: url('../images/marked.png'); background-size: 100%; }
-          &.filled { background-image: url('../images/filled.png'); background-size: 100%; }
-          &.hint { background-color: rgba(251, 154, 0, 0.5); }
-        }
-      }
-    }
-  }
+  @import 'title.less';
+  @import 'about.less';
+  @import 'puzzle-select.less';
+  @import 'editor.less';
+  @import 'game.less';
 
   /************************************/
   /*        LANDSCAPE       */
@@ -253,79 +156,6 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
 
     .dialog-box { padding: 1%; width: 50%;
       .button { margin-top: 3%; }
-    }
-
-    #title {
-      h1 { font-size: 4em; line-height: 1; margin: 3% 0; }
-      .button { width: 45%; height: 15%; margin: 2%; }
-      .copyright { margin-top: 0%; }
-    }
-
-    #about {
-      h2 { margin: 1%; padding-top: 0; }
-      p { padding: 0; margin: 2% 0; width: 100%; }
-    }
-
-    #difficulty-select {
-      h2 { margin-bottom: 0; padding-top: 0; }
-
-      .select { width: 45%; height: 15%; margin: 2%; }
-    }
-
-    #puzzle-select {
-      .back { width: 25%; }
-      .play { float: left; margin: 3% 0 0 1.5%; }
-      h2 { padding: 0; float: left; margin: 3% 0 0 1.5%; }
-
-      ul.info { margin: 0 0 0 1.5%; float: left; text-align: left; width: 54%; }
-
-      .previous { float: left; margin-top: -7%; margin-left: 10%; width: 10%; height: 14%; }
-      .next { float: right; margin-top: -7%; margin-right: 4%; width: 10%; height: 14%; }
-
-      .preview { width: 40%; height: 60%; float: right; margin: 4% 1.5% 0 0; position: relative; }
-    }
-
-    #game {
-      .actions { width: 100%;
-        &.pause { height: 20%; margin: 0 0 3% 0;
-          .text { transform: none; margin: 0; display: inline; }
-        }
-
-        &.mark,
-        &.fill { width: 100%; height: 40%; display: block; margin: 0;
-          .text {
-            .icon { width: 18%; height: 80%; }
-          }
-        }
-        &.mark {  }
-        &.fill { margin-top: 5%; }
-      }
-
-      .info { margin: 0; width: 100%; height: 38%;
-        &.complete { margin: 0 0 3% 0; padding: 0 5%; line-height: 1;
-          .percentage { line-height: 0.6; padding: 5%; }
-        }
-        &.timer { margin: 0 0 3% 0; line-height: 1.2;
-          span {  }
-          .seconds { width: 23%; }
-        }
-      }
-
-      .top { width: 32%; height: 66%; float: left; margin: 0.5% 1% 1% 0; }
-
-      .grid-background { float: right; }
-
-      .bottom { width: 32%; height: 34%; float: left; margin-right: 1%; }
-    }
-
-    #editor {
-      .grid { float: right; }
-      .top { height: 66%; width: 33%; float: left;
-        .button { width: 100%; height: 23%; margin: 1% 0; }
-      }
-      .bottom { height: 33%; width: 33%; float: left; 
-        .button { width: 100%; height: 45%; margin: 1% 0; }
-      }
     }
   }
 }
