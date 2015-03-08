@@ -44,7 +44,7 @@ class DialogBox extends Backbone.View
 
     @options = _.extend(defaults, options)
 
-    _.bind(@resize, @)
+    _.bindAll(@, 'resize')
     $(window).on('resize', @resize)
 
     @.on('sfx:play', (soundId) =>
