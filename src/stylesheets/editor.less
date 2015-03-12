@@ -1,29 +1,27 @@
-#nonograms {
-  #editor {
-    .button.create { float: right; }
-    .top { height: 22%;
-      .button { width: 45%; height: 40%; margin: 1% 2%; }
-    }
-    .bottom { height: 11%;
-      .button { width: 45%; height: 85%; margin: 3% 2.5% 0 2.5%; }
-    }
-
-    .grid { width: 100%; height: 67%; background: #fff; .border; .box-shadow;
-      div { width: 10%; height: 10%; border-top: 1px solid #000; border-left: 1px solid #000; float: left; .border-box;
-        &.filled { background-image: url('../images/filled.png'); background-size: 100%; }
-      }
-    }
+#editor {
+  .button.create { float: right; }
+  .top { height: 22%;
+    .button { width: 45%; height: 40%; margin: 1% 2%; }
+  }
+  .bottom { height: 11%;
+    .button { width: 45%; height: 85%; margin: 3% 2.5% 0 2.5%; }
   }
 
-  &.landscape {
-    #editor {
-      .grid { float: right; }
-      .top { height: 66%; width: 33%; float: left;
-        .button { width: 100%; height: 23%; margin: 1% 0; }
-      }
-      .bottom { height: 33%; width: 33%; float: left;
-        .button { width: 100%; height: 45%; margin: 1% 0; }
-      }
+  .grid { width: 100%; height: 67%; background: #fff; .border; .box-shadow;
+    div { width: 10%; height: 10%; border-top: 1px solid #000; border-left: 1px solid #000; float: left; .border-box;
+      &.filled { background-image: url('../images/filled.png'); background-size: 100%; }
+    }
+  }
+}
+
+&.landscape {
+  #editor {
+    .grid { float: right; }
+    .top { height: 66%; width: 33%; float: left;
+      .button { width: 100%; height: 23%; margin: 1% 0; }
+    }
+    .bottom { height: 33%; width: 33%; float: left;
+      .button { width: 100%; height: 45%; margin: 1% 0; }
     }
   }
 }
