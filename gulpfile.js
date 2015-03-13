@@ -42,7 +42,7 @@ gulp.task('copy', function () {
 
 gulp.task('watch', function () {
     gulp.watch(['src/**/*.coffee', 'src/**/*.html'], ['coffee']);
-    gulp.watch(['src/stylesheets/main.less'], ['less']);
+    gulp.watch(['src/stylesheets/*.less'], ['less']);
 });
 
 gulp.task('cordova', function () {
