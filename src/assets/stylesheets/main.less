@@ -110,14 +110,21 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   h1 { font: normal 4rem/1.5 @font-family; margin: 3%; .text-shadow; }
   h2 { font: normal 3.5rem/1.5 @font-family; margin: 3%; .text-shadow; }
 
-  .button { font: normal 2.3rem/0 @font-family; width: 50%; height: 10%; .border; padding: 0; background: #665945; color: #fff; text-align: center; text-decoration: none; display: inline-block; margin: 1.5%; .box-shadow; .border-box;
-    .bevel { display: block; width: 100%; height: 100%; .border; border-color: #7b6c55 #3c362c #3c362c #7b6c55; .border-box;
-      .text { position: relative; top: 40%; }
-    }
+  .button {
+    font: normal 2.3rem/10% @font-family; 
+    width: 50%; 
+    height: 10%; 
+    background: url('../images/button.png'); 
+    color: #fff; 
+    text-align: center; 
+    display: inline-block; 
+    margin: 1.5%; 
+    background-size: contain;
+    .box-shadow;
 
     &:active,
-    &.active { position: relative; left: 5px; top: 5px; box-shadow: none; color: @alt-color; }
-    &.small { width: 30%; height: 8%; font-size: 1.5rem; }
+    &.active { position: relative; left: 5px; top: 5px;  color: @alt-color; }
+    &.small { width: 40%; height: 8%; font-size: 1.5rem; }
     &.back { float: left; }
     &.disabled { opacity: 0.3;
       &:active { position: static; color: #fff; .box-shadow; }
@@ -149,8 +156,8 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
   &.landscape {
     .scene { background-size: contain; }
 
-    .button { width: 35%; height: 15%;
-      &.small { width: 25%; height: 11%; }
+    .button { width: 33.33%; height: 15%;
+      &.small { width: 24.44%; height: 11%; }
       &.back { float: left; width: 20%; }
       &.previous,
       &.next { width: 10%; }

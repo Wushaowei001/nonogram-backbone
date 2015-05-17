@@ -68,3 +68,15 @@
   [ ] iPhone 6+
   [ ] iPad
   [ ] iPad 2x
+
+## Button sizes
+3.33:1 width/height button ratio
+
+3:2 portrait orientation, 1 unit width == 1.5 units height
+width: 50%
+height: 10% (15% converted)
+
+2:3 landscape orientation, 1 unit height == 1.5 units width
+
+width: 33.33% (50% converted)
+height: 15%
