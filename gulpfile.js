@@ -20,7 +20,7 @@ gulp.task('coffee', function () {
 });
 
 gulp.task('less', function () {
-    gulp.src('src/stylesheets/main.less')
+    gulp.src('src/assets/stylesheets/main.less')
         .pipe(less())
         .pipe(autoprefixer({
             browsers: ['last 2 versions'],
@@ -31,23 +31,34 @@ gulp.task('less', function () {
         .pipe(gulp.dest('dist/assets/stylesheets'));
 });
 
-gulp.task('build', function () {
-    gulp.start(['coffee', 'less']);
+gulp.task('copy-assets', function () {
+    var sourceDirectories = [
+        'src/assets/fonts/**',
+        'src/assets/images/**',
+        'src/assets/music/**',
+        'src/assets/sounds/**'
+    ];
+    gulp.src(sourceDirectories, { base: './src' })
+        .pipe(gulp.dest('dist'));
 });
 
-gulp.task('copy', function () {
-    gulp.src(['dist/javascript/**', 'dist/assets/**'], { base: './dist' })
-        .pipe(gulp.dest('cordova/www'));
+gulp.task('build', function () {
+    gulp.start(['coffee', 'less', 'copy-assets']);
 });
 
 gulp.task('watch', function () {
     gulp.watch(['src/**/*.coffee', 'src/**/*.html'], ['coffee']);
-    gulp.watch(['src/stylesheets/*.less'], ['less']);
+    gulp.watch(['src/assets/stylesheets/*.less'], ['less']);
 });
 
 gulp.task('cordova', function () {
+    gulp.src(['dist/javascript/**', 'dist/assets/**'], { base: './dist' })
+        .pipe(gulp.dest('cordova/www'));
+});
+
+gulp.task('watch-cordova', function () {
    gulp.watch([
     'src/**/*.coffee',
     'src/**/*.html',
-    'src/stylesheets/main.less'], ['build', 'copy']);
+    'src/stylesheets/main.less'], ['build', 'cordova']);
 });
