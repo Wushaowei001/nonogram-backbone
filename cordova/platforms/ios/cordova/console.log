@@ -1,0 +1,16 @@
+2015-01-28 00:18:28.891 NonogramMadness[1141:5870098] DiskCookieStorage changing policy from 2 to 0, cookie file: file:///Users/demick/Library/Developer/CoreSimulator/Devices/5908945D-43EB-40FA-8069-AB177803294D/data/Containers/Data/Application/24302CED-4B3D-4634-9B7E-410E40A57E63/Library/Cookies/Cookies.binarycookies
+2015-01-28 00:18:29.039 NonogramMadness[1141:5870098] Apache Cordova native platform version 3.7.0 is starting.
+2015-01-28 00:18:29.040 NonogramMadness[1141:5870098] Multi-tasking -> Device: YES, App: YES
+2015-01-28 00:18:29.042 NonogramMadness[1141:5870098] Unlimited access to network resources
+2015-01-28 00:18:29.046 NonogramMadness[1141:5870098] 
+
+Started backup to iCloud! Please be careful.
+Your application might be rejected by Apple if you store too much data.
+For more information please read "iOS Data Storage Guidelines" at:
+https://developer.apple.com/icloud/documentation/data-storage/
+To disable web storage backup to iCloud, set the BackupWebStorage preference to "local" in the Cordova config.xml file
+
+2015-01-28 00:18:29.617 NonogramMadness[1141:5870098] Resetting plugins due to page load.
+2015-01-28 00:18:29.730 NonogramMadness[1141:5870098] Finished load of: file:///Users/demick/Library/Developer/CoreSimulator/Devices/5908945D-43EB-40FA-8069-AB177803294D/data/Containers/Bundle/Application/E00F102C-E4CF-4572-BE31-60DE277E0E5A/NonogramMadness.app/www/index.html
+>>>> frameSizeChanged = 4096
+>>>> frameSizeChanged = 4096
