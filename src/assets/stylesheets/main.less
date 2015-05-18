@@ -15,9 +15,17 @@
 @desktop-xl:  ~"only screen and (min-width: 1129px)";
 
 .text-shadow {
-  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
-  @media @iphone6 { text-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5); }
-  @media @iphone6plus { text-shadow: 7px 7px 0 rgba(0, 0, 0, 0.5); }
+  position: relative;
+
+  &::after {
+    content: attr(title);
+    color: rgba(0, 0, 0, 0.6);
+    display: block;
+    position: absolute;
+    left: 1.1rem;
+    top: 0.6rem;
+    z-index: -1;
+  }
 }
 
 .box-shadow {
@@ -107,8 +115,8 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
     }
   }
 
-  h1 { font: normal 4rem/1.5 @font-family; margin: 3%; .text-shadow; }
-  h2 { font: normal 3.5rem/1.5 @font-family; margin: 3%; .text-shadow; }
+  h1 { font: normal 4rem/1.5 @font-family; margin: 3% 0; .text-shadow; }
+  h2 { font: normal 3.5rem/1.5 @font-family; margin: 3% 0; .text-shadow; }
 
   .button {
     font: normal 2.3rem/10% @font-family; 
@@ -116,15 +124,18 @@ body { font-size: 62.5%; width: 100%; height: 100%; background: #000; overflow: 
     height: 10%; 
     background: url('../images/button.png'); 
     color: #fff; 
-    text-align: center; 
-    display: inline-block; 
     margin: 1.5%; 
     background-size: contain;
+    display: inline-flex;
+    text-align: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
     .box-shadow;
 
     &:active,
     &.active { position: relative; left: 5px; top: 5px;  color: @alt-color; }
-    &.small { width: 40%; height: 8%; font-size: 1.5rem; }
+    &.small { width: 35%; height: 7%; font-size: 1.5rem; }
     &.back { float: left; }
     &.disabled { opacity: 0.3;
       &:active { position: static; color: #fff; .box-shadow; }
