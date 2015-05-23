@@ -42,6 +42,8 @@
 		4C2D4398CCBA4E13A9A86508 /* InAppPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25D65C39804C4BB6BBBB2268 /* InAppPurchase.m */; };
 		DC1EE2CA8186493096BD7289 /* SKProduct+LocalizedPrice.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A3DC254FE144891A3C31786 /* SKProduct+LocalizedPrice.m */; };
 		2D70A50F25EB465893A51B6C /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8963DF91CE5749D69D312680 /* StoreKit.framework */; };
+		64F0A0F0D76E457E864EF55D /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = DC360748E7A7405BAB12A806 /* CDVSplashScreen.m */; };
+		59E213DD96274A81B852E67A /* CDVStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = B4587EE1D76B412783B50FBA /* CDVStatusBar.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -112,6 +114,10 @@
 		0EB073E3DE1F4D54BF9CC0F6 /* InAppPurchase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "InAppPurchase.h"; path = "cc.fovea.cordova.purchase/InAppPurchase.h"; sourceTree = "<group>"; fileEncoding = 4; };
 		776D0725190E462BB893C5D5 /* SKProduct+LocalizedPrice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "SKProduct+LocalizedPrice.h"; path = "cc.fovea.cordova.purchase/SKProduct+LocalizedPrice.h"; sourceTree = "<group>"; fileEncoding = 4; };
 		8963DF91CE5749D69D312680 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "StoreKit.framework"; path = "System/Library/Frameworks/StoreKit.framework"; sourceTree = SDKROOT; fileEncoding = 4; };
+		DC360748E7A7405BAB12A806 /* CDVSplashScreen.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVSplashScreen.m"; path = "org.apache.cordova.splashscreen/CDVSplashScreen.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		B15D40A80D914B429B23A1CC /* CDVSplashScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVSplashScreen.h"; path = "org.apache.cordova.splashscreen/CDVSplashScreen.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		B4587EE1D76B412783B50FBA /* CDVStatusBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVStatusBar.m"; path = "org.apache.cordova.statusbar/CDVStatusBar.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		C02DD16DA10F4FF4980C3B4F /* CDVStatusBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVStatusBar.h"; path = "org.apache.cordova.statusbar/CDVStatusBar.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,6 +222,10 @@
 				6A3DC254FE144891A3C31786 /* SKProduct+LocalizedPrice.m */,
 				0EB073E3DE1F4D54BF9CC0F6 /* InAppPurchase.h */,
 				776D0725190E462BB893C5D5 /* SKProduct+LocalizedPrice.h */,
+				DC360748E7A7405BAB12A806 /* CDVSplashScreen.m */,
+				B15D40A80D914B429B23A1CC /* CDVSplashScreen.h */,
+				B4587EE1D76B412783B50FBA /* CDVStatusBar.m */,
+				C02DD16DA10F4FF4980C3B4F /* CDVStatusBar.h */,
 			);
 			name = Plugins;
 			path = "NonogramMadness/Plugins";
@@ -402,6 +412,8 @@
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
 				4C2D4398CCBA4E13A9A86508 /* InAppPurchase.m in Sources */,
 				DC1EE2CA8186493096BD7289 /* SKProduct+LocalizedPrice.m in Sources */,
+				64F0A0F0D76E457E864EF55D /* CDVSplashScreen.m in Sources */,
+				59E213DD96274A81B852E67A /* CDVStatusBar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

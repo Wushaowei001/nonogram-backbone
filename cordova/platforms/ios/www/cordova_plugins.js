@@ -6,12 +6,28 @@ module.exports = [
         "clobbers": [
             "store"
         ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.splashscreen/www/splashscreen.js",
+        "id": "org.apache.cordova.splashscreen.SplashScreen",
+        "clobbers": [
+            "navigator.splashscreen"
+        ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.statusbar/www/statusbar.js",
+        "id": "org.apache.cordova.statusbar.statusbar",
+        "clobbers": [
+            "window.StatusBar"
+        ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "cc.fovea.cordova.purchase": "3.10.1"
+    "cc.fovea.cordova.purchase": "3.10.1",
+    "org.apache.cordova.splashscreen": "1.0.0",
+    "org.apache.cordova.statusbar": "0.1.10"
 }
 // BOTTOM OF METADATA
 });
